@@ -10,14 +10,14 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <view contentMode="scaleToFill" id="Wsq-gv-ebq" customClass="PopupAlert" customModule="Swipe" customModuleProvider="target">
+        <view contentMode="scaleToFill" id="Wsq-gv-ebq" customClass="PopupAlert" customModule="XLibrary">
             <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yMP-kk-msw" userLabel="Settings Window">
                     <rect key="frame" x="32" y="328" width="350" height="250"/>
                     <subviews>
-                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="window-frame" id="1Qq-2N-b9g" userLabel="background" customClass="ScaleFrame" customModule="Swipe" customModuleProvider="target">
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="window-frame" id="1Qq-2N-b9g" userLabel="background" customClass="ScaleFrame" customModule="XLibrary">
                             <rect key="frame" x="0.0" y="0.0" width="350" height="250"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         </imageView>

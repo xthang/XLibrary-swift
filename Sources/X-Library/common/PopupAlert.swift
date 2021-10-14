@@ -12,7 +12,7 @@ public class PopupAlert: PopupView {
 	
 	
 	public static func initiate(title: String?, message: String?, preferredStyle: UIAlertController.Style) -> PopupAlert {
-		let alert = UINib(nibName: "PopupAlert", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
+		let alert = UINib(nibName: "PopupAlert", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		alert.title.text = title
 		alert.message.text = message
 		

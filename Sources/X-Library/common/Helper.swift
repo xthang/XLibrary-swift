@@ -48,8 +48,9 @@ public struct Helper {
 	private static func buildUsersInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
 		var data: [String: Any] = [:]	// why 'Any' ?: in case a value is nil, the value is set to null
 		
-		data["ids"] = KeychainItem.currentUserIdentifier != nil ? [ KeychainItem.currentUserIdentifier ] : nil
-		data["current-id"] = KeychainItem.currentUserIdentifier
+		let xUserID = KeychainItem.currentUserIdentifier
+		data["ids"] = xUserID != nil ? [ xUserID ] : nil
+		data["current-id"] = xUserID
 		
 		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
 		
@@ -402,8 +403,11 @@ public struct Helper {
 	
 	private static func logError(_ tag: String, _ errors: inout [String: Any]) {
 		let app: [String: Any] = buildAppInfo(2, &errors)
-		let users = buildUsersInfo(2, &errors)
 		let device: [String: Any] = buildDeviceInfo(2, &errors)
+		
+		let users: [String: Any]?
+		if tag == "get-user-id" { users = nil }
+		else { users = buildUsersInfo(2, &errors) }
 		
 		let url = URL(string: "https://xthang.xyz/app/log-api.php")!
 		

@@ -25,7 +25,10 @@ let package = Package(
 						   "UnityAds",
 						   .product(name: "FacebookCore", package: "Facebook"),
 						   .product(name: "FacebookLogin", package: "Facebook")],
-			path: "Sources/X-Library"),	// sources: ["", "class", "libs", "common"]
+			path: "Sources/X-Library"
+			// sources: ["", "class", "libs", "common"]
+			// linkerSettings: [.unsafeFlags(["-ObjC"])]
+		),
 		.testTarget(
 			name: "X-LibraryTests",
 			dependencies: ["XLibrary"]),
@@ -57,7 +60,7 @@ let package = Package(
 			name: "UnityAds",
 			path: "libs/UnityAds.xcframework"
 		)
-	],
-	cLanguageStandard: .c99,
-	cxxLanguageStandard: .gnucxx14
+	]
+//	cLanguageStandard: .c99,
+//	cxxLanguageStandard: .gnucxx14
 )
