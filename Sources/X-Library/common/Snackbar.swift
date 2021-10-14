@@ -4,9 +4,9 @@
 
 import UIKit
 
-struct Snackbar {
+public struct Snackbar {
 	
-	enum NotiType {
+	public enum NotiType {
 		case i
 		case s
 		case w
@@ -23,7 +23,7 @@ struct Snackbar {
 		return snackbar
 	}
 	
-	static func i(_ msg: String) {
+	public static func i(_ msg: String) {
 		DispatchQueue.main.async {
 			let snackbar = initSnackbar(msg)
 			
@@ -31,7 +31,7 @@ struct Snackbar {
 		}
 	}
 	
-	static func s(_ msg: String) {
+	public static func s(_ msg: String) {
 		DispatchQueue.main.async {
 			let snackbar = initSnackbar(msg)
 			
@@ -42,7 +42,7 @@ struct Snackbar {
 		}
 	}
 	
-	static func w(_ msg: String) {
+	public static func w(_ msg: String) {
 		DispatchQueue.main.async {
 			let snackbar = initSnackbar(msg)
 			
@@ -52,7 +52,7 @@ struct Snackbar {
 		}
 	}
 	
-	static func e(_ msg: String) {
+	public static func e(_ msg: String) {
 		DispatchQueue.main.async {
 			let snackbar = initSnackbar(msg)
 			
@@ -63,7 +63,7 @@ struct Snackbar {
 		}
 	}
 	
-	static func show(_ msg: String, _ type: NotiType) {
+	public static func show(_ msg: String, _ type: NotiType) {
 		switch type {
 			case .i: i(msg)
 			case .s: s(msg)

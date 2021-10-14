@@ -6,11 +6,11 @@ import GoogleMobileAds
 import UnityAds
 import CoreGraphics
 
-class ADBanner: NSObject {
+public class ADBanner: NSObject {
 	private let TAG = "ADS"
 	private static let TAG = "ADS"
 	
-	static var shared = ADBanner()
+	public static var shared = ADBanner()
 	var rootViewController: UIViewController?
 	
 	private var banner: UIView
@@ -21,7 +21,7 @@ class ADBanner: NSObject {
 	
 	var uAdLoaded = false
 	
-	static func initiate() {
+	public static func initiate() {
 		// Setup Google Mobile Ads
 		GADMobileAds.sharedInstance().start { status in
 			NSLog("--  \(ADBanner.TAG) | GADMobileAds: start: \(status.adapterStatusesByClassName)")
@@ -36,7 +36,7 @@ class ADBanner: NSObject {
 		}
 	}
 	
-	override init() {
+	public override init() {
 		banner = UIView()
 		gAdBanner = GADBannerView()
 		super.init()
@@ -45,7 +45,7 @@ class ADBanner: NSObject {
 		gAdBanner.delegate = self
 	}
 	
-	func show(viewController: UIViewController, position: BannerPosition? = nil) {
+	public func show(viewController: UIViewController, position: BannerPosition? = nil) {
 		rootViewController = viewController
 		gAdBanner.rootViewController = viewController
 		self.position = position
@@ -59,7 +59,7 @@ class ADBanner: NSObject {
 		}
 	}
 	
-	func reloadAd() {
+	public func reloadAd() {
 		guard let viewController = rootViewController, let view = viewController.view
 		else {
 			NSLog("!-  \(TAG) | reloadAd: viewController/view is nil")
@@ -173,42 +173,42 @@ class ADBanner: NSObject {
 		})
 	}
 	
-	func remove() {
+	public func remove() {
 		banner.removeFromSuperview()
 		rootViewController = nil
 	}
 }
 
-enum BannerPosition: CaseIterable {
+public enum BannerPosition: CaseIterable {
 	case top, bottom
 }
 
 extension ADBanner: GADBannerViewDelegate {
-	func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
+	public func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
 		NSLog("<-- \(TAG) | GAds: bannerViewDidReceiveAd: \(rootViewController as Any? ?? "--") | \(bannerView.responseInfo?.adNetworkClassName as Any? ?? "--")")
 		
 		show(adBanner: bannerView)
 	}
 	
-	func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
+	public func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
 		NSLog("<-- \(TAG) | GAds: bannerView: didFailToReceiveAdWithError: \(error.localizedDescription)")
 		
 		reloadUAd()
 	}
 	
-	func bannerViewDidRecordImpression(_ bannerView: GADBannerView) {
+	public func bannerViewDidRecordImpression(_ bannerView: GADBannerView) {
 		NSLog("--  \(TAG) | GAds: bannerViewDidRecordImpression")
 	}
 	
-	func bannerViewWillPresentScreen(_ bannerView: GADBannerView) {
+	public func bannerViewWillPresentScreen(_ bannerView: GADBannerView) {
 		NSLog("--  \(TAG) | GAds: bannerViewWillPresentScreen")
 	}
 	
-	func bannerViewWillDismissScreen(_ bannerView: GADBannerView) {
+	public func bannerViewWillDismissScreen(_ bannerView: GADBannerView) {
 		NSLog("--  \(TAG) | GAds: bannerViewWillDIsmissScreen")
 	}
 	
-	func bannerViewDidDismissScreen(_ bannerView: GADBannerView) {
+	public func bannerViewDidDismissScreen(_ bannerView: GADBannerView) {
 		NSLog("--  \(TAG) | GAds: bannerViewDidDismissScreen")
 	}
 }
@@ -228,63 +228,63 @@ extension ADBanner: GADBannerViewDelegate {
 
 // Unity Ads
 extension ADBanner: UnityAdsInitializationDelegate {
-	func initializationComplete() {
+	public func initializationComplete() {
 		NSLog("--  \(TAG) | UAds: initializationComplete")
 	}
 	
-	func initializationFailed(_ error: UnityAdsInitializationError, withMessage message: String) {
+	public func initializationFailed(_ error: UnityAdsInitializationError, withMessage message: String) {
 		NSLog("!-  \(TAG) | UAds: initializationFailed: \(error) | withMessage: \(message)")
 	}
 }
 
 // For Interstitial display ads & Rewarded video ads
 extension ADBanner: UnityAdsLoadDelegate {
-	func unityAdsAdLoaded(_ placementId: String) {
+	public func unityAdsAdLoaded(_ placementId: String) {
 		NSLog("<-- \(TAG) | UAds: unityAdsAdLoaded: \(placementId)")
 	}
 	
-	func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
+	public func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
 		NSLog("!-- \(TAG) | UAds: unityAdsAdFailed: \(placementId) | error: \(error) | withMessage: \(message)")
 	}
 }
 
 // For Interstitial display ads & Rewarded video ads
 extension ADBanner: UnityAdsShowDelegate {
-	func unityAdsShowComplete(_ placementId: String, withFinish state: UnityAdsShowCompletionState) {
+	public func unityAdsShowComplete(_ placementId: String, withFinish state: UnityAdsShowCompletionState) {
 		NSLog("--  \(TAG) | UAds: unityAdsShowComplete: \(placementId) | withFinish: \(state)")
 	}
 	
-	func unityAdsShowFailed(_ placementId: String, withError error: UnityAdsShowError, withMessage message: String) {
+	public func unityAdsShowFailed(_ placementId: String, withError error: UnityAdsShowError, withMessage message: String) {
 		NSLog("!-  \(TAG) | UAds: unityAdsShowFailed: \(placementId) | error: \(error) | withMessage: \(message)")
 	}
 	
-	func unityAdsShowStart(_ placementId: String) {
+	public func unityAdsShowStart(_ placementId: String) {
 		NSLog("--  \(TAG) | UAds: unityAdsShowStart: \(placementId)")
 	}
 	
-	func unityAdsShowClick(_ placementId: String) {
+	public func unityAdsShowClick(_ placementId: String) {
 		NSLog("--  \(TAG) | UAds: unityAdsShowClick: \(placementId)")
 	}
 }
 
 // For Banner ads
 extension ADBanner: UADSBannerViewDelegate {
-	func bannerViewDidLoad(_ bannerView: UADSBannerView) {
+	public func bannerViewDidLoad(_ bannerView: UADSBannerView) {
 		NSLog("<-- \(TAG) | UAds: bannerViewDidLoad: \(bannerView.placementId)")
 		
 		uAdLoaded = true
 		show(adBanner: bannerView)
 	}
 	
-	func bannerViewDidClick(_ bannerView: UADSBannerView) {
+	public func bannerViewDidClick(_ bannerView: UADSBannerView) {
 		NSLog("--  \(TAG) | UAds: bannerViewDidClick: \(bannerView.placementId)")
 	}
 	
-	func bannerViewDidLeaveApplication(_ bannerView: UADSBannerView) {
+	public func bannerViewDidLeaveApplication(_ bannerView: UADSBannerView) {
 		NSLog("--  \(TAG) | UAds: bannerViewDidLeaveApplication: \(bannerView.placementId)")
 	}
 	
-	func bannerViewDidError(_ bannerView: UADSBannerView, error: UADSBannerError) {
+	public func bannerViewDidError(_ bannerView: UADSBannerView, error: UADSBannerError) {
 		NSLog("!-  \(TAG) | UAds: bannerViewDidError: \(bannerView.placementId) | error: \(error)")
 	}
 }

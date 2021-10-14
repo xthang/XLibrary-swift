@@ -5,20 +5,20 @@
 import UIKit
 import AVFoundation
 
-class PopupView: UIView {
+open class PopupView: UIView {
 	private let TAG = "PopupView"
 	
 	@IBOutlet var popupWindow: UIView!
 	
 	
-	override func willMove(toSuperview newSuperview: UIView?) {
+	open override func willMove(toSuperview newSuperview: UIView?) {
 		guard newSuperview != nil else { return }
 		
 		// alpha = 0
 		popupWindow.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
 	}
 	
-	override func didMoveToSuperview() {
+	open override func didMoveToSuperview() {
 		// NSLog("--  \(TAG) | Popup: didMoveToSuperview: \(hash)")
 		guard let view = superview else { return }
 		
@@ -47,7 +47,7 @@ class PopupView: UIView {
 					   }), completion: nil)
 	}
 	
-	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+	open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		super.touchesBegan(touches, with: event)
 		
 		guard let touch = touches.first else { return }

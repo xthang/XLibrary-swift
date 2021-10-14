@@ -4,20 +4,20 @@
 
 import UIKit
 
-class XButton: UIButton {
+public class XButton: UIButton {
 	
-	@IBInspectable var highlightedImage: UIImage? {
+	@IBInspectable public var highlightedImage: UIImage? {
 		didSet {
 			setImage(highlightedImage, for: .highlighted)
 		}
 	}
-	@IBInspectable var selectedImage: UIImage? {
+	@IBInspectable public var selectedImage: UIImage? {
 		didSet {
 			setImage(selectedImage, for: .selected)
 		}
 	}
 	
-	var soundEnabled: Bool = true
+	public var soundEnabled: Bool = true
 	
 	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
 		playSound()
@@ -29,9 +29,9 @@ class XButton: UIButton {
 	}
 }
 
-class CustomButton: XButton {
+public class CustomButton: XButton {
 	
-	@IBInspectable var highlightedBackgroundImage: UIImage? {
+	@IBInspectable public var highlightedBackgroundImage: UIImage? {
 		didSet {
 			setBackgroundImage(highlightedBackgroundImage, for: .highlighted)
 		}
@@ -62,7 +62,7 @@ class CustomButton: XButton {
 		//		layer.borderColor = UIColor.green.cgColor;
 	}
 	
-	override func setBackgroundImage(_ image: UIImage?, for state: UIControl.State) {
+	public override func setBackgroundImage(_ image: UIImage?, for state: UIControl.State) {
 		let img = image?.resizableImage(
 			withCapInsets: UIEdgeInsets(top: image!.size.height * 0.5, left: image!.size.width * 0.5,
 										bottom: image!.size.height * 0.5, right: image!.size.width * 0.5),
@@ -94,7 +94,7 @@ class CustomButton: XButton {
 	}
 }
 
-class TabButton: XButton {
+public class TabButton: XButton {
 	
 	override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		UIView.animate(withDuration: 0,
@@ -112,7 +112,7 @@ class TabButton: XButton {
 		super.touchesEnded(touches, with: event)
 	}
 	
-	func onSelected() {
+	public func onSelected() {
 		transform = .identity
 		UIView.animate(withDuration: 0.1,
 					   delay: 0,

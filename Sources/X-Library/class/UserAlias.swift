@@ -4,22 +4,22 @@
 
 import Foundation
 
-class UserAlias: Codable {
-	var id: Int?
-	var creationTime: Date?
-	var updatedTime: Date?
-	var deletedTime: Date?
-	var status: Int?
-	var userID: Int?
-	var partnerID: Int?
-	var partnerUserID: String?
-	var contactValue: String?
-	var partnerUserFirstName: String?
-	var partnerUserMiddleName: String?
-	var partnerUserLastName: String?
-	var linkURL: String?
-	var imageURL: String?
-	var friendIDs: [String]?
+public class UserAlias: Codable {
+	public var id: Int?
+	public var creationTime: Date?
+	public var updatedTime: Date?
+	public var deletedTime: Date?
+	public var status: Int?
+	public var userID: Int?
+	public var partnerID: Int?
+	public var partnerUserID: String?
+	public var contactValue: String?
+	public var partnerUserFirstName: String?
+	public var partnerUserMiddleName: String?
+	public var partnerUserLastName: String?
+	public var linkURL: String?
+	public var imageURL: String?
+	public var friendIDs: [String]?
 	
 	enum CodingKeys: String, CodingKey {
 		case id

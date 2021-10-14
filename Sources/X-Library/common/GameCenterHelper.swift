@@ -4,10 +4,10 @@
 
 import GameKit
 
-struct GameCenterHelper {
+public struct GameCenterHelper {
 	static let TAG = "🕹"
 	
-	static func authenticateLocalPlayer(_ fromView: UIViewController) {
+	public static func authenticateLocalPlayer(_ fromView: UIViewController) {
 		GKLocalPlayer.local.authenticateHandler = { viewController, error in
 			var state : Bool = false
 			
@@ -30,7 +30,7 @@ struct GameCenterHelper {
 		}
 	}
 	
-	static func showGameCenterLeaderBoard() {
+	public static func showGameCenterLeaderBoard() {
 		// NSLog("--  \(TAG) | showGameCenterLeaderBoard: \(GKLocalPlayer.local.isAuthenticated)")
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
@@ -45,7 +45,7 @@ struct GameCenterHelper {
 		}
 	}
 	
-	static func submitScore(_ score: Int) {
+	public static func submitScore(_ score: Int) {
 		// Submit score to GC leaderboard
 		let bestScoreInt = GKScore(leaderboardIdentifier: AppConfig.GameCenter.LeaderBoard.all, player: GKLocalPlayer.local)
 		bestScoreInt.value = Int64(score)
@@ -59,7 +59,7 @@ struct GameCenterHelper {
 		}
 	}
 	
-	static func loadScores(_ scope: GKLeaderboard.PlayerScope?, finished: @escaping (GKLeaderboard?, [GKScore]?, Error?)->()) {
+	public static func loadScores(_ scope: GKLeaderboard.PlayerScope?, finished: @escaping (GKLeaderboard?, [GKScore]?, Error?)->()) {
 		// NSLog("--  \(TAG) | loadScores: \(GKLocalPlayer.local.isAuthenticated)")
 		
 		GameCenterHelper.fetchLeaderboardBestScore { (leaderboard, e) in
@@ -100,7 +100,7 @@ struct GameCenterHelper {
 		}
 	}
 	
-	static func presentMatchmaker(_ fromView: UIViewController) {
+	public static func presentMatchmaker(_ fromView: UIViewController) {
 		// NSLog("--  \(TAG) | presentMatchmaker: \(GKLocalPlayer.local.isAuthenticated)")
 		
 		let request = GKMatchRequest()

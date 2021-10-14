@@ -4,9 +4,9 @@
 
 import UIKit
 
-class CustomSegue1: UIStoryboardSegue {
+public class CustomSegue1: UIStoryboardSegue {
 	
-	override func perform() {
+	public override func perform() {
 		destination.transitioningDelegate = self
 		
 		/// if set segue kind in StoryBoard to custom:
@@ -17,11 +17,11 @@ class CustomSegue1: UIStoryboardSegue {
 }
 
 extension CustomSegue1: UIViewControllerTransitioningDelegate {
-	func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+	public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
 		return Presenter()
 	}
 	
-	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+	public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
 		return Presenter()
 	}
 	

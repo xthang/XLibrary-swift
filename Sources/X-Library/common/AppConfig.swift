@@ -4,15 +4,15 @@
 
 import GoogleMobileAds
 
-struct AppConfig {
+public struct AppConfig {
 	
 	private static let TAG = "🎛"
 	
 	static let nsDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "AppConfig", ofType: "plist")!)!
 	
-	static let appID = nsDictionary["AppID"] as! Int
-	static let appleID: String = nsDictionary["AppleID"] as! String
-	static let shareURL: String = nsDictionary["ShareURL"] as! String
+	public static let appID = nsDictionary["AppID"] as! Int
+	public static let appleID: String = nsDictionary["AppleID"] as! String
+	public static let shareURL: String = nsDictionary["ShareURL"] as! String
 	
 	static let keychainAccessGroup: String = nsDictionary["KeychainAccessGroup"] as! String
 	static let keychainIdService: String = nsDictionary["KeychainIdService"] as! String
@@ -27,7 +27,7 @@ struct AppConfig {
 	static let unityGameID: String = nsDictionary["UnityGameID"] as! String
 	static let unityAdEnabled: Bool = nsDictionary["UnityAdEnabled"] as! Bool
 	
-	static func initiate() {
+	public static func initiate() {
 		NSLog("-------  \(TAG)")
 		
 		gAdTestDevices.append(GADSimulatorID)

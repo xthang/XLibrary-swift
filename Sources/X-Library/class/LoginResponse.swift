@@ -2,7 +2,7 @@
 //  Created by Thang Nguyen on 9/18/21.
 //
 
-struct LoginRepsonse: Codable {
+public struct LoginRepsonse: Codable {
 	var resultCode: String?
 	var result: String?
 	

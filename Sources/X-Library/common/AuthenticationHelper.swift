@@ -6,11 +6,11 @@ import AuthenticationServices
 
 import FBSDKLoginKit
 
-struct AuthenticationHelper {
+public struct AuthenticationHelper {
 	
 	private static let TAG = "🔑"
 	
-	static func signIn(_ tag: Int, _ authMethod: Int, authPartner: String?, userInfo: User?, partnerAuthData: [String: Any?]?, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
+	public static func signIn(_ tag: Int, _ authMethod: Int, authPartner: String?, userInfo: User?, partnerAuthData: [String: Any?]?, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
 		NSLog("--> \(TAG) | [log in] [\(tag)] ...: \(authMethod) | \(authPartner as Any? ?? "--") | \(userInfo as Any? ?? "--") | \(partnerAuthData as Any? ?? "--")")
 		
 		var errors: [String: Any] = [:]
@@ -131,7 +131,7 @@ struct AuthenticationHelper {
 		completion(successful, msg)
 	}
 	
-	static func getAppleIDCredentialState(userID: String, alias: UserAlias) {
+	public static func getAppleIDCredentialState(userID: String, alias: UserAlias) {
 		NSLog("--> \(TAG) |  get CredentialState ...: forUserID: \(userID)")
 		
 		if #available(iOS 13.0, *) {
@@ -159,7 +159,7 @@ struct AuthenticationHelper {
 		}
 	}
 	
-	static func signOut(_ tag: Int, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
+	public static func signOut(_ tag: Int, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
 		NSLog("--> \(TAG) | [Sign out X] [\(tag)] ...")
 		do {
 			// todo: call API if neccessary
@@ -192,7 +192,7 @@ struct AuthenticationHelper {
 		}
 	}
 	
-	static func unlinkAccount(_ tag: Int, userInfo: User, alias: UserAlias, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
+	public static func unlinkAccount(_ tag: Int, userInfo: User, alias: UserAlias, completion: @escaping (_ ok: Bool, _ msg: String?) -> Void) {
 		NSLog("--> \(TAG) | [unlink Acc] [\(tag)] ...: \(userInfo) | \(alias)")
 		
 		var errors: [String: Any] = [:]

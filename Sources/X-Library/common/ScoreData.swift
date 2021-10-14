@@ -14,7 +14,7 @@ import CSQLite
 import SQLite3
 #endif
 
-class ScoreData {
+public class ScoreData {
 	private static let TAG = "Db"
 	
 	static var path : String = "xDB.sqlite"
@@ -103,7 +103,7 @@ class ScoreData {
 		return true
 	}
 	
-	static func insert(_ scores: [Score]) -> [Score]? {
+	public static func insert(_ scores: [Score]) -> [Score]? {
 		NSLog("--  \(TAG) | inserting: \(scores.count)")
 		guard let db = createOrOpenDB(), createTable(db) else { return nil }
 		defer {
@@ -151,13 +151,13 @@ class ScoreData {
 		return fails
 	}
 	
-	static func insert(_ score: Score) -> Bool {
+	public static func insert(_ score: Score) -> Bool {
 		let rs = insert([score])
 		if rs == nil || rs!.count > 0 { return false }
 		return true
 	}
 	
-	static func getHighests(limit: Int) -> [Score]? {
+	public static func getHighests(limit: Int) -> [Score]? {
 		guard let db = createOrOpenDB(), createTable(db) else { return nil }
 		defer {
 			close(db)
@@ -193,7 +193,7 @@ class ScoreData {
 		return scores
 	}
 	
-	static func getHishest() -> Score? {
+	public static func getHishest() -> Score? {
 		return getHighests(limit: 1)?.first
 	}
 	

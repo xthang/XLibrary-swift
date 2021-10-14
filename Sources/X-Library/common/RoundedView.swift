@@ -4,11 +4,11 @@
 
 import UIKit
 
-class RoundedView : UIView {
+public class RoundedView : UIView {
 	
 	private let TAG = "◯"
 	
-	override func layoutSubviews() {
+	public override func layoutSubviews() {
 		super.layoutSubviews()
 		
 		cornerRadiusRatio = 0.5

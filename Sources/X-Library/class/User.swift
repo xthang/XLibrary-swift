@@ -4,29 +4,29 @@
 
 import Foundation
 
-class User: Codable {
-	static var current: User?
+public class User: Codable {
+	public static var current: User?
 	
-	var id: Int?
-	var creationTime: Date?
-	var updatedTime: Date?
-	var deletedTime: Date?
-	var status: Int?
-	var creationChannelID: Int?
-	var personID: Int?
-	var username: String?
-	var password: String?
-	var name: String?
-	var img: String?
-	var language: String?
-	var role: Int?
-	var loginTime: Date?
-	var locale: String?
-	var timeZone: String?
-	var note: String?
+	public var id: Int?
+	public var creationTime: Date?
+	public var updatedTime: Date?
+	public var deletedTime: Date?
+	public var status: Int?
+	public var creationChannelID: Int?
+	public var personID: Int?
+	public var username: String?
+	public var password: String?
+	public var name: String?
+	public var img: String?
+	public var language: String?
+	public var role: Int?
+	public var loginTime: Date?
+	public var locale: String?
+	public var timeZone: String?
+	public var note: String?
 	
-	var currentAlias: UserAlias?
-	var aliases: [UserAlias]?
+	public var currentAlias: UserAlias?
+	public var aliases: [UserAlias]?
 	
 	enum CodingKeys: String, CodingKey {
 		case id = "id"
@@ -51,7 +51,9 @@ class User: Codable {
 		case aliases
 	}
 	
-	func apply(id: Int) -> User {
+	public init() { }
+	
+	public func apply(id: Int) -> User {
 		self.id = id
 		return self
 	}

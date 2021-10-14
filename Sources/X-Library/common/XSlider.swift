@@ -5,22 +5,22 @@
 import UIKit
 
 //@IBDesignable
-class XSlider: UIControl {
+public class XSlider: UIControl {
 	private let TAG = "XSlider"
 	
-	override var bounds: CGRect {	// frame not update immediately when rotate
+	public override var bounds: CGRect {	// frame not update immediately when rotate
 		didSet {
 			updateLayerFrames(1)
 		}
 	}
 	
-	@IBInspectable var value: CGFloat = 0.8 {
+	@IBInspectable public var value: CGFloat = 0.8 {
 		didSet {
 			updateLayerFrames(2)
 		}
 	}
 	
-	var isInactive: Bool = false {
+	public var isInactive: Bool = false {
 		didSet {
 			alpha = isInactive ? 0.5 : 1
 		}
@@ -29,34 +29,34 @@ class XSlider: UIControl {
 	static let defaultThumb = Helper.circle(diameter: 30, color: .white)
 	
 	private let thumbImageView = UIImageView()
-	@IBInspectable var thumbImage: UIImage? {
+	@IBInspectable public var thumbImage: UIImage? {
 		didSet {
 			thumbImageView.image = thumbImage
 		}
 	}
-	@IBInspectable var highlightedThumbImage: UIImage? {
+	@IBInspectable public var highlightedThumbImage: UIImage? {
 		didSet {
 			thumbImageView.highlightedImage = highlightedThumbImage
 		}
 	}
-	@IBInspectable var thumbColor: UIColor? {
+	@IBInspectable public var thumbColor: UIColor? {
 		didSet {
 			thumbImageView.image = (thumbColor != nil) ? Helper.circle(diameter: 30, color: thumbColor!) : XSlider.defaultThumb
 		}
 	}
 	
 	private let trackLine = UIImageView()
-	@IBInspectable var trackLineColor: UIColor? {
+	@IBInspectable public var trackLineColor: UIColor? {
 		didSet {
 			trackLine.backgroundColor = trackLineColor
 		}
 	}
-	@IBInspectable var trackLineImage: UIImage? {
+	@IBInspectable public var trackLineImage: UIImage? {
 		didSet {
 			trackLine.image = trackLineImage
 		}
 	}
-	@IBInspectable var trackLineHeightPercent: CGFloat = 0.3 {
+	@IBInspectable public var trackLineHeightPercent: CGFloat = 0.3 {
 		didSet {
 		}
 	}
@@ -67,20 +67,20 @@ class XSlider: UIControl {
 			trackLineInd.backgroundColor = trackLineIndColor
 		}
 	}
-	@IBInspectable var trackLineIndImage: UIImage? {
+	@IBInspectable public var trackLineIndImage: UIImage? {
 		didSet {
 			trackLineInd.image = trackLineIndImage
 		}
 	}
-	@IBInspectable var trackLineIndHeightPercent: CGFloat = 0.3 {
+	@IBInspectable public var trackLineIndHeightPercent: CGFloat = 0.3 {
 		didSet {
 		}
 	}
 	
-	@IBInspectable var trackLineInsetPerThumb: CGFloat = 0
+	@IBInspectable public var trackLineInsetPerThumb: CGFloat = 0
 	
 	
-	override func awakeFromNib() {
+	public override func awakeFromNib() {
 		// NSLog("--  \(TAG) | xS: awakeFromNib")
 		super.awakeFromNib()
 		
@@ -88,7 +88,7 @@ class XSlider: UIControl {
 		updateLayerFrames(0)
 	}
 	
-	override func prepareForInterfaceBuilder() {
+	public override func prepareForInterfaceBuilder() {
 		NSLog("--  \(TAG) | xS: prepareForInterfaceBuilder")
 		super.prepareForInterfaceBuilder()
 		
@@ -134,7 +134,7 @@ class XSlider: UIControl {
 		CATransaction.commit()
 	}
 	
-	override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
+	public override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
 		let loc = touch.location(in: self)
 		
 		if thumbImageView.frame.contains(loc) {
@@ -144,7 +144,7 @@ class XSlider: UIControl {
 		return thumbImageView.isHighlighted
 	}
 	
-	override func continueTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
+	public override func continueTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
 		let location = touch.location(in: self)
 		
 		if thumbImageView.isHighlighted {
@@ -155,7 +155,7 @@ class XSlider: UIControl {
 		return true
 	}
 	
-	override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
+	public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
 		thumbImageView.isHighlighted = false
 		sendActions(for: .valueChanged)
 	}

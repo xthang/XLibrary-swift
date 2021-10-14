@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct KeychainItem {
+public struct KeychainItem {
 	// MARK: Types
 	
 	enum KeychainError: Error {
@@ -139,7 +139,7 @@ struct KeychainItem {
 		}
 	}
 	
-	static func saveUserInKeychain(_ account: String, _ password: String) throws {
+	public static func saveUserInKeychain(_ account: String, _ password: String) throws {
 		try KeychainItem(service: AppConfig.keychainIdService, account: account, accessGroup: AppConfig.keychainAccessGroup).saveItem(password)
 	}
 	
@@ -151,7 +151,7 @@ struct KeychainItem {
 	 For the purpose of this demo app, the user identifier will be stored in the device keychain.
 	 You should store the user identifier in your account management system.
 	 */
-	static var currentUserIdentifier: Int? {
+	public static var currentUserIdentifier: Int? {
 		do {
 			let storedIdentifier = try Int(KeychainItem(service: AppConfig.keychainIdService, account: AppConfig.keychainXUserIdKey, accessGroup: AppConfig.keychainAccessGroup).readItem())
 			return storedIdentifier

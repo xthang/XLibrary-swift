@@ -7,8 +7,12 @@ import SystemConfiguration
 import SystemConfiguration.CaptiveNetwork
 import AVFoundation
 import UIKit
+import NetworkExtension
 
 class Device {
+	private let TAG = "📺"
+	private static let TAG = "📺"
+	
 	
 	static var isSimulator: Bool { return TARGET_OS_SIMULATOR != 0 }
 	
@@ -148,12 +152,29 @@ class Device {
 			for i in 0..<CFArrayGetCount(interface) {
 				let interfaceName: UnsafeRawPointer = CFArrayGetValueAtIndex(interface, i)
 				let rec = unsafeBitCast(interfaceName, to: AnyObject.self)
-				currentNetworksInfo.append(CNCopyCurrentNetworkInfo("\(rec)" as CFString) as! [String : AnyObject])
+				if let info = CNCopyCurrentNetworkInfo("\(rec)" as CFString) {
+					currentNetworksInfo.append(info as! [String : AnyObject])
+				}
 			}
 			
 			return currentNetworksInfo
 		}
+		
 		return nil
+	}
+	
+	// require Access Wifi Information entitlement
+	@available(iOS 14.0, *)
+	static func getCurrentWifiInfo(completion: @escaping (Any?) -> Void) {
+		NEHotspotNetwork.fetchCurrent { network in
+			guard let network = network else {
+				completion(nil)
+				return
+			}
+			
+			NSLog("--  \(Device.TAG) | currentWirelessInfo: \(network)")
+			completion(network)
+		}
 	}
 }
 

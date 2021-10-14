@@ -7,14 +7,14 @@ import Foundation
 //internal let gameQueue = DispatchQueue(label: "game_queue")
 //internal var bRunning = false
 
-struct EOSHelper {
+public struct EOSHelper {
 	private static let TAG = "EOS"
 	
 	//	static var platform: EOS_HPlatform!
 	
 	/** Call this during the AppDelegates start up phase, didFinishLaunchingWithOptions to initialize the EOS SDK
 	 *  NOTE: EOSWrapper.initializeSDK and EOSWrapper.shutdownSDK must be called on the main thread */
-	internal static func initializeEOS() {
+	public static func initializeEOS() {
 		// Initialize the sdk with our product name and product version number
 		//		let Result = EOSWrapper.initializeSDK("Login", version:"1.0")
 		//		if Result == EOS_Success {
@@ -26,7 +26,7 @@ struct EOSHelper {
 	
 	/** Call this during the AppDelegates termination phase, applicationWillTerminate to clean up the EOS SDK and release any created platforms
 	 *  NOTE: EOSWrapper.initializeSDK and EOSWrapper.shutdownSDK must be called on the main thread */
-	internal static func shutdownEOS() {
+	public static func shutdownEOS() {
 		//		bRunning = false
 		//
 		//		gameQueue.sync {
@@ -38,7 +38,7 @@ struct EOSHelper {
 	
 	/** Create a platform with our Dev Portal settings for this application
 	 *  This is the hub that provides access to all the other interfaces */
-	internal static func createPlatform() -> Bool {
+	public static func createPlatform() -> Bool {
 		// Get our applications json settings, which contains the values we obtained from the Epic Developer Portal
 		//		let settings = EOSSettings()
 		//		platform = EOSWrapper.createPlatform(settings.data.productId,
@@ -54,7 +54,7 @@ struct EOSHelper {
 	}
 	
 	/** Provided as an example of how to release a platform outside of normal shutdown handling, which already does this for us! */
-	internal static func releasePlatform() {
+	public static func releasePlatform() {
 		//		if platform != nil {
 		//			releasePlatform(platform)
 		//			platform = nil
@@ -71,7 +71,7 @@ struct EOSHelper {
 	
 	/** Call this once from your UIViewController in viewDidLoad, to ensure the EOS SDK periodically ticks and processes messages
 	 *  This will maintain calling itself every 10th of a second after the initial trigger */
-	internal static func startGameLoop() {
+	public static func startGameLoop() {
 		//		gameQueue.asyncAfter(deadline: .now() + 0.1, qos: .utility) {
 		//			if bRunning {
 		//				EOSWrapper.tick()
@@ -83,7 +83,7 @@ struct EOSHelper {
 	/** Register our interest in changes to the login status
 	 *  We can see transitions from logged out to in and vice versa in response to calls to login and logout
 	 *  Also we can see if the EOS SDK service logged us out for other reasons and keep the application in sync */
-	internal static func registerNotications() {
+	public static func registerNotications() {
 		//		EOSWrapper.addNotifyLoginStatusChanged { loggedIn, prevLoggedIn in
 		//			NSLog("--  \(TAG) | LoginStatusChanged: %x -> %x", prevLoggedIn, loggedIn)
 		//
@@ -95,7 +95,7 @@ struct EOSHelper {
 	
 	/** Attempt an auto login with any locally persisted credentials (from a previous successful login during another session)
 	 *  It is normal for this to fail with EOS_NotFound if no persisted credentials exist */
-	internal static func autoLogin() {
+	public static func autoLogin() {
 		NSLog("--  \(TAG) | AutoLogging in...")
 		
 		//		EOSWrapper.loginPersistentAuth { result in

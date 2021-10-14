@@ -7,12 +7,12 @@ import Foundation
 import FacebookCore
 import FBSDKLoginKit
 
-struct FacebookHelper {
+public struct FacebookHelper {
 	
 	private static let TAG = "Fb"
 	
 	
-	static func buildFacebookInfo(_ tag: Int) -> [String: Any] {
+	public static func buildFacebookInfo(_ tag: Int) -> [String: Any] {
 		var data: [String: Any] = [:]
 		
 		if let accessToken = AccessToken.current {

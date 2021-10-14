@@ -8,27 +8,27 @@ import AdSupport
 import CoreTelephony
 import AVFoundation
 
-struct Helper {
+public struct Helper {
 	
 	private static let TAG = "🧰"
 	
-	static var soundOn: Bool {
+	public static var soundOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.sound) as? Bool ?? true
 	}
-	static var soundVolume: Float {
+	public static var soundVolume: Float {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.sound_volume) as? Float ?? 0.7
 	}
-	static var musicOn: Bool {
+	public static var musicOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.music) as? Bool ?? true
 	}
-	static var musicVolume: Float {
+	public static var musicVolume: Float {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.music_volume) as? Float ?? 0.7
 	}
-	static var vibrationOn: Bool {
+	public static var vibrationOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
 	
-	static func buildAppInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildAppInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
 		var app: [String: Any] = [:]
 		
 		app["id"] = AppConfig.appID	// db table Application
@@ -56,7 +56,7 @@ struct Helper {
 		return data
 	}
 	
-	static func buildDeviceInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildDeviceInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
 		var device: [String: Any] = [:]
 		
 		device["uid"] = KeychainItem.getUserIdentifier(AppConfig.keychainDeviceIdKey)
@@ -129,7 +129,7 @@ struct Helper {
 		return device
 	}
 	
-	static func buildSystemInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildSystemInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
 		var data: [String: Any] = [:]
 		
 		data["locale"] = Locale.current.identifier
@@ -305,7 +305,7 @@ struct Helper {
 		return userSettings
 	}
 	
-	static func getConfig() {
+	public static func getConfig() {
 		var errors: [String: Any] = [:]
 		let app = buildAppInfo(1, &errors)
 		let users = buildUsersInfo(1, &errors)
@@ -377,7 +377,7 @@ struct Helper {
 		task.resume()
 	}
 	
-	static func log(_ tag: String, _ e: NSException, _ data: String? = nil) {
+	public static func log(_ tag: String, _ e: NSException, _ data: String? = nil) {
 		NSLog("!-- \(TAG) | logging Exception: \(e)")
 		
 		var errors: [String: Any] = [:]
@@ -389,7 +389,7 @@ struct Helper {
 		logError(tag, &errors)
 	}
 	
-	static func log(_ tag: String, _ e: Error, _ data: String? = nil) {
+	public static func log(_ tag: String, _ e: Error, _ data: String? = nil) {
 		NSLog("!-- \(TAG) | logging Error: \(e)")
 		
 		var errors: [String: Any] = [:]
@@ -430,7 +430,7 @@ struct Helper {
 		RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 1))
 	}
 	
-	static func sendDeviceTokenToServer(deviceToken: Data) {
+	public static func sendDeviceTokenToServer(deviceToken: Data) {
 		let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
 		NSLog("--> \(TAG) | sending DeviceToken to xthang: \(token)")
 		
@@ -462,7 +462,7 @@ struct Helper {
 		task.resume()
 	}
 	
-	static func sendFCMTokenToServer(fcmToken: String?) {
+	public static func sendFCMTokenToServer(fcmToken: String?) {
 		NSLog("--> \(TAG) | sending FCMToken to xthang: \(fcmToken ?? "nil")")
 		
 		let url = URL(string: "https://xthang.xyz/push-notification/push-subscribe-api.php")!
@@ -493,7 +493,7 @@ struct Helper {
 		task.resume()
 	}
 	
-	static func openSystemSettings(title: String) {
+	public static func openSystemSettings(title: String) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -521,7 +521,7 @@ struct Helper {
 		}
 	}
 	
-	static func initAttributedString(string: String, fontSize: CGFloat) -> NSAttributedString {
+	public static func initAttributedString(string: String, fontSize: CGFloat) -> NSAttributedString {
 		return NSAttributedString(string: string,
 								  attributes: [.font: UIFont(name: "Maniac", size: fontSize)!,
 											   .strokeColor: UIColor.black,
@@ -530,7 +530,7 @@ struct Helper {
 											  ])
 	}
 	
-	static func circle(diameter: CGFloat, color: UIColor) -> UIImage {
+	public static func circle(diameter: CGFloat, color: UIColor) -> UIImage {
 		UIGraphicsBeginImageContextWithOptions(CGSize(width: diameter, height: diameter), false, 0)
 		let ctx = UIGraphicsGetCurrentContext()!
 		ctx.saveGState()

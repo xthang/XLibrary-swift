@@ -5,26 +5,26 @@
 import UIKit
 import GameKit
 
-class Score: CustomStringConvertible {
+public class Score: CustomStringConvertible {
 	var id: Int?
-	var score: Int
-	var time: Date
+	public var score: Int
+	public var time: Date
 	
 	var player: Player
 	
-	var gkScore: GKScore?
+	public var gkScore: GKScore?
 	
-	var tap: Int?
+	public var tap: Int?
 	
-	var description: String { return "( \(id as Any) | \(time) | \(score) | \(player) )"}
+	public var description: String { return "( \(id as Any) | \(time) | \(score) | \(player) )"}
 	
-	init(_ score: Int) {
+	public init(_ score: Int) {
 		self.score = score
 		self.time = Date()
 		self.player = Player(GKLocalPlayer.local)
 	}
 	
-	init(_ gkScore: GKScore) {
+	public init(_ gkScore: GKScore) {
 		self.gkScore = gkScore
 		self.score = Int(gkScore.value)
 		self.time = gkScore.date

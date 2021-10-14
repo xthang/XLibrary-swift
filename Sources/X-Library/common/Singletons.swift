@@ -5,12 +5,12 @@
 import UIKit
 import AVFoundation
 
-class Singletons {
+public class Singletons {
 	private let TAG = "SgT"
 	
-	static var instance = Singletons()
+	public static var instance = Singletons()
 	
-	static let backgroundAudio : AVAudioPlayer? = {
+	public static let backgroundAudio : AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "background", withExtension: "mp3") {
 			// NSLog("--  \(TAG) | init background audio ...: \(url)")
@@ -21,7 +21,7 @@ class Singletons {
 		return s
 	}()
 	
-	static let btnSound: AVAudioPlayer? = {
+	public static let btnSound: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "pop", withExtension: "wav") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
@@ -31,7 +31,7 @@ class Singletons {
 		return s
 	}()
 	
-	static let whooshSound: AVAudioPlayer? = {
+	public static let whooshSound: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "whoosh", withExtension: "wav") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
@@ -41,7 +41,7 @@ class Singletons {
 		return s
 	}()
 	
-	static let whooshSound2: AVAudioPlayer? = {
+	public static let whooshSound2: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "whoosh", withExtension: "m4a") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")

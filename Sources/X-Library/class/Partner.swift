@@ -2,13 +2,13 @@
 //  Created by Thang Nguyen on 9/19/21.
 //
 
-struct Partner {
-	enum ID: Int {
+public struct Partner {
+	public enum ID: Int {
 		case facebook = 2
 		case appleID = 3
 	}
 	
-	enum CredentialState: Int {
+	public enum CredentialState: Int {
 		case undefined = -1
 		case revoked = 0
 		case authorized = 1

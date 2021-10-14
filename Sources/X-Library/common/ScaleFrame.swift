@@ -4,7 +4,7 @@
 
 import UIKit
 
-class ScaleFrame: UIImageView {
+public class ScaleFrame: UIImageView {
 	
 	required init?(coder: NSCoder) {
 		super.init(coder: coder)

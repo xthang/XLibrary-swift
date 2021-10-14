@@ -7,20 +7,20 @@ import GoogleMobileAds
 
 
 extension Notification.Name {
-	static let sound = Notification.Name(rawValue: "sound")
-	static let soundVolume = Notification.Name(rawValue: "sound-volume")
-	static let music = Notification.Name(rawValue: "music")
-	static let musicVolume = Notification.Name(rawValue: "music-volume")
-	static let vibration = Notification.Name(rawValue: "vibration")
+	public static let sound = Notification.Name(rawValue: "sound")
+	public static let soundVolume = Notification.Name(rawValue: "sound-volume")
+	public static let music = Notification.Name(rawValue: "music")
+	public static let musicVolume = Notification.Name(rawValue: "music-volume")
+	public static let vibration = Notification.Name(rawValue: "vibration")
 	
-	static let xAuthStateChanged = Notification.Name(rawValue: "xAuthStateChanged")
+	public static let xAuthStateChanged = Notification.Name(rawValue: "xAuthStateChanged")
 	
-	static let presentGame = Notification.Name(rawValue: "presentGame")
-	static let gcAuthenticationChanged = Notification.Name(rawValue: "gcAuthenticationChanged")
+	public static let presentGame = Notification.Name(rawValue: "presentGame")
+	public static let gcAuthenticationChanged = Notification.Name(rawValue: "gcAuthenticationChanged")
 	
-	static let appleIDStateChanged = Notification.Name(rawValue: "appleIDStateChanged")
-	static let fbStateChanged = Notification.Name(rawValue: "fbStateChanged")
-	static let eosLoginStatusChanged = Notification.Name(rawValue: "eosLoginStatusChanged")
+	public static let appleIDStateChanged = Notification.Name(rawValue: "appleIDStateChanged")
+	public static let fbStateChanged = Notification.Name(rawValue: "fbStateChanged")
+	public static let eosLoginStatusChanged = Notification.Name(rawValue: "eosLoginStatusChanged")
 }
 
 extension UIControl.Event {
@@ -119,11 +119,11 @@ extension UIImageView {
 		animationImages = images
 	}
 	
-	func loadSpinner() {
+	public func loadSpinner() {
 		fromGif(resourceName: "spinner-icon-gif", ofType: "jpg")
 	}
 	
-	func downloadImage(from url: URL, completion: @escaping (_ ok: Bool) -> Void) {
+	public func downloadImage(from url: URL, completion: @escaping (_ ok: Bool) -> Void) {
 		URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
 			guard let data = data, error == nil, !data.isEmpty else {
 				NSLog("--> image download fail: %@ | %@ | %@", response?.suggestedFilename ?? url.lastPathComponent, error?.localizedDescription ?? "--", data != nil ? String(data!.count) : "--")
@@ -154,11 +154,11 @@ extension UIImage {
 }
 
 extension SKScene {
-	@objc func doPressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
+	@objc open func doPressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
 }
 
 extension GKError {
-	var content: String {
+	public var content: String {
 		switch code {
 			case .notAuthenticated, .notAuthorized, .userDenied, .invalidCredentials:
 				return NSLocalizedString("Local player has not been authenticated", comment: "")

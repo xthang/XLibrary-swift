@@ -4,14 +4,14 @@
 
 import UIKit
 
-class PopupAlert: PopupView {
+public class PopupAlert: PopupView {
 	
 	@IBOutlet var title: UILabel!
 	@IBOutlet var message: UILabel!
 	@IBOutlet var buttons: UIStackView!
 	
 	
-	static func initiate(title: String?, message: String?, preferredStyle: UIAlertController.Style) -> PopupAlert {
+	public static func initiate(title: String?, message: String?, preferredStyle: UIAlertController.Style) -> PopupAlert {
 		let alert = UINib(nibName: "PopupAlert", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		alert.title.text = title
 		alert.message.text = message
@@ -19,7 +19,7 @@ class PopupAlert: PopupView {
 		return alert
 	}
 	
-	func addAction(title: String?, style: UIAlertAction.Style, handler: (() -> Void)?) {
+	public func addAction(title: String?, style: UIAlertAction.Style, handler: (() -> Void)?) {
 		let btn = CustomButton()
 		// btn.soundEnabled = false
 		btn.setTitle(title, for: .normal)
