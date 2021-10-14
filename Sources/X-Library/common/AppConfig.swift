@@ -8,7 +8,7 @@ public struct AppConfig {
 	
 	private static let TAG = "🎛"
 	
-	static let nsDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "AppConfig", ofType: "plist")!)!
+	public static let nsDictionary = NSDictionary(contentsOfFile: Bundle.main.path(forResource: "AppConfig", ofType: "plist")!)!
 	
 	public static let appID = nsDictionary["AppID"] as! Int
 	public static let appleID: String = nsDictionary["AppleID"] as! String

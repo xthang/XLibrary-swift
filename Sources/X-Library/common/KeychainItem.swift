@@ -57,8 +57,8 @@ public struct KeychainItem {
 		
 		// Parse the password string from the query result.
 		guard let existingItem = queryResult as? [String: AnyObject],
-				let passwordData = existingItem[kSecValueData as String] as? Data,
-				let password = String(data: passwordData, encoding: .utf8)
+			  let passwordData = existingItem[kSecValueData as String] as? Data,
+			  let password = String(data: passwordData, encoding: .utf8)
 		else {
 			throw KeychainError.unexpectedPasswordData
 		}
@@ -127,15 +127,16 @@ public struct KeychainItem {
 		return query
 	}
 	
-	static func getUserIdentifier(_ account: String) -> String? {
+	static func getUserIdentifier(_ tag: String, _ account: String) throws -> String? {
 		do {
 			let storedIdentifier = try KeychainItem(service: AppConfig.keychainIdService, account: account, accessGroup: AppConfig.keychainAccessGroup).readItem()
 			return storedIdentifier
 		} catch let error as KeychainError {
-			if case .unhandledError = error { Helper.log("get-kch-id", error) }
-			return nil
-		} catch {
-			return nil
+			if case .noPassword = error {
+				return nil
+			}
+			// Helper.log("\(tag)|get-kch-id", error)
+			throw error
 		}
 	}
 	
@@ -152,14 +153,17 @@ public struct KeychainItem {
 	 You should store the user identifier in your account management system.
 	 */
 	public static var currentUserIdentifier: Int? {
-		do {
-			let storedIdentifier = try Int(KeychainItem(service: AppConfig.keychainIdService, account: AppConfig.keychainXUserIdKey, accessGroup: AppConfig.keychainAccessGroup).readItem())
-			return storedIdentifier
-		} catch let error as KeychainError {
-			if case .unhandledError = error { Helper.log("get-user-id", error) }
-			return nil
-		} catch {
-			return nil
+		get throws {
+			do {
+				let storedIdentifier = try Int(KeychainItem(service: AppConfig.keychainIdService, account: AppConfig.keychainXUserIdKey, accessGroup: AppConfig.keychainAccessGroup).readItem())
+				return storedIdentifier
+			} catch let error as KeychainError {
+				if case .noPassword = error {
+					return nil
+				}
+				// Helper.log("get-user-id", error)
+				throw error
+			}
 		}
 	}
 }

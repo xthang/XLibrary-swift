@@ -28,7 +28,7 @@ public struct Helper {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
 	
-	public static func buildAppInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildAppInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
 		var app: [String: Any] = [:]
 		
 		app["id"] = AppConfig.appID	// db table Application
@@ -45,22 +45,32 @@ public struct Helper {
 		return app
 	}
 	
-	private static func buildUsersInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	private static func buildUsersInfo(_ tag: String, _ err: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
 		var data: [String: Any] = [:]	// why 'Any' ?: in case a value is nil, the value is set to null
 		
-		let xUserID = KeychainItem.currentUserIdentifier
-		data["ids"] = xUserID != nil ? [ xUserID ] : nil
-		data["current-id"] = xUserID
+		do {
+			let xUserID = try KeychainItem.currentUserIdentifier
+			data["ids"] = xUserID != nil ? [ xUserID ] : nil
+			data["current-id"] = xUserID
+		} catch {
+			if !suppressError { throw error }
+			else { err["user-info"] = "[\(tag)] \(error)" }
+		}
 		
 		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
 		
 		return data
 	}
 	
-	public static func buildDeviceInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildDeviceInfo(_ tag: String, _ err: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
 		var device: [String: Any] = [:]
 		
-		device["uid"] = KeychainItem.getUserIdentifier(AppConfig.keychainDeviceIdKey)
+		do {
+			device["uid"] = try KeychainItem.getUserIdentifier("\(tag)|device-info", AppConfig.keychainDeviceIdKey)
+		} catch {
+			if !suppressError { throw error }
+			else { err["device-info"] = "[\(tag)] \(error)" }
+		}
 		
 		device["model-id"] = UIDevice.modelID
 		device["model"] = UIDevice.current.model
@@ -125,7 +135,7 @@ public struct Helper {
 			return x
 		})
 		
-		if tag == 1 { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
+		if tag == "cfg" { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
 		
 		return device
 	}
@@ -306,80 +316,87 @@ public struct Helper {
 		return userSettings
 	}
 	
-	public static func getConfig() {
-		var errors: [String: Any] = [:]
-		let app = buildAppInfo(1, &errors)
-		let users = buildUsersInfo(1, &errors)
-		let device = buildDeviceInfo(1, &errors)
-		let system = buildSystemInfo(1, &errors)
-		let process = buildProcessInfo(1, &errors)
-		let telephony = buildTelephonyInfo(1, &errors)
-		let connectivity = buildConnectivityInfo(1, &errors)
-		let audio = buildAudioInfo(1, &errors)
-		let userSettings = buildUserConfigInfo(1, &errors)
-		
-		let url = URL(string: "https://xthang.xyz/app/config-api.php")!
-		
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
-		request.setValue("ios", forHTTPHeaderField: "platform")
-		request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.httpBody = try? JSONSerialization.data(withJSONObject: [
-			"tag": 1,
-			"app": app,
-			"users": users,
-			"device": device,
-			"system": system,
-			"process": process,
-			"telephony": telephony,
-			"connectivity": connectivity,
-			"audio": audio,
-			"user-settings": userSettings,
-			"errors": !errors.isEmpty ? errors as Any : nil
-		], options: [])
-		
-		let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
-			let stt = (response as? HTTPURLResponse)?.statusCode
-			let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-			NSLog("<-- \(TAG) | getting Config: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+	public static func getConfig(completion: @escaping (Error?, [String: Any]?) -> Void) {
+		do {
+			var errors: [String: Any] = [:]
+			let app = buildAppInfo("cfg", &errors)
+			let users = try buildUsersInfo("cfg", &errors, false)
+			let device = try buildDeviceInfo("cfg", &errors, false)
+			let system = buildSystemInfo(1, &errors)
+			let process = buildProcessInfo(1, &errors)
+			let telephony = buildTelephonyInfo(1, &errors)
+			let connectivity = buildConnectivityInfo(1, &errors)
+			let audio = buildAudioInfo(1, &errors)
+			let userSettings = buildUserConfigInfo(1, &errors)
 			
-			if error != nil {
-				let msg = "[get config] [1] Something is wrong"
-				Snackbar.e(msg)
-				return
-			}
-			if let d = data {
-				do {
-					let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
-					NSLog("--  \(TAG) | getting Config: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
-					
-					if stt != 200 {
-						let msg = "[2] [\(stt as Any? ?? "")] Getting Config error"
-						Snackbar.e(msg)
-						return
-					}
-					
-					if device["uid"] == nil {
-						try KeychainItem.saveUserInKeychain(AppConfig.keychainDeviceIdKey, dict["device-uid"] as! String)
-					}
-				} catch let error as KeychainItem.KeychainError {
-					NSLog("!-- \(TAG) | getting Config: keychain error: \(error)")
-					Snackbar.e("[get config] keychain error")
-					Helper.log("get-cfg-kch", error)
-				} catch {
-					NSLog("!-- \(TAG) | getting Config: decode error: \(error)")
-					Snackbar.e("[get config] [2] Something is wrong")
-					let idx = dataStr?.firstIndex(of: "{")
-					Helper.log("get-cfg", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
+			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
+			
+			var request = URLRequest(url: url)
+			request.httpMethod = "POST"
+			request.setValue("ios", forHTTPHeaderField: "platform")
+			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+			request.httpBody = try? JSONSerialization.data(withJSONObject: [
+				"tag": 1,
+				"app": app,
+				"users": users,
+				"device": device,
+				"system": system,
+				"process": process,
+				"telephony": telephony,
+				"connectivity": connectivity,
+				"audio": audio,
+				"user-settings": userSettings,
+				"errors": !errors.isEmpty ? errors as Any : nil
+			], options: [])
+			
+			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
+				let stt = (response as? HTTPURLResponse)?.statusCode
+				let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
+				NSLog("<-- \(TAG) | getting Config: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+				
+				if error != nil {
+					let msg = "[get config] [1] Something is wrong"
+					Snackbar.e(msg)
+					completion(error, nil)
+					return
 				}
-			}
-		})
-		
-		task.resume()
+				if let d = data {
+					do {
+						let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
+						NSLog("--  \(TAG) | getting Config: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
+						
+						if stt != 200 {
+							let msg = "[2] [\(stt as Any? ?? "")] Getting Config error"
+							Snackbar.e(msg)
+							completion(error, dict)
+							return
+						}
+						
+						if device["uid"] == nil {
+							try! KeychainItem.saveUserInKeychain(AppConfig.keychainDeviceIdKey, dict["device-uid"] as! String)
+						}
+						completion(error, dict)
+					} catch {
+						NSLog("!-- \(TAG) | getting Config: decode error: \(error)")
+						Snackbar.e("[get config] [2] Something is wrong")
+						let idx = dataStr?.firstIndex(of: "{")
+						Helper.log("get-cfg", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
+						completion(error, nil)
+					}
+				}
+			})
+			
+			task.resume()
+		} catch {
+			NSLog("!-- \(TAG) | cfg | error: \(error)")
+			log("cfg", error)
+			completion(error, nil)
+			fatalError("cfg: \(error)")
+		}
 	}
 	
 	public static func log(_ tag: String, _ e: NSException, _ data: String? = nil) {
-		NSLog("!-- \(TAG) | logging Exception: \(e)")
+		NSLog("!-- \(TAG) | logging Exception: \(tag) | \(e) | data: \(data ?? "--")")
 		
 		var errors: [String: Any] = [:]
 		errors["e-name"] = e.name
@@ -388,10 +405,14 @@ public struct Helper {
 		errors["e-data"] = data
 		
 		logError(tag, &errors)
+		
+		if tag == "uncaught-exception" {
+			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 1))
+		}
 	}
 	
 	public static func log(_ tag: String, _ e: Error, _ data: String? = nil) {
-		NSLog("!-- \(TAG) | logging Error: \(e)")
+		NSLog("!-- \(TAG) | logging Error: \(tag) | \(e) | data: \(data ?? "--")")
 		
 		var errors: [String: Any] = [:]
 		errors["e-name"] = String(describing: type(of: e))
@@ -402,12 +423,9 @@ public struct Helper {
 	}
 	
 	private static func logError(_ tag: String, _ errors: inout [String: Any]) {
-		let app: [String: Any] = buildAppInfo(2, &errors)
-		let device: [String: Any] = buildDeviceInfo(2, &errors)
-		
-		let users: [String: Any]?
-		if tag == "get-user-id" { users = nil }
-		else { users = buildUsersInfo(2, &errors) }
+		let app: [String: Any] = buildAppInfo(tag, &errors)
+		let users: [String: Any]? = try? buildUsersInfo(tag, &errors, true)
+		let device: [String: Any]? = try? buildDeviceInfo(tag, &errors, true)
 		
 		let url = URL(string: "https://xthang.xyz/app/log-api.php")!
 		
@@ -426,12 +444,10 @@ public struct Helper {
 		let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 			let stt = (response as? HTTPURLResponse)?.statusCode
 			let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-			NSLog("<-- \(TAG) | log error: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+			NSLog("<-- \(TAG) | \(tag) | log error: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
 		})
 		
 		task.resume()
-		
-		RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 1))
 	}
 	
 	public static func sendDeviceTokenToServer(deviceToken: Data) {

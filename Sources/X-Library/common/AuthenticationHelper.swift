@@ -14,8 +14,8 @@ public struct AuthenticationHelper {
 		NSLog("--> \(TAG) | [log in] [\(tag)] ...: \(authMethod) | \(authPartner as Any? ?? "--") | \(userInfo as Any? ?? "--") | \(partnerAuthData as Any? ?? "--")")
 		
 		var errors: [String: Any] = [:]
-		let app = Helper.buildAppInfo(3, &errors)
-		let device = Helper.buildDeviceInfo(3, &errors)
+		let app = Helper.buildAppInfo("\(tag)|sign-in", &errors)
+		let device = try! Helper.buildDeviceInfo("\(tag)|sign-in", &errors, false)
 		let system = Helper.buildSystemInfo(3, &errors)
 		
 		let url = URL(string: "https://xthang.xyz/account/sign-in-api.php")!
@@ -196,7 +196,7 @@ public struct AuthenticationHelper {
 		NSLog("--> \(TAG) | [unlink Acc] [\(tag)] ...: \(userInfo) | \(alias)")
 		
 		var errors: [String: Any] = [:]
-		let app: [String: Any] = Helper.buildAppInfo(1, &errors)
+		let app: [String: Any] = Helper.buildAppInfo("\(tag)|unlink", &errors)
 		
 		let url = URL(string: "https://xthang.xyz/account/unlink-account-api.php")!
 		
