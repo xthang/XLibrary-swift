@@ -35,7 +35,7 @@ public class PopupAlert: PopupView {
 				}
 			}, for: .touchUpInside)
 		} else {
-			btn.addTarget(self, action: #selector(dismissView(sender:)), for: .touchUpInside)
+			btn.addTarget(self, action: #selector(dismissView(_:)), for: .touchUpInside)
 			
 			if let h = handler {
 				@objc class ClosureSleeve: NSObject {

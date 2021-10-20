@@ -27,6 +27,11 @@ public struct Helper {
 	public static var vibrationOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
+	public static var isFirstRun: Bool {
+		let x = UserDefaults.standard.object(forKey: "is_first_run") as? Bool ?? true
+		UserDefaults.standard.set(false, forKey: "is_first_run")
+		return x
+	}
 	
 	public static func buildAppInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
 		var app: [String: Any] = [:]
@@ -391,6 +396,8 @@ public struct Helper {
 			NSLog("!-- \(TAG) | cfg | error: \(error)")
 			log("cfg", error)
 			completion(error, nil)
+			
+			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
 			fatalError("cfg: \(error)")
 		}
 	}
@@ -407,7 +414,7 @@ public struct Helper {
 		logError(tag, &errors)
 		
 		if tag == "uncaught-exception" {
-			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 1))
+			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
 		}
 	}
 	
@@ -541,6 +548,106 @@ public struct Helper {
 		}
 	}
 	
+	public static func share(_ tag: String, _ sourceView: UIView, _ sourceRect: CGRect?, viewController: UIViewController?, text: String, image: UIImage) {
+		NSLog("--  \(TAG) | share [\(tag)]: ...")
+		
+		if var controller = viewController ?? UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = controller.presentedViewController {
+				controller = presentedViewController
+			}
+			
+			let firstActivityItem = text
+			let secondActivityItem : NSURL = NSURL(string: AppConfig.shareURL)!
+			
+			let activityViewController : UIActivityViewController = UIActivityViewController(
+				activityItems: [firstActivityItem, secondActivityItem, image],
+				applicationActivities: nil)
+			
+			// This lines is for the popover you need to show in iPad
+			activityViewController.popoverPresentationController?.sourceView = sourceView
+			
+			// This line remove the arrow of the popover to show in iPad
+			// activityViewController.popoverPresentationController?.permittedArrowDirections = .down
+			if sourceRect != nil {
+				activityViewController.popoverPresentationController?.sourceRect = sourceRect!
+			}
+			
+			if #available(iOS 13.0, *) {
+				activityViewController.activityItemsConfiguration = [
+					UIActivity.ActivityType.message,
+					UIActivity.ActivityType.saveToCameraRoll,
+					UIActivity.ActivityType.print,
+					UIActivity.ActivityType.addToReadingList,
+					UIActivity.ActivityType.postToFacebook,
+					UIActivity.ActivityType.postToFlickr,
+					UIActivity.ActivityType.postToVimeo,
+					UIActivity.ActivityType.postToWeibo,
+					UIActivity.ActivityType.postToTencentWeibo,
+				] as? UIActivityItemsConfigurationReading
+				
+				// activityViewController.isModalInPresentation = true
+			}
+			
+			activityViewController.excludedActivityTypes = [
+				.assignToContact,
+			]
+			
+			controller.present(activityViewController, animated: true, completion: nil)
+		}
+	}
+	
+	public static func rateApp(_ tag: String) {
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
+			let view = topController.view!
+			
+			if let url = URL(string: "itms-apps://itunes.apple.com/app/id\(AppConfig.appleID)?action=write-review") {
+				let alert = PopupAlert.initiate(title: NSLocalizedString("Hi there", comment: ""), message: "⭐️ \(NSLocalizedString("Rate us on AppStore", comment: "")) ⭐️", preferredStyle: .alert)
+				alert.addAction(title: "OK", style: .default) {
+					if #available(iOS 10, *) {
+						UIApplication.shared.open(url, options: [:], completionHandler: { [weak view] success in
+							if !success {
+								let alert = PopupAlert.initiate(title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert)
+								alert.addAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil)
+								view?.addSubview(alert)
+							}
+						})
+					} else {
+						UIApplication.shared.openURL(url)
+					}
+				}
+				alert.addAction(title: "Cancel", style: .default, handler: nil)
+				view.addSubview(alert)
+			} else {
+				NSLog("!-  \(TAG) | rateApp [\(tag)]: AppStore url not available: \(AppConfig.appleID)")
+				let alert = PopupAlert.initiate(title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert)
+				alert.addAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil)
+				view.addSubview(alert)
+			}
+		}
+	}
+	
+	public static func removeAds(_ tag: String) {
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
+			let view = topController.view!
+			
+			let alert = PopupAlert.initiate(title: NSLocalizedString("Ads removal", comment: ""), message: NSLocalizedString("Do you want to remove all ads?", comment: ""), preferredStyle: .alert)
+			alert.addAction(title: "OK", style: .default) {
+				
+			}
+			alert.addAction(title: "Restore", style: .default) {
+				
+			}
+			alert.addAction(title: "Cancel", style: .default, handler: nil)
+			view.addSubview(alert)
+		}
+	}
+	
 	public static func initAttributedString(string: String, fontSize: CGFloat) -> NSAttributedString {
 		return NSAttributedString(string: string,
 								  attributes: [.font: UIFont(name: "Maniac", size: fontSize)!,
@@ -564,5 +671,28 @@ public struct Helper {
 		UIGraphicsEndImageContext()
 		
 		return img
+	}
+	
+	public static func factors(of n: Int) -> [Int]? {
+		// precondition(n > 0, "n must be positive")
+		if n <= 0 { return nil }
+		
+		let sqrtn = Int(Double(n).squareRoot())
+		var factors: [Int] = []
+		factors.reserveCapacity(2 * sqrtn)
+		for i in 1...sqrtn {
+			if n % i == 0 {
+				factors.append(i)
+			}
+		}
+		var j = factors.count - 1
+		if factors[j] * factors[j] == n {
+			j -= 1
+		}
+		while j >= 0 {
+			factors.append(n / factors[j])
+			j -= 1
+		}
+		return factors
 	}
 }

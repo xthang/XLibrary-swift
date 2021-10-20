@@ -73,8 +73,8 @@
             </constraints>
             <connections>
                 <outlet property="buttons" destination="cVq-tt-jI7" id="dwM-tS-KUh"/>
+                <outlet property="contentView" destination="yMP-kk-msw" id="WDT-yz-szL"/>
                 <outlet property="message" destination="TDz-Ng-td0" id="I6I-bE-zO3"/>
-                <outlet property="popupWindow" destination="yMP-kk-msw" id="SKd-AG-UXB"/>
                 <outlet property="title" destination="lhe-1i-KC1" id="bjy-I1-E7m"/>
             </connections>
             <point key="canvasLocation" x="-626.25" y="-660.625"/>

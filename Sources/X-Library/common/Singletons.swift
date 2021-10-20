@@ -10,7 +10,9 @@ public class Singletons {
 	
 	public static var instance = Singletons()
 	
-	public static let backgroundAudio : AVAudioPlayer? = {
+	private var musicOn = false
+	
+	private let backgroundAudio : AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "background", withExtension: "mp3") {
 			// NSLog("--  \(TAG) | init background audio ...: \(url)")
@@ -21,7 +23,7 @@ public class Singletons {
 		return s
 	}()
 	
-	public static let btnSound: AVAudioPlayer? = {
+	public let btnSound: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "pop", withExtension: "wav") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
@@ -31,7 +33,7 @@ public class Singletons {
 		return s
 	}()
 	
-	public static let whooshSound: AVAudioPlayer? = {
+	public let whooshSound: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "whoosh", withExtension: "wav") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
@@ -41,7 +43,7 @@ public class Singletons {
 		return s
 	}()
 	
-	public static let whooshSound2: AVAudioPlayer? = {
+	public let whooshSound2: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
 		if let url = Bundle.main.url(forResource: "whoosh", withExtension: "m4a") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
@@ -55,10 +57,10 @@ public class Singletons {
 	private init() {
 		NSLog("-------  \(TAG)")
 		
-		let _ = Singletons.backgroundAudio
-		let _ = Singletons.btnSound
-		let _ = Singletons.whooshSound
-		let _ = Singletons.whooshSound2
+		let _ = backgroundAudio
+		let _ = btnSound
+		let _ = whooshSound
+		let _ = whooshSound2
 		
 		if #available(iOS 13.0, *) {
 			NotificationCenter.default.addObserver(self, selector: #selector(self.enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
@@ -73,8 +75,8 @@ public class Singletons {
 	}
 	
 	@objc func enterForeground(_ notification: NSNotification) {
-		if let bgAudio = Singletons.backgroundAudio {
-			if Helper.musicOn && !bgAudio.isPlaying { bgAudio.play() }
+		if let bgAudio = backgroundAudio {
+			if musicOn && Helper.musicOn && !bgAudio.isPlaying { bgAudio.play() }
 			else if !Helper.musicOn && bgAudio.isPlaying { bgAudio.stop() }
 		}
 	}
@@ -84,21 +86,34 @@ public class Singletons {
 	}
 	
 	@objc func changeSoundVolume(_ notification: NSNotification) {
-		Singletons.btnSound?.volume = Float(notification.object as! CGFloat)
-		Singletons.whooshSound?.volume = Float(notification.object as! CGFloat)
-		Singletons.whooshSound2?.volume = Float(notification.object as! CGFloat)
+		btnSound?.volume = Float(notification.object as! CGFloat)
+		whooshSound?.volume = Float(notification.object as! CGFloat)
+		whooshSound2?.volume = Float(notification.object as! CGFloat)
 	}
 	
 	@objc func toggleMusic(_ notification: NSNotification) {
 		NSLog("--  \(TAG) | toggleMusic")
 		if notification.object as! Bool {
-			Singletons.backgroundAudio!.play()
+			backgroundAudio!.play()
 		} else {
-			Singletons.backgroundAudio!.pause()
+			backgroundAudio!.pause()
 		}
 	}
 	
 	@objc func changeMusicVolume(_ notification: NSNotification) {
-		Singletons.backgroundAudio?.volume = Float(notification.object as! CGFloat)
+		backgroundAudio?.volume = Float(notification.object as! CGFloat)
+	}
+	
+	public func playMusic() {
+		if Helper.musicOn, let bgAudio = backgroundAudio, !bgAudio.isPlaying {
+			if bgAudio.play() { musicOn = true }
+		}
+	}
+	
+	public func pauseMusic() {
+		if let x = backgroundAudio, x.isPlaying {
+			x.stop()
+			musicOn = false
+		}
 	}
 }

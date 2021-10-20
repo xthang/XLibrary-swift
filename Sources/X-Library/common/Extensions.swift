@@ -44,12 +44,17 @@ public extension UIDevice {
 }
 
 extension UIColor {
-	static var background: UIColor {
-		return UIColor(red: 26/255, green: 26/255, blue: 26/255, alpha: 1)
-	}
 	
-	static var sky: UIColor {
-		return UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
+	public static var background = UIColor(red: 26/255, green: 26/255, blue: 26/255, alpha: 1)
+	
+	public static var sky = UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
+	
+	public static func rgb(_ rgb: Int, alpha: CGFloat = 1.0) -> UIColor {
+		return UIColor(
+			red: CGFloat((Float((rgb & 0xff0000) >> 16)) / 255.0),
+			green: CGFloat((Float((rgb & 0x00ff00) >> 8)) / 255.0),
+			blue: CGFloat((Float((rgb & 0x0000ff) >> 0)) / 255.0),
+			alpha: alpha)
 	}
 }
 
@@ -85,13 +90,24 @@ extension UIView {
 	/// `cornerRadiusRatio = 0.5`.
 	@IBInspectable public var cornerRadiusRatio: CGFloat {
 		get {
-			return layer.cornerRadius / frame.width
+			return layer.cornerRadius / min(frame.width, frame.height)
 		}
 		set {
 			// Make sure that it's between 0.0 and 1.0. If not, restrict it to that range.
 			let normalizedRatio = max(0.0, min(1.0, newValue))
-			layer.cornerRadius = frame.width * normalizedRatio
+			layer.cornerRadius = min(frame.width, frame.height) * normalizedRatio
 		}
+	}
+	
+	public var viewController: UIViewController? {
+		var parentResponder: UIResponder? = self.next
+		while parentResponder != nil {
+			if let viewController = parentResponder as? UIViewController {
+				return viewController
+			}
+			parentResponder = parentResponder?.next
+		}
+		return nil
 	}
 }
 
@@ -154,7 +170,8 @@ extension UIImage {
 }
 
 extension SKScene {
-	@objc open func doPressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
+	/// receive keyboard presses from ViewController
+	@objc open func pressesDidBegin(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
 }
 
 extension GKError {

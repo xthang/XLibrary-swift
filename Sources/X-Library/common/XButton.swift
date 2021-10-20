@@ -4,7 +4,28 @@
 
 import UIKit
 
-public class XButton: UIButton {
+open class XButton: UIButton {
+	
+	@IBInspectable public var highlightedColor: UIColor?
+	internal var temporaryBackgroundColor: UIColor?
+	
+	public override var isHighlighted: Bool {
+		didSet {
+			if isHighlighted {
+				if temporaryBackgroundColor == nil {
+					if let highlightedColor = highlightedColor {
+						temporaryBackgroundColor = backgroundColor
+						backgroundColor = highlightedColor
+					}
+				}
+			} else {
+				if let temporaryColor = temporaryBackgroundColor {
+					backgroundColor = temporaryColor
+					temporaryBackgroundColor = nil
+				}
+			}
+		}
+	}
 	
 	@IBInspectable public var highlightedImage: UIImage? {
 		didSet {
@@ -16,26 +37,29 @@ public class XButton: UIButton {
 			setImage(selectedImage, for: .selected)
 		}
 	}
-	
-	public var soundEnabled: Bool = true
-	
-	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-		playSound()
-		super.touchesEnded(touches, with: event)
-	}
-	
-	func playSound() {
-		if Helper.soundOn && soundEnabled { Singletons.btnSound?.play() }
-	}
-}
-
-public class CustomButton: XButton {
-	
 	@IBInspectable public var highlightedBackgroundImage: UIImage? {
 		didSet {
 			setBackgroundImage(highlightedBackgroundImage, for: .highlighted)
 		}
 	}
+	
+	@IBInspectable public var soundEnabled: Bool = true
+	
+	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+		guard let touch = touches.first else { return }
+		let location = touch.location(in: self)
+		if bounds.contains(location) {
+			playSound()
+		}
+		super.touchesEnded(touches, with: event)
+	}
+	
+	func playSound() {
+		if Helper.soundOn && soundEnabled { Singletons.instance.btnSound?.play() }
+	}
+}
+
+public class CustomButton: XButton {
 	
 	required init?(coder: NSCoder) {
 		super.init(coder: coder)
@@ -76,9 +100,8 @@ public class CustomButton: XButton {
 					   delay: 0,
 					   options: .allowUserInteraction,
 					   animations: { [weak self] in
-						self?.transform = CGAffineTransform(translationX: 0, y: 5)
-					   }
-		)
+			self?.transform = CGAffineTransform(translationX: 0, y: 5)
+		})
 		super.touchesBegan(touches, with: event)
 	}
 	
@@ -87,9 +110,8 @@ public class CustomButton: XButton {
 					   delay: 0,
 					   options: .allowUserInteraction,
 					   animations: { [weak self] in
-						self?.transform = .identity
-					   }
-		)
+			self?.transform = .identity
+		})
 		super.touchesEnded(touches, with: event)
 	}
 }
@@ -101,9 +123,8 @@ public class TabButton: XButton {
 					   delay: 0,
 					   options: .allowUserInteraction,
 					   animations: { [weak self] in
-						self?.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-					   }
-		)
+			self?.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+		})
 		super.touchesBegan(touches, with: event)
 	}
 	
@@ -118,8 +139,7 @@ public class TabButton: XButton {
 					   delay: 0,
 					   options: .allowUserInteraction,
 					   animations: { [weak self] in
-						self?.transform = CGAffineTransform(translationX: 0, y: (self?.frame.height ?? 0) * 0.20)
-					   }
-		)
+			self?.transform = CGAffineTransform(translationX: 0, y: (self?.frame.height ?? 0) * 0.20)
+		})
 	}
 }
