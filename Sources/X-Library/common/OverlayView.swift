@@ -8,7 +8,7 @@ open class OverlayView: UIView {
 	
 	private let TAG = "OV"
 	
-	@IBOutlet var contentView: UIView!
+	@IBOutlet public var contentView: UIView!
 	
 	
 	open class func initiate(_ fileName: String) -> OverlayView {

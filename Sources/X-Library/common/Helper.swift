@@ -159,6 +159,8 @@ public struct Helper {
 		
 		data["jailbreak"] = jb
 		
+		data["isProtectedDataAvailable"] = UIApplication.shared.isProtectedDataAvailable
+		
 		if tag == 1 { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
 		
 		return data
@@ -314,14 +316,14 @@ public struct Helper {
 		userSettings["sound"] = UserDefaults.standard.object(forKey: CommonConfig.Settings.sound)
 		userSettings["sound-volume"] = UserDefaults.standard.object(forKey: CommonConfig.Settings.sound_volume)
 		userSettings["vibration"] = UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration)
-		userSettings["noti-types"] = try? UIApplication.shared.currentUserNotificationSettings?.types.rawValue
+		userSettings["noti-types"] = UIApplication.shared.currentUserNotificationSettings?.types.rawValue
 		
 		if tag == 1 { NSLog("--> \(TAG) | build User Config Info [\(tag)]: \(userSettings)") }
 		
 		return userSettings
 	}
 	
-	public static func getConfig(completion: @escaping (Error?, [String: Any]?) -> Void) {
+	public static func getConfig(_ tag: String, data: [String: Any?]?, completion: @escaping (Error?, [String: Any]?) -> Void) {
 		do {
 			var errors: [String: Any] = [:]
 			let app = buildAppInfo("cfg", &errors)
@@ -341,7 +343,8 @@ public struct Helper {
 			request.setValue("ios", forHTTPHeaderField: "platform")
 			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 			request.httpBody = try? JSONSerialization.data(withJSONObject: [
-				"tag": 1,
+				"tag": tag,
+				"data": data,
 				"app": app,
 				"users": users,
 				"device": device,
@@ -357,7 +360,7 @@ public struct Helper {
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 				let stt = (response as? HTTPURLResponse)?.statusCode
 				let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-				NSLog("<-- \(TAG) | getting Config: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+				NSLog("<-- \(TAG) | getting Config [\(tag)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
 				
 				if error != nil {
 					let msg = "[get config] [1] Something is wrong"
@@ -368,7 +371,7 @@ public struct Helper {
 				if let d = data {
 					do {
 						let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
-						NSLog("--  \(TAG) | getting Config: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
+						NSLog("--  \(TAG) | getting Config [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
 						
 						if stt != 200 {
 							let msg = "[2] [\(stt as Any? ?? "")] Getting Config error"
@@ -382,7 +385,7 @@ public struct Helper {
 						}
 						completion(error, dict)
 					} catch {
-						NSLog("!-- \(TAG) | getting Config: decode error: \(error)")
+						NSLog("!-- \(TAG) | getting Config [\(tag)]: decode error: \(error)")
 						Snackbar.e("[get config] [2] Something is wrong")
 						let idx = dataStr?.firstIndex(of: "{")
 						Helper.log("get-cfg", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
@@ -393,12 +396,12 @@ public struct Helper {
 			
 			task.resume()
 		} catch {
-			NSLog("!-- \(TAG) | cfg | error: \(error)")
-			log("cfg", error)
+			NSLog("!-- \(TAG) | cfg [\(tag)] | error: \(error)")
+			log(tag, error, data == nil ? nil : "\(data!)")
 			completion(error, nil)
 			
-			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
-			fatalError("cfg: \(error)")
+			// RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
+			// fatalError("cfg [\(tag)]: \(error)")
 		}
 	}
 	
@@ -430,9 +433,10 @@ public struct Helper {
 	}
 	
 	private static func logError(_ tag: String, _ errors: inout [String: Any]) {
-		let app: [String: Any] = buildAppInfo(tag, &errors)
-		let users: [String: Any]? = try? buildUsersInfo(tag, &errors, true)
-		let device: [String: Any]? = try? buildDeviceInfo(tag, &errors, true)
+		let app = buildAppInfo(tag, &errors)
+		let users = try? buildUsersInfo(tag, &errors, true)
+		let device = try? buildDeviceInfo(tag, &errors, true)
+		let system = buildSystemInfo(1, &errors)
 		
 		let url = URL(string: "https://xthang.xyz/app/log-api.php")!
 		
@@ -445,6 +449,7 @@ public struct Helper {
 			"app": app,
 			"users": users,
 			"device": device,
+			"system": system,
 			"errors": !errors.isEmpty ? errors : nil
 		], options: [])
 		

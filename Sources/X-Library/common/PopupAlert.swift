@@ -30,7 +30,7 @@ public class PopupAlert: PopupView {
 		
 		if #available(iOS 14.0, *) {
 			btn.addAction(UIAction { [weak self] _ in
-				self?.dismissView(sender: nil) {
+				self?.dismissView(nil) {
 					handler?()
 				}
 			}, for: .touchUpInside)

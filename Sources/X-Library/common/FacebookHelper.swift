@@ -18,7 +18,7 @@ public struct FacebookHelper {
 		if let accessToken = AccessToken.current {
 			// User is logged in, do work such as go to next view controller.
 			var t: [String: Any] = [:]
-			t["graphDomain"] = accessToken.graphDomain
+			// t["graphDomain"] = accessToken.graphDomain
 			t["tokenString"] = accessToken.tokenString
 			t["appID"] = accessToken.appID
 			t["userID"] = accessToken.userID

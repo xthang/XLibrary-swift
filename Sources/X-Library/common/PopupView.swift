@@ -39,7 +39,7 @@ open class PopupView: OverlayView {
 					   }), completion: nil)
 	}
 	
-	@objc func dismissView(sender: UIButton?, completion: (() -> Void)? = nil) {
+	@objc public override func dismissView(_ sender: UIButton?, completion: (() -> Void)? = nil) {
 		if Helper.soundOn { Singletons.instance.whooshSound?.play() }
 		UIView.animate(withDuration: 0.15,
 					   delay: 0,
