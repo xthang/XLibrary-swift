@@ -100,6 +100,17 @@ public struct GameCenterHelper {
 		}
 	}
 	
+	public static func reportAchievement(_ identifier: String) {
+		let achievement = GKAchievement(identifier: identifier)
+		GKAchievement.report([achievement]) { error in
+			if let err = error {
+				NSLog("--> \(TAG) | report achievement: error: \(err.localizedDescription)")
+			} else {
+				NSLog("--> \(TAG) | Achievement submitted!")
+			}
+		}
+	}
+	
 	public static func presentMatchmaker(_ fromView: UIViewController) {
 		// NSLog("--  \(TAG) | presentMatchmaker: \(GKLocalPlayer.local.isAuthenticated)")
 		

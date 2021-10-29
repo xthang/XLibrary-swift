@@ -11,54 +11,54 @@ public struct Snackbar {
 		case s
 		case w
 		case e
-		
 	}
 	
-	private static func initSnackbar(_ msg: String) -> TTGSnackbar {
-		let snackbar: TTGSnackbar = TTGSnackbar.init(message: msg, duration: .long)
+	public static func initSnackbar(_ msg: String, duration: TTGSnackbarDuration = .long) -> TTGSnackbar {
+		let snackbar = TTGSnackbar(message: msg, duration: duration)
 		
 		snackbar.leftMargin = 20
 		snackbar.rightMargin = 20
+		snackbar.messageTextAlign = .center
 		
 		return snackbar
 	}
 	
 	public static func i(_ msg: String) {
+		let snackbar = initSnackbar(msg)
+		
 		DispatchQueue.main.async {
-			let snackbar = initSnackbar(msg)
-			
 			snackbar.show()
 		}
 	}
 	
 	public static func s(_ msg: String) {
+		let snackbar = initSnackbar(msg)
+		
+		snackbar.backgroundColor = UIColor(red:0.30, green:0.72, blue:0.53, alpha:1.00)
+		snackbar.messageTextColor = UIColor(red:0.22, green:0.29, blue:0.36, alpha:1.00)
+		
 		DispatchQueue.main.async {
-			let snackbar = initSnackbar(msg)
-			
-			snackbar.backgroundColor = UIColor(red:0.30, green:0.72, blue:0.53, alpha:1.00)
-			snackbar.messageTextColor = UIColor(red:0.22, green:0.29, blue:0.36, alpha:1.00)
-			
 			snackbar.show()
 		}
 	}
 	
 	public static func w(_ msg: String) {
+		let snackbar = initSnackbar(msg)
+		
+		snackbar.backgroundColor = .yellow
+		
 		DispatchQueue.main.async {
-			let snackbar = initSnackbar(msg)
-			
-			snackbar.backgroundColor = .yellow
-			
 			snackbar.show()
 		}
 	}
 	
 	public static func e(_ msg: String) {
+		let snackbar = initSnackbar(msg)
+		
+		snackbar.backgroundColor = .systemRed
+		snackbar.messageTextColor = .white
+		
 		DispatchQueue.main.async {
-			let snackbar = initSnackbar(msg)
-			
-			snackbar.backgroundColor = .systemRed
-			snackbar.messageTextColor = .white
-			
 			snackbar.show()
 		}
 	}

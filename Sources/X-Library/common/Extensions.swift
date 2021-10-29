@@ -21,6 +21,10 @@ extension Notification.Name {
 	public static let appleIDStateChanged = Notification.Name(rawValue: "appleIDStateChanged")
 	public static let fbStateChanged = Notification.Name(rawValue: "fbStateChanged")
 	public static let eosLoginStatusChanged = Notification.Name(rawValue: "eosLoginStatusChanged")
+	
+	public static let inAppPurchased = Notification.Name("inAppPurchased")
+	
+	public static let levelFinished = Notification.Name("levelFinished")
 }
 
 extension UIControl.Event {

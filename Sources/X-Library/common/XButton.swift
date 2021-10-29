@@ -27,6 +27,27 @@ open class XButton: UIButton {
 		}
 	}
 	
+	@IBInspectable public var diabledColor: UIColor?
+	internal var temporaryDiabledBackgroundColor: UIColor?
+	
+	public override var isEnabled: Bool {
+		didSet {
+			if !isEnabled {
+				if temporaryDiabledBackgroundColor == nil {
+					if let diabledColor = diabledColor {
+						temporaryDiabledBackgroundColor = backgroundColor
+						backgroundColor = diabledColor
+					}
+				}
+			} else {
+				if let temporaryColor = temporaryDiabledBackgroundColor {
+					backgroundColor = temporaryColor
+					temporaryDiabledBackgroundColor = nil
+				}
+			}
+		}
+	}
+	
 	@IBInspectable public var highlightedImage: UIImage? {
 		didSet {
 			setImage(highlightedImage, for: .highlighted)

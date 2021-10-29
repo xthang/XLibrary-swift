@@ -17,10 +17,14 @@ public struct CommonConfig {
 	}()
 	
 	public struct Settings {
-		public static var sound: String = "sound_enabled_preference"
-		public static var sound_volume: String = "sound_volume_preference"
-		public static var music: String = "music_enabled_preference"
-		public static var music_volume: String = "music_volume_preference"
-		public static var vibration: String = "vibration_enabled_preference"
+		public static let sound: String = "sound_enabled_preference"
+		public static let sound_volume: String = "sound_volume_preference"
+		public static let music: String = "music_enabled_preference"
+		public static let music_volume: String = "music_volume_preference"
+		public static let vibration: String = "vibration_enabled_preference"
+	}
+	
+	public struct Keys {
+		public static let purchased = "purchased"
 	}
 }

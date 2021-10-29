@@ -38,14 +38,22 @@ public class ADBanner: NSObject {
 	
 	public override init() {
 		banner = UIView()
+		// banner.layer.zPosition = 990
 		gAdBanner = GADBannerView()
 		super.init()
 		
 		gAdBanner.adUnitID = AppConfig.GADUnit.main
 		gAdBanner.delegate = self
+		
+		NotificationCenter.default.addObserver(self, selector: #selector(self.purchased), name: .inAppPurchased, object: nil)
 	}
 	
 	public func show(viewController: UIViewController, position: BannerPosition? = nil) {
+		if Helper.adsRemoved {
+			NSLog("!-  \(TAG) | show in viewController: ads are removed")
+			return
+		}
+		
 		rootViewController = viewController
 		gAdBanner.rootViewController = viewController
 		self.position = position
@@ -60,6 +68,10 @@ public class ADBanner: NSObject {
 	}
 	
 	public func reloadAd() {
+		if Helper.adsRemoved {
+			NSLog("!-  \(TAG) | reloadAd: ads are removed")
+			return
+		}
 		guard let viewController = rootViewController, let view = viewController.view
 		else {
 			NSLog("!-  \(TAG) | reloadAd: viewController/view is nil")
@@ -76,19 +88,20 @@ public class ADBanner: NSObject {
 				return view.frame
 			}
 		}()
-		let viewWidth = frame.size.width
-		if gAdBanner.adSize.size.width == viewWidth && gAdBanner.responseInfo != nil {
-			NSLog("!-  \(TAG) | reloadAd: adSize.size.width == viewWidth && responseInfo != nil")
+		let viewWidth = min(frame.size.width, frame.size.height)
+		let newAdWidth = viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85)
+		if gAdBanner.adSize.size.width == newAdWidth && gAdBanner.responseInfo != nil {
+			NSLog("!-  \(TAG) | reloadAd: adSize.size.width == viewWidth == \(newAdWidth) && responseInfo != nil")
 			return
 		}
 		
-		NSLog("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth)")
+		NSLog("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(newAdWidth)")
 		
 		// Step 3 - Get Adaptive GADAdSize and set the ad view.
 		// Here the current interface orientation is used. If the ad is being preloaded
 		// for a future orientation change or different orientation, the function for the
 		// relevant orientation should be used.
-		gAdBanner.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85))
+		gAdBanner.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(newAdWidth)
 		
 		// Step 4 - Create an ad request and load the adaptive banner ad.
 		let request = GADRequest()
@@ -100,8 +113,21 @@ public class ADBanner: NSObject {
 	}
 	
 	func reloadUAd() {
+		if Helper.adsRemoved {
+			NSLog("!-  \(TAG) | reloadUAd: ads are removed")
+			return
+		}
+		
 		let size = gAdBanner.adSize.size
-		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.main, size: CGSize(width: max(320, size.width), height: max(50, size.height)))
+		let newAdSize = CGSize(width: max(320, size.width), height: max(50, size.height))
+		if uADSBanner?.size == newAdSize {
+			NSLog("!-  \(TAG) | reload UAd: uADSBanner.size == newAdSize == \(newAdSize)")
+			return
+		}
+		
+		NSLog("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(newAdSize)")
+		
+		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.main, size: newAdSize)
 		uADSBanner!.delegate = self
 		
 		uADSBanner!.load()
@@ -134,36 +160,36 @@ public class ADBanner: NSObject {
 		
 		banner.addConstraints(
 			[NSLayoutConstraint(item: adBanner,
-									  attribute: attribute,
-									  relatedBy: .equal,
-									  toItem: banner,
-									  attribute: attribute,
-									  multiplier: 1,
-									  constant: 0),
+								attribute: attribute,
+								relatedBy: .equal,
+								toItem: banner,
+								attribute: attribute,
+								multiplier: 1,
+								constant: 0),
 			 NSLayoutConstraint(item: adBanner,
-									  attribute: .centerX,
-									  relatedBy: .equal,
-									  toItem: banner,
-									  attribute: .centerX,
-									  multiplier: 1,
-									  constant: 0)
+								attribute: .centerX,
+								relatedBy: .equal,
+								toItem: banner,
+								attribute: .centerX,
+								multiplier: 1,
+								constant: 0)
 			])
 		
 		view.addConstraints(
 			[NSLayoutConstraint(item: banner,
-									  attribute: attribute,
-									  relatedBy: .equal,
-									  toItem: layoutGuide,
-									  attribute: attribute,
-									  multiplier: 1,
-									  constant: 0),
+								attribute: attribute,
+								relatedBy: .equal,
+								toItem: layoutGuide,
+								attribute: attribute,
+								multiplier: 1,
+								constant: 0),
 			 NSLayoutConstraint(item: banner,
-									  attribute: .centerX,
-									  relatedBy: .equal,
-									  toItem: view,
-									  attribute: .centerX,
-									  multiplier: 1,
-									  constant: 0)
+								attribute: .centerX,
+								relatedBy: .equal,
+								toItem: view,
+								attribute: .centerX,
+								multiplier: 1,
+								constant: 0)
 			])
 		
 		banner.alpha = 0
@@ -176,6 +202,14 @@ public class ADBanner: NSObject {
 	public func remove() {
 		banner.removeFromSuperview()
 		rootViewController = nil
+	}
+	
+	@objc func purchased(_ notification: NSNotification) {
+		if notification.object as? String == AdsStore.shared.adsRemovalID {
+			NSLog("--  \(TAG) | purchased: \(hash) - \(notification.object ?? "--")")
+			
+			remove()
+		}
 	}
 }
 

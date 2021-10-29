@@ -8,7 +8,7 @@ public class PopupAlert: PopupView {
 	
 	@IBOutlet var title: UILabel!
 	@IBOutlet var message: UILabel!
-	@IBOutlet var buttons: UIStackView!
+	@IBOutlet public var buttons: UIStackView!
 	
 	
 	public static func initiate(title: String?, message: String?, preferredStyle: UIAlertController.Style) -> PopupAlert {
@@ -55,6 +55,8 @@ public class PopupAlert: PopupView {
 				btn.addTarget(sleeve, action: #selector(ClosureSleeve.invoke), for: .touchUpInside)
 			}
 		}
+		
+		NSLayoutConstraint(item: btn, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 0, constant: 50).isActive = true
 		
 		buttons.addArrangedSubview(btn)
 	}

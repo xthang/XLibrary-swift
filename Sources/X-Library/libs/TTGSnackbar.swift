@@ -12,13 +12,13 @@ import Darwin
 // MARK: - Enum
 
 /**
-Snackbar display duration types.
-
-- short:   1 second
-- middle:  3 seconds
-- long:    5 seconds
-- forever: Not dismiss automatically. Must be dismissed manually.
-*/
+ Snackbar display duration types.
+ 
+ - short:   1 second
+ - middle:  3 seconds
+ - long:    5 seconds
+ - forever: Not dismiss automatically. Must be dismissed manually.
+ */
 
 @objc public enum TTGSnackbarDuration: Int {
 	case short = 1
@@ -28,16 +28,16 @@ Snackbar display duration types.
 }
 
 /**
-Snackbar animation types.
-
-- fadeInFadeOut:               Fade in to show and fade out to dismiss.
-- slideFromBottomToTop:        Slide from the bottom of screen to show and slide up to dismiss.
-- slideFromBottomBackToBottom: Slide from the bottom of screen to show and slide back to bottom to dismiss.
-- slideFromLeftToRight:        Slide from the left to show and slide to rigth to dismiss.
-- slideFromRightToLeft:        Slide from the right to show and slide to left to dismiss.
-- slideFromTopToBottom:        Slide from the top of screen to show and slide down to dismiss.
-- slideFromTopBackToTop:       Slide from the top of screen to show and slide back to top to dismiss.
-*/
+ Snackbar animation types.
+ 
+ - fadeInFadeOut:               Fade in to show and fade out to dismiss.
+ - slideFromBottomToTop:        Slide from the bottom of screen to show and slide up to dismiss.
+ - slideFromBottomBackToBottom: Slide from the bottom of screen to show and slide back to bottom to dismiss.
+ - slideFromLeftToRight:        Slide from the left to show and slide to rigth to dismiss.
+ - slideFromRightToLeft:        Slide from the right to show and slide to left to dismiss.
+ - slideFromTopToBottom:        Slide from the top of screen to show and slide down to dismiss.
+ - slideFromTopBackToTop:       Slide from the top of screen to show and slide back to top to dismiss.
+ */
 
 @objc public enum TTGSnackbarAnimationType: Int {
 	case fadeInFadeOut
@@ -421,6 +421,10 @@ open class TTGSnackbar: UIView {
 	fileprivate var bottomMarginConstraint: NSLayoutConstraint? = nil
 	fileprivate var topMarginConstraint: NSLayoutConstraint? = nil // Only work when top animation type
 	fileprivate var centerXConstraint: NSLayoutConstraint? = nil
+	fileprivate var centerYConstraint: NSLayoutConstraint? = nil
+	
+	public var centerYMultiplier: CGFloat?
+	public var centerYConstant: CGFloat?
 	
 	// Content constraints.
 	fileprivate var iconImageViewWidthConstraint: NSLayoutConstraint? = nil
@@ -449,23 +453,23 @@ open class TTGSnackbar: UIView {
 	}
 	
 	/**
-	Default init
-	
-	- returns: TTGSnackbar instance
-	*/
+	 Default init
+	 
+	 - returns: TTGSnackbar instance
+	 */
 	public init() {
 		super.init(frame: TTGSnackbar.snackbarDefaultFrame)
 		configure()
 	}
 	
 	/**
-	Show a single message like a Toast.
-	
-	- parameter message:  Message text.
-	- parameter duration: Duration type.
-	
-	- returns: TTGSnackbar instance
-	*/
+	 Show a single message like a Toast.
+	 
+	 - parameter message:  Message text.
+	 - parameter duration: Duration type.
+	 
+	 - returns: TTGSnackbar instance
+	 */
 	@objc public init(message: String, duration: TTGSnackbarDuration) {
 		super.init(frame: TTGSnackbar.snackbarDefaultFrame)
 		self.duration = duration
@@ -474,13 +478,13 @@ open class TTGSnackbar: UIView {
 	}
 	
 	/**
-	Show a customContentView like a Toast
-	
-	- parameter customContentView: Custom View to be shown.
-	- parameter duration: Duration type.
-	
-	- returns: TTGSnackbar instance
-	*/
+	 Show a customContentView like a Toast
+	 
+	 - parameter customContentView: Custom View to be shown.
+	 - parameter duration: Duration type.
+	 
+	 - returns: TTGSnackbar instance
+	 */
 	public init(customContentView: UIView, duration: TTGSnackbarDuration) {
 		super.init(frame: TTGSnackbar.snackbarDefaultFrame)
 		self.duration = duration
@@ -489,15 +493,15 @@ open class TTGSnackbar: UIView {
 	}
 	
 	/**
-	Show a message with action button.
-	
-	- parameter message:     Message text.
-	- parameter duration:    Duration type.
-	- parameter actionText:  Action button title.
-	- parameter actionBlock: Action callback closure.
-	
-	- returns: TTGSnackbar instance
-	*/
+	 Show a message with action button.
+	 
+	 - parameter message:     Message text.
+	 - parameter duration:    Duration type.
+	 - parameter actionText:  Action button title.
+	 - parameter actionBlock: Action callback closure.
+	 
+	 - returns: TTGSnackbar instance
+	 */
 	public init(message: String, duration: TTGSnackbarDuration, actionText: String, actionBlock: @escaping TTGActionBlock) {
 		super.init(frame: TTGSnackbar.snackbarDefaultFrame)
 		self.duration = duration
@@ -508,17 +512,17 @@ open class TTGSnackbar: UIView {
 	}
 	
 	/**
-	Show a custom message with action button.
-	
-	- parameter message:          Message text.
-	- parameter duration:         Duration type.
-	- parameter actionText:       Action button title.
-	- parameter messageFont:      Message label font.
-	- parameter actionButtonFont: Action button font.
-	- parameter actionBlock:      Action callback closure.
-	
-	- returns: TTGSnackbar instance
-	*/
+	 Show a custom message with action button.
+	 
+	 - parameter message:          Message text.
+	 - parameter duration:         Duration type.
+	 - parameter actionText:       Action button title.
+	 - parameter messageFont:      Message label font.
+	 - parameter actionButtonFont: Action button font.
+	 - parameter actionBlock:      Action callback closure.
+	 
+	 - returns: TTGSnackbar instance
+	 */
 	public init(message: String, duration: TTGSnackbarDuration, actionText: String, messageFont: UIFont, actionTextFont: UIFont, actionBlock: @escaping TTGActionBlock) {
 		super.init(frame: TTGSnackbar.snackbarDefaultFrame)
 		self.duration = duration
@@ -546,8 +550,8 @@ open class TTGSnackbar: UIView {
 public extension TTGSnackbar {
 	
 	/**
-	Show the snackbar.
-	*/
+	 Show the snackbar.
+	 */
 	@objc func show() {
 		// Only show once
 		if superview != nil {
@@ -596,10 +600,10 @@ public extension TTGSnackbar {
 		if let superView = containerView ?? currentWindow {
 			superView.addSubview(self)
 			
-			var relativeToItem:Any = superView as Any;
+			var relativeToItem: Any = superView
 			if #available(iOS 11.0, *) {
 				if shouldHonorSafeAreaLayoutGuides {
-					relativeToItem = superView.safeAreaLayoutGuide as Any
+					relativeToItem = superView.safeAreaLayoutGuide
 				}
 			}
 			
@@ -628,6 +632,13 @@ public extension TTGSnackbar {
 				item: self, attribute: .centerX, relatedBy: .equal,
 				toItem: superView, attribute: .centerX, multiplier: 1, constant: 0)
 			
+			// Center Y constraint
+			if centerYMultiplier != nil || centerYConstant != nil {
+				centerYConstraint = NSLayoutConstraint.init(
+					item: self, attribute: .centerY, relatedBy: .equal,
+					toItem: superView, attribute: .centerY, multiplier: centerYMultiplier ?? 1, constant: centerYConstant ?? 0)
+			}
+			
 			// Min height constraint
 			let minHeightConstraint = NSLayoutConstraint.init(
 				item: self, attribute: .height, relatedBy: .greaterThanOrEqual,
@@ -637,9 +648,10 @@ public extension TTGSnackbar {
 			// http://stackoverflow.com/questions/25059443/what-is-nslayoutconstraint-uiview-encapsulated-layout-height-and-how-should-i
 			leftMarginConstraint?.priority = UILayoutPriority(999)
 			rightMarginConstraint?.priority = UILayoutPriority(999)
-			topMarginConstraint?.priority = UILayoutPriority(999)
-			bottomMarginConstraint?.priority = UILayoutPriority(999)
+			topMarginConstraint?.priority = UILayoutPriority(990)
+			bottomMarginConstraint?.priority = UILayoutPriority(990)
 			centerXConstraint?.priority = UILayoutPriority(999)
+			centerYConstraint?.priority = UILayoutPriority(999)
 			
 			// Add constraints
 			superView.addConstraint(leftMarginConstraint!)
@@ -647,6 +659,7 @@ public extension TTGSnackbar {
 			superView.addConstraint(bottomMarginConstraint!)
 			superView.addConstraint(topMarginConstraint!)
 			superView.addConstraint(centerXConstraint!)
+			if centerYConstraint != nil { superView.addConstraint(centerYConstraint!) }
 			superView.addConstraint(minHeightConstraint)
 			
 			// Active or deactive
@@ -654,6 +667,7 @@ public extension TTGSnackbar {
 			leftMarginConstraint?.isActive = self.shouldActivateLeftAndRightMarginOnCustomContentView ? true : customContentView == nil
 			rightMarginConstraint?.isActive = self.shouldActivateLeftAndRightMarginOnCustomContentView ? true : customContentView == nil
 			centerXConstraint?.isActive = customContentView != nil
+			centerYConstraint?.isActive = true
 			
 			// Show
 			showWithAnimation()
@@ -668,15 +682,14 @@ public extension TTGSnackbar {
 	}
 	
 	/**
-	Show.
-	*/
+	 Show.
+	 */
 	fileprivate func showWithAnimation() {
 		var animationBlock: (() -> Void)? = nil
 		let superViewWidth = (superview?.frame)!.width
 		let snackbarHeight = systemLayoutSizeFitting(.init(width: superViewWidth - leftMargin - rightMargin, height: TTGSnackbar.snackbarMinHeight)).height
 		
 		switch animationType {
-			
 			case .fadeInFadeOut:
 				alpha = 0.0
 				// Animation
@@ -714,15 +727,15 @@ public extension TTGSnackbar {
 		leftMarginConstraint?.constant = leftMargin
 		rightMarginConstraint?.constant = -rightMargin
 		centerXConstraint?.constant = 0
+		centerYConstraint?.constant = centerYConstant ?? 0
 		
 		UIView.animate(withDuration: animationDuration, delay: 0,
 					   usingSpringWithDamping: animationSpringWithDamping,
 					   initialSpringVelocity: animationInitialSpringVelocity, options: .allowUserInteraction,
-					   animations: {
-						() -> Void in
-						animationBlock?()
-						self.superview?.layoutIfNeeded()
-					   }, completion: nil)
+					   animations: { () -> Void in
+			animationBlock?()
+			self.superview?.layoutIfNeeded()
+		}, completion: nil)
 	}
 }
 
@@ -731,8 +744,8 @@ public extension TTGSnackbar {
 public extension TTGSnackbar {
 	
 	/**
-	Dismiss the snackbar manually.
-	*/
+	 Dismiss the snackbar manually.
+	 */
 	@objc func dismiss() {
 		// On main thread
 		DispatchQueue.main.async {
@@ -742,10 +755,10 @@ public extension TTGSnackbar {
 	}
 	
 	/**
-	Dismiss.
-	
-	- parameter animated: If dismiss with animation.
-	*/
+	 Dismiss.
+	 
+	 - parameter animated: If dismiss with animation.
+	 */
 	fileprivate func dismissAnimated(_ animated: Bool) {
 		// If the dismiss timer is nil, snackbar is dismissing or not ready to dismiss.
 		if dismissTimer == nil || superview == nil {
@@ -772,7 +785,6 @@ public extension TTGSnackbar {
 		var animationBlock: (() -> Void)? = nil
 		
 		switch animationType {
-			
 			case .fadeInFadeOut:
 				animationBlock = {
 					self.alpha = 0.0
@@ -811,20 +823,18 @@ public extension TTGSnackbar {
 		UIView.animate(withDuration: animationDuration, delay: 0,
 					   usingSpringWithDamping: animationSpringWithDamping,
 					   initialSpringVelocity: animationInitialSpringVelocity, options: .curveEaseIn,
-					   animations: {
-						() -> Void in
-						animationBlock?()
-						self.superview?.layoutIfNeeded()
-					   }) {
-			(finished) -> Void in
+					   animations: { () -> Void in
+			animationBlock?()
+			self.superview?.layoutIfNeeded()
+		}) { (finished) -> Void in
 			self.dismissBlock?(self)
 			self.removeFromSuperview()
 		}
 	}
 	
 	/**
-	Invalid the dismiss timer.
-	*/
+	 Invalid the dismiss timer.
+	 */
 	fileprivate func invalidDismissTimer() {
 		dismissTimer?.invalidate()
 		dismissTimer = nil
@@ -1026,10 +1036,10 @@ private extension TTGSnackbar {
 private extension TTGSnackbar {
 	
 	/**
-	Action button callback
-	
-	- parameter button: action button
-	*/
+	 Action button callback
+	 
+	 - parameter button: action button
+	 */
 	@objc func doAction(_ button: UIButton) {
 		// Call action block first
 		button == actionButton ? actionBlock?(self) : secondActionBlock?(self)
@@ -1052,10 +1062,10 @@ private extension TTGSnackbar {
 	}
 	
 	/**
-	Action button callback
-	
-	- parameter gesture: the gesture that is sent to the user
-	*/
+	 Action button callback
+	 
+	 - parameter gesture: the gesture that is sent to the user
+	 */
 	
 	@objc func didSwipeSelf(_ gesture: UISwipeGestureRecognizer) {
 		self.onSwipeBlock?(self, gesture.direction)

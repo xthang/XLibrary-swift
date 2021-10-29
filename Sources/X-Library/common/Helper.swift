@@ -32,6 +32,9 @@ public struct Helper {
 		UserDefaults.standard.set(false, forKey: "is_first_run")
 		return x
 	}
+	public static var adsRemoved: Bool {
+		return UserDefaults.standard.stringArray(forKey: CommonConfig.Keys.purchased)?.contains(AdsStore.shared.adsRemovalID) ?? false
+	}
 	
 	public static func buildAppInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
 		var app: [String: Any] = [:]
@@ -395,7 +398,7 @@ public struct Helper {
 			})
 			
 			task.resume()
-		} catch {
+		} catch { /// possible error: KeychainError.unhandledError(25308): errSecInteractionNotAllowed
 			NSLog("!-- \(TAG) | cfg [\(tag)] | error: \(error)")
 			log(tag, error, data == nil ? nil : "\(data!)")
 			completion(error, nil)
@@ -601,7 +604,7 @@ public struct Helper {
 		}
 	}
 	
-	public static func rateApp(_ tag: String) {
+	public static func showAppRatingDialog(_ tag: String) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -634,7 +637,7 @@ public struct Helper {
 		}
 	}
 	
-	public static func removeAds(_ tag: String) {
+	public static func showAdsRemovalDialog(_ tag: String) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -642,13 +645,18 @@ public struct Helper {
 			let view = topController.view!
 			
 			let alert = PopupAlert.initiate(title: NSLocalizedString("Ads removal", comment: ""), message: NSLocalizedString("Do you want to remove all ads?", comment: ""), preferredStyle: .alert)
-			alert.addAction(title: "OK", style: .default) {
-				
+			alert.buttons.axis = .vertical
+			
+			if let adsRemoval = AdsStore.shared.adsRemoval {
+				alert.addAction(title: NSLocalizedString("OK", comment: "") + " (\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price))", style: .default) {
+					let ok = Payment.purchase(adsRemoval)
+					if !ok { Snackbar.w(NSLocalizedString("Payment is unavailable", comment: "")) }
+				}
 			}
-			alert.addAction(title: "Restore", style: .default) {
-				
+			alert.addAction(title: NSLocalizedString("Restore", comment: ""), style: .default) {
+				Payment.restorePurchases()
 			}
-			alert.addAction(title: "Cancel", style: .default, handler: nil)
+			alert.addAction(title: NSLocalizedString("Cancel", comment: ""), style: .default, handler: nil)
 			view.addSubview(alert)
 		}
 	}
