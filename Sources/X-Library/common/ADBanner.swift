@@ -89,13 +89,13 @@ public class ADBanner: NSObject {
 			}
 		}()
 		let viewWidth = min(frame.size.width, frame.size.height)
-		let newAdWidth = viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85)
+		let newAdWidth = floor(viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85))
 		if gAdBanner.adSize.size.width == newAdWidth && gAdBanner.responseInfo != nil {
 			NSLog("!-  \(TAG) | reloadAd: adSize.size.width == viewWidth == \(newAdWidth) && responseInfo != nil")
 			return
 		}
 		
-		NSLog("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(newAdWidth)")
+		NSLog("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(gAdBanner.adSize.size.width) -> \(newAdWidth)")
 		
 		// Step 3 - Get Adaptive GADAdSize and set the ad view.
 		// Here the current interface orientation is used. If the ad is being preloaded
@@ -120,17 +120,18 @@ public class ADBanner: NSObject {
 		
 		let size = gAdBanner.adSize.size
 		let newAdSize = CGSize(width: max(320, size.width), height: max(50, size.height))
-		if uADSBanner?.size == newAdSize {
-			NSLog("!-  \(TAG) | reload UAd: uADSBanner.size == newAdSize == \(newAdSize)")
+		if uAdLoaded && uADSBanner!.size == newAdSize {
+			NSLog("!-  \(TAG) | reload UAd: uAdLoaded && uADSBanner.size == newAdSize == \(newAdSize)")
 			return
 		}
 		
-		NSLog("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(newAdSize)")
+		NSLog("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(uADSBanner?.size as Any? ?? "--") -> \(newAdSize)")
 		
 		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.main, size: newAdSize)
 		uADSBanner!.delegate = self
 		
 		uADSBanner!.load()
+		uAdLoaded = false
 	}
 	
 	private func show(adBanner: UIView) {

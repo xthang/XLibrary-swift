@@ -16,7 +16,7 @@ public struct AuthenticationHelper {
 		var errors: [String: Any] = [:]
 		let app = Helper.buildAppInfo("\(tag)|sign-in", &errors)
 		let device = try! Helper.buildDeviceInfo("\(tag)|sign-in", &errors, false)
-		let system = Helper.buildSystemInfo(3, &errors)
+		let system = Helper.buildSystemInfo("\(tag)|sign-in", &errors)
 		
 		let url = URL(string: "https://xthang.xyz/account/sign-in-api.php")!
 		

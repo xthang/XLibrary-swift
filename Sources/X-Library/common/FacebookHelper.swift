@@ -5,7 +5,7 @@
 import Foundation
 
 import FacebookCore
-import FBSDKLoginKit
+import FacebookLogin
 
 public struct FacebookHelper {
 	

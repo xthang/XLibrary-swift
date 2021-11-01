@@ -27,12 +27,10 @@ open class BaseStore: NSObject {
 		
 		super.init()
 		
-		requestProducts { result in
-			
-		}
+		requestProducts(TAG)
 	}
 	
-	open func requestProducts(completion completionHandler: @escaping (_ result: Result<[SKProduct], Error>) -> Void) {
+	open func requestProducts(_ tag: String, completion completionHandler: ((_ result: Result<[SKProduct], Error>) -> Void)? = nil) {
 		productsRequest?.cancel()
 		productsRequestCompletionHandler = completionHandler
 		

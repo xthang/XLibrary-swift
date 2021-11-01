@@ -7,6 +7,7 @@ import SystemConfiguration
 import AdSupport
 import CoreTelephony
 import AVFoundation
+import GameKit
 
 public struct Helper {
 	
@@ -53,7 +54,7 @@ public struct Helper {
 		return app
 	}
 	
-	private static func buildUsersInfo(_ tag: String, _ err: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
+	public static func buildUsersInfo(_ tag: String, _ err: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
 		var data: [String: Any] = [:]	// why 'Any' ?: in case a value is nil, the value is set to null
 		
 		do {
@@ -64,6 +65,28 @@ public struct Helper {
 			if !suppressError { throw error }
 			else { err["user-info"] = "[\(tag)] \(error)" }
 		}
+		
+		var gamePlayer: [String: Any] = [:]
+		gamePlayer["playerID"] = GKLocalPlayer.local.playerID
+		gamePlayer["guestIdentifier"] = GKLocalPlayer.local.guestIdentifier
+		gamePlayer["alias"] = GKLocalPlayer.local.alias
+		gamePlayer["displayName"] = GKLocalPlayer.local.displayName
+		gamePlayer["friends"] = GKLocalPlayer.local.friends?.count
+		gamePlayer["isFriend"] = GKLocalPlayer.local.isFriend
+		gamePlayer["isAuthenticated"] = GKLocalPlayer.local.isAuthenticated
+		gamePlayer["isUnderage"] = GKLocalPlayer.local.isUnderage
+		if #available(iOS 12.4, *) {
+			gamePlayer["gamePlayerID"] = GKLocalPlayer.local.gamePlayerID
+			gamePlayer["teamPlayerID"] = GKLocalPlayer.local.teamPlayerID
+		}
+		if #available(iOS 13.0, *) {
+			gamePlayer["isMultiplayerGamingRestricted"] = GKLocalPlayer.local.isMultiplayerGamingRestricted
+		}
+		if #available(iOS 14.0, *) {
+			gamePlayer["isInvitable"] = GKLocalPlayer.local.isInvitable
+			gamePlayer["isPersonalizedCommunicationRestricted"] = GKLocalPlayer.local.isPersonalizedCommunicationRestricted
+		}
+		data["game-player"] = gamePlayer
 		
 		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
 		
@@ -148,7 +171,7 @@ public struct Helper {
 		return device
 	}
 	
-	public static func buildSystemInfo(_ tag: Int, _ err: inout [String: Any]) -> [String: Any] {
+	public static func buildSystemInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
 		var data: [String: Any] = [:]
 		
 		data["locale"] = Locale.current.identifier
@@ -164,7 +187,7 @@ public struct Helper {
 		
 		data["isProtectedDataAvailable"] = UIApplication.shared.isProtectedDataAvailable
 		
-		if tag == 1 { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
+		if tag == "cfg" { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
 		
 		return data
 	}
@@ -332,7 +355,7 @@ public struct Helper {
 			let app = buildAppInfo("cfg", &errors)
 			let users = try buildUsersInfo("cfg", &errors, false)
 			let device = try buildDeviceInfo("cfg", &errors, false)
-			let system = buildSystemInfo(1, &errors)
+			let system = buildSystemInfo("cfg", &errors)
 			let process = buildProcessInfo(1, &errors)
 			let telephony = buildTelephonyInfo(1, &errors)
 			let connectivity = buildConnectivityInfo(1, &errors)
@@ -348,6 +371,7 @@ public struct Helper {
 			request.httpBody = try? JSONSerialization.data(withJSONObject: [
 				"tag": tag,
 				"data": data,
+				"errors": !errors.isEmpty ? errors as Any : nil,
 				"app": app,
 				"users": users,
 				"device": device,
@@ -356,8 +380,7 @@ public struct Helper {
 				"telephony": telephony,
 				"connectivity": connectivity,
 				"audio": audio,
-				"user-settings": userSettings,
-				"errors": !errors.isEmpty ? errors as Any : nil
+				"user-settings": userSettings
 			], options: [])
 			
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
@@ -377,7 +400,7 @@ public struct Helper {
 						NSLog("--  \(TAG) | getting Config [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
 						
 						if stt != 200 {
-							let msg = "[2] [\(stt as Any? ?? "")] Getting Config error"
+							let msg = "[2] [code: \(stt as Any? ?? "")] Getting Config error"
 							Snackbar.e(msg)
 							completion(error, dict)
 							return
@@ -417,7 +440,7 @@ public struct Helper {
 		errors["e-callStackSymbols"] = e.callStackSymbols
 		errors["e-data"] = data
 		
-		logError(tag, &errors)
+		logError(tag, errors)
 		
 		if tag == "uncaught-exception" {
 			RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
@@ -432,37 +455,40 @@ public struct Helper {
 		errors["e-reason"] = "\(e)"
 		errors["e-data"] = data
 		
-		logError(tag, &errors)
+		logError(tag, errors)
 	}
 	
-	private static func logError(_ tag: String, _ errors: inout [String: Any]) {
-		let app = buildAppInfo(tag, &errors)
-		let users = try? buildUsersInfo(tag, &errors, true)
-		let device = try? buildDeviceInfo(tag, &errors, true)
-		let system = buildSystemInfo(1, &errors)
-		
-		let url = URL(string: "https://xthang.xyz/app/log-api.php")!
-		
-		var request = URLRequest(url: url)
-		request.httpMethod = "POST"
-		request.setValue("ios", forHTTPHeaderField: "platform")
-		request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.httpBody = try? JSONSerialization.data(withJSONObject: [
-			"tag": tag,
-			"app": app,
-			"users": users,
-			"device": device,
-			"system": system,
-			"errors": !errors.isEmpty ? errors : nil
-		], options: [])
-		
-		let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
-			let stt = (response as? HTTPURLResponse)?.statusCode
-			let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-			NSLog("<-- \(TAG) | \(tag) | log error: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
-		})
-		
-		task.resume()
+	private static func logError(_ tag: String, _ errors: [String: Any]) {
+		var errors = errors
+		DispatchQueue.main.async {
+			let app = buildAppInfo(tag, &errors)
+			let users = try? buildUsersInfo(tag, &errors, true)
+			let device = try? buildDeviceInfo(tag, &errors, true)
+			let system = buildSystemInfo(tag, &errors)
+			
+			let url = URL(string: "https://xthang.xyz/app/log-api.php")!
+			
+			var request = URLRequest(url: url)
+			request.httpMethod = "POST"
+			request.setValue("ios", forHTTPHeaderField: "platform")
+			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+			request.httpBody = try? JSONSerialization.data(withJSONObject: [
+				"tag": tag,
+				"errors": !errors.isEmpty ? errors : nil,
+				"app": app,
+				"users": users,
+				"device": device,
+				"system": system
+			], options: [])
+			
+			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
+				let stt = (response as? HTTPURLResponse)?.statusCode
+				let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
+				NSLog("<-- \(TAG) | log error [\(tag)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+			})
+			
+			task.resume()
+		}
 	}
 	
 	public static func sendDeviceTokenToServer(deviceToken: Data) {
@@ -528,13 +554,19 @@ public struct Helper {
 		task.resume()
 	}
 	
-	public static func openSystemSettings(title: String) {
+	public static func openSystemSettings(type: PopupAlert.UIType = .type1, title: String) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
 			}
 			
-			let alert = PopupAlert.initiate(title: title, message: NSLocalizedString("You need to open Settings to change this", comment: ""), preferredStyle: .alert)
+			let buttonType: PopupAlert.ButtonType = type == .type1 ? .type1 : .type2
+			
+			let alert = PopupAlert.initiate(type: type, title: title, message: NSLocalizedString("You need to open Settings to change this", comment: ""), preferredStyle: .alert, buttonType: buttonType)
+			if type == .type1 {
+				alert.contentView.backgroundColor = .popupBackground
+			}
+			
 			alert.addAction(title: NSLocalizedString("Open", comment: ""), style: .default) {
 				guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
 					return
@@ -604,20 +636,26 @@ public struct Helper {
 		}
 	}
 	
-	public static func showAppRatingDialog(_ tag: String) {
+	public static func showAppRatingDialog(_ tag: String, type: PopupAlert.UIType = .type1) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
 			}
 			let view = topController.view!
 			
+			let buttonType: PopupAlert.ButtonType = type == .type1 ? .type1 : .type2
+			
 			if let url = URL(string: "itms-apps://itunes.apple.com/app/id\(AppConfig.appleID)?action=write-review") {
-				let alert = PopupAlert.initiate(title: NSLocalizedString("Hi there", comment: ""), message: "⭐️ \(NSLocalizedString("Rate us on AppStore", comment: "")) ⭐️", preferredStyle: .alert)
+				let alert = PopupAlert.initiate(type: type, title: "⭐️", message: NSLocalizedString("Rate us on AppStore", comment: ""), preferredStyle: .alert, buttonType: buttonType)
+				if type == .type1 {
+					alert.contentView.backgroundColor = .popupBackground
+				}
+				
 				alert.addAction(title: "OK", style: .default) {
 					if #available(iOS 10, *) {
 						UIApplication.shared.open(url, options: [:], completionHandler: { [weak view] success in
 							if !success {
-								let alert = PopupAlert.initiate(title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert)
+								let alert = PopupAlert.initiate(type: type, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert, buttonType: buttonType)
 								alert.addAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil)
 								view?.addSubview(alert)
 							}
@@ -630,28 +668,45 @@ public struct Helper {
 				view.addSubview(alert)
 			} else {
 				NSLog("!-  \(TAG) | rateApp [\(tag)]: AppStore url not available: \(AppConfig.appleID)")
-				let alert = PopupAlert.initiate(title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert)
+				let alert = PopupAlert.initiate(type: type, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), preferredStyle: .alert, buttonType: buttonType)
+				if type == .type1 {
+					alert.contentView.backgroundColor = UIColor(red: 240, green: 240, blue: 240, alpha: 1)
+				}
+				
 				alert.addAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil)
 				view.addSubview(alert)
 			}
 		}
 	}
 	
-	public static func showAdsRemovalDialog(_ tag: String) {
+	public static func showAdsRemovalDialog(_ tag: String, type: PopupAlert.UIType = .type1) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
 			}
 			let view = topController.view!
 			
-			let alert = PopupAlert.initiate(title: NSLocalizedString("Ads removal", comment: ""), message: NSLocalizedString("Do you want to remove all ads?", comment: ""), preferredStyle: .alert)
+			let msg: String
+			if let _ = AdsStore.shared.adsRemoval {
+				msg = NSLocalizedString("Do you want to remove all ads?", comment: "")
+			} else {
+				msg = NSLocalizedString("[Ads removal is not available. Please try again later!]", comment: "")
+			}
+			
+			let buttonType: PopupAlert.ButtonType = type == .type1 ? .type1 : .type2
+			
+			let alert = PopupAlert.initiate(type: type, title: NSLocalizedString("Ads removal", comment: ""), message: msg, preferredStyle: .alert, buttonType: buttonType)
+			if type == .type1 {
+				alert.contentView.backgroundColor = .popupBackground
+			}
 			alert.buttons.axis = .vertical
 			
 			if let adsRemoval = AdsStore.shared.adsRemoval {
 				alert.addAction(title: NSLocalizedString("OK", comment: "") + " (\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price))", style: .default) {
-					let ok = Payment.purchase(adsRemoval)
-					if !ok { Snackbar.w(NSLocalizedString("Payment is unavailable", comment: "")) }
+					_ = Payment.purchase(adsRemoval)
 				}
+			} else {
+				AdsStore.shared.requestProducts(TAG)
 			}
 			alert.addAction(title: NSLocalizedString("Restore", comment: ""), style: .default) {
 				Payment.restorePurchases()

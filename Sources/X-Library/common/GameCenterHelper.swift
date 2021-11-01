@@ -52,9 +52,9 @@ public struct GameCenterHelper {
 		
 		GKScore.report([bestScoreInt]) { error in
 			if let err = error {
-				NSLog("--> \(TAG) | updateScore error: \(err.localizedDescription)")
+				NSLog("--> \(TAG) | updateScore (\(score)): error: \(err.localizedDescription)")
 			} else {
-				NSLog("--> \(TAG) | Best Score submitted to your Leaderboard!")
+				NSLog("--> \(TAG) | Best Score (\(score)) submitted to your Leaderboard!")
 			}
 		}
 	}
@@ -100,13 +100,30 @@ public struct GameCenterHelper {
 		}
 	}
 	
+	public static func showGameCenterAchievement(_ tag: String) {
+		// NSLog("--  \(TAG) | showGameCenterAchievement: \(GKLocalPlayer.local.isAuthenticated)")
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
+			
+			let gcVC = GKGameCenterViewController()
+			gcVC.gameCenterDelegate = xGKGameCenterControllerDelegate.instance
+			gcVC.viewState = .achievements
+			topController.present(gcVC, animated: true)
+		}
+	}
+	
 	public static func reportAchievement(_ identifier: String) {
 		let achievement = GKAchievement(identifier: identifier)
+		achievement.showsCompletionBanner = true
+		achievement.percentComplete = 100
+		
 		GKAchievement.report([achievement]) { error in
 			if let err = error {
-				NSLog("--> \(TAG) | report achievement: error: \(err.localizedDescription)")
+				NSLog("--> \(TAG) | report achievement (\(identifier)): error: \(err.localizedDescription)")
 			} else {
-				NSLog("--> \(TAG) | Achievement submitted!")
+				NSLog("--> \(TAG) | Achievement (\(identifier)) submitted!")
 			}
 		}
 	}

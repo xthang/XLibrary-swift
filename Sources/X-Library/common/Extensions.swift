@@ -7,6 +7,7 @@ import GoogleMobileAds
 
 
 extension Notification.Name {
+	
 	public static let sound = Notification.Name(rawValue: "sound")
 	public static let soundVolume = Notification.Name(rawValue: "sound-volume")
 	public static let music = Notification.Name(rawValue: "music")
@@ -28,6 +29,7 @@ extension Notification.Name {
 }
 
 extension UIControl.Event {
+	
 	public static let valueChangedEnded = UIControl.Event(rawValue: UInt())
 }
 
@@ -49,10 +51,6 @@ public extension UIDevice {
 
 extension UIColor {
 	
-	public static var background = UIColor(red: 26/255, green: 26/255, blue: 26/255, alpha: 1)
-	
-	public static var sky = UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
-	
 	public static func rgb(_ rgb: Int, alpha: CGFloat = 1.0) -> UIColor {
 		return UIColor(
 			red: CGFloat((Float((rgb & 0xff0000) >> 16)) / 255.0),
@@ -60,9 +58,18 @@ extension UIColor {
 			blue: CGFloat((Float((rgb & 0x0000ff) >> 0)) / 255.0),
 			alpha: alpha)
 	}
+	
+	public static var background = UIColor(red: 26/255, green: 26/255, blue: 26/255, alpha: 1)
+	public static var popupBackground = UIColor.rgb(0xf0f0f0)
+	public static var buttonBackground = UIColor.rgb(0xe5e5e5)
+	public static var buttonHighlightedBackground = UIColor.rgb(0xbababa)
+	public static var buttonDisabledBackground = UIColor.rgb(0xbbbbbb)
+	
+	public static var sky = UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
 }
 
 extension UIWindow {
+	
 	open override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
 		if motion == .motionShake {
 			if var topController = rootViewController {
@@ -80,6 +87,11 @@ extension UIWindow {
 }
 
 extension UIView {
+	
+	struct Key {
+		static var cornerRadiusRatio = "cornerRadiusRatio"
+	}
+	
 	//	@IBInspectable public var borderWidth: CGFloat {
 	//		get {
 	//			return layer.borderWidth
@@ -94,9 +106,10 @@ extension UIView {
 	/// `cornerRadiusRatio = 0.5`.
 	@IBInspectable public var cornerRadiusRatio: CGFloat {
 		get {
-			return layer.cornerRadius / min(frame.width, frame.height)
+			return objc_getAssociatedObject(self, &Key.cornerRadiusRatio) as? CGFloat ?? 0
 		}
 		set {
+			objc_setAssociatedObject(self, &Key.cornerRadiusRatio, newValue, .OBJC_ASSOCIATION_RETAIN)
 			// Make sure that it's between 0.0 and 1.0. If not, restrict it to that range.
 			let normalizedRatio = max(0.0, min(1.0, newValue))
 			layer.cornerRadius = min(frame.width, frame.height) * normalizedRatio
@@ -113,9 +126,32 @@ extension UIView {
 		}
 		return nil
 	}
+	
+	public func asImage() -> UIImage {
+		if #available(iOS 10.0, *) {
+			let renderer = UIGraphicsImageRenderer(bounds: bounds)
+			return renderer.image { rendererContext in
+				layer.render(in: rendererContext.cgContext)
+			}
+		} else {
+			UIGraphicsBeginImageContext(self.frame.size)
+			self.layer.render(in:UIGraphicsGetCurrentContext()!)
+			let image = UIGraphicsGetImageFromCurrentImageContext()
+			UIGraphicsEndImageContext()
+			return UIImage(cgImage: image!.cgImage!)
+		}
+	}
+	
+	public func asPngData() -> Data {
+		let renderer = UIGraphicsImageRenderer(bounds: bounds)
+		return renderer.pngData { rendererContext in
+			layer.render(in: rendererContext.cgContext)
+		}
+	}
 }
 
 extension UIImageView {
+	
 	static let TAG = "UIImageView"
 	
 	func fromGif(resourceName: String, ofType: String) {
@@ -160,6 +196,7 @@ extension UIImageView {
 }
 
 extension UIImage {
+	
 	func resizeTopAlignedToFill(_ containerWidth: CGFloat) -> UIImage? {
 		let newHeight = containerWidth * size.height / size.width
 		let newSize = CGSize(width: containerWidth, height: newHeight)
@@ -179,6 +216,7 @@ extension SKScene {
 }
 
 extension GKError {
+	
 	public var content: String {
 		switch code {
 			case .notAuthenticated, .notAuthorized, .userDenied, .invalidCredentials:
@@ -197,6 +235,7 @@ extension GKError {
 
 @available(iOS 13.0, *)
 extension ASAuthorizationAppleIDProvider.CredentialState {
+	
 	func toPartnerState() -> Partner.CredentialState {
 		switch self {
 			case .revoked: return .revoked

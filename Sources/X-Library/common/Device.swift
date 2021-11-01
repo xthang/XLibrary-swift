@@ -180,7 +180,7 @@ class Device {
 
 struct JailBrakeHelper {
 	static func hasCydiaInstalled() -> Bool {
-		return UIApplication.shared.canOpenURL(URL(string: "cydia://")!)
+		return UIApplication.shared.canOpenURL(URL(string: "cydia://")!)	// UIApplication.canOpenURL(_:) must be used from main thread only
 	}
 	
 	static func isContainsSuspiciousApps() -> Bool {

@@ -9,8 +9,8 @@ public class RoundedView : UIView {
 	private let TAG = "◯"
 	
 	public override func layoutSubviews() {
-		super.layoutSubviews()
+		cornerRadiusRatio = cornerRadiusRatio == 0 ? 0.5 : cornerRadiusRatio
 		
-		cornerRadiusRatio = 0.5
+		super.layoutSubviews()
 	}
 }

@@ -66,6 +66,13 @@ open class XButton: UIButton {
 	
 	@IBInspectable public var soundEnabled: Bool = true
 	
+	
+	open override func layoutSubviews() {
+		if cornerRadiusRatio != 0 { cornerRadiusRatio = cornerRadiusRatio }
+		
+		super.layoutSubviews()
+	}
+	
 	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
 		guard let touch = touches.first else { return }
 		let location = touch.location(in: self)

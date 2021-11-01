@@ -25,7 +25,7 @@ public class Singletons {
 	
 	public let btnSound: AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
-		if let url = Bundle.main.url(forResource: "pop", withExtension: "wav") {
+		if let url = Bundle.main.url(forResource: "button", withExtension: "wav") {
 			// NSLog("--  \(TAG) | init button audio ...: \(url)")
 			s = try? AVAudioPlayer(contentsOf: url)
 			s?.volume = Helper.soundVolume
@@ -93,10 +93,11 @@ public class Singletons {
 	
 	@objc func toggleMusic(_ notification: NSNotification) {
 		NSLog("--  \(TAG) | toggleMusic")
+		
 		if notification.object as! Bool {
-			backgroundAudio!.play()
+			playMusic()
 		} else {
-			backgroundAudio!.pause()
+			pauseMusic()
 		}
 	}
 	
@@ -105,15 +106,16 @@ public class Singletons {
 	}
 	
 	public func playMusic() {
+		musicOn = true
 		if Helper.musicOn, let bgAudio = backgroundAudio, !bgAudio.isPlaying {
-			if bgAudio.play() { musicOn = true }
+			bgAudio.play()
 		}
 	}
 	
 	public func pauseMusic() {
-		if let x = backgroundAudio, x.isPlaying {
-			x.stop()
-			musicOn = false
+		musicOn = false
+		if let bgAudio = backgroundAudio, bgAudio.isPlaying {
+			bgAudio.stop()
 		}
 	}
 }

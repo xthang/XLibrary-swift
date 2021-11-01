@@ -12,6 +12,7 @@ public struct AppConfig {
 	
 	public static let appID = nsDictionary["AppID"] as! Int
 	public static let appleID: String = nsDictionary["AppleID"] as! String
+	public static let aboutURL: String = nsDictionary["AboutURL"] as! String
 	public static let shareURL: String = nsDictionary["ShareURL"] as! String
 	
 	static let keychainAccessGroup: String = nsDictionary["KeychainAccessGroup"] as! String
@@ -27,10 +28,42 @@ public struct AppConfig {
 	static let unityGameID: String = nsDictionary["UnityGameID"] as! String
 	static let unityAdEnabled: Bool = nsDictionary["UnityAdEnabled"] as! Bool
 	
-	public static func initiate() {
-		NSLog("-------  \(TAG)")
+	public static func initiate(_ tag: String) {
+		NSLog("-------  \(TAG) | \(tag)")
 		
+		_ = appID
+		_ = appleID
+		_ = aboutURL
+		_ = shareURL
+		
+		_ = keychainAccessGroup
+		_ = keychainIdService
+		_ = keychainDeviceIdKey
+		_ = keychainXUserIdKey
+		
+		_ = GameCenter.LeaderBoard.all
+		
+		_ = GADUnit.main
 		gAdTestDevices.append(GADSimulatorID)
+		
+		_ = unityAppID
+		_ = unityGameID
+		_ = unityAdEnabled
+		_ = UnityAdUnit.main
+	}
+	
+	public struct GameCenter {
+		public static let dict1 = nsDictionary["GameCenter"] as! NSDictionary
+		
+		struct LeaderBoard {
+			static let dict2 = dict1["Leaderboards"] as! NSDictionary
+			
+			static var all: String = dict2["All"] as! String
+		}
+		
+		public struct Achievement {
+			public static let dict2 = dict1["Achievements"] as! NSDictionary
+		}
 	}
 	
 	struct GADUnit {
@@ -43,21 +76,5 @@ public struct AppConfig {
 		static let dict1 = nsDictionary["UnityAdUnits"] as! NSDictionary
 		
 		static var main: String = dict1["Main"] as! String
-	}
-	
-	struct GameCenter {
-		static let dict1 = nsDictionary["GameCenter"] as! NSDictionary
-		
-		struct LeaderBoard {
-			static let dict2 = dict1["Leaderboards"] as! NSDictionary
-			
-			static var all: String = dict2["AllScores"] as! String
-		}
-		
-		struct Achievement {
-			static let dict2 = dict1["Achievements"] as! NSDictionary
-			
-			static var score100: String = dict2["Score100"] as! String
-		}
 	}
 }

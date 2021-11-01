@@ -10,6 +10,8 @@ open class OverlayView: UIView {
 	
 	@IBOutlet public var contentView: UIView!
 	
+	var dismissHandler: ((_ isButton: Bool) -> Void)?
+	
 	
 	open class func initiate(_ fileName: String) -> OverlayView {
 		return UINib(nibName: fileName, bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! OverlayView
@@ -64,6 +66,15 @@ open class OverlayView: UIView {
 		}
 	}
 	
+	//open override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+	//	// stop passing touches from an overlay view to the views underneath
+	//	return true
+	//}
+	
+	public func onDismiss(handler: @escaping (_ isButton: Bool) -> Void) {
+		self.dismissHandler = handler
+	}
+	
 	@IBAction public func dismissView(_ sender: UIButton?) {
 		dismissView(sender, completion: nil)
 	}
@@ -74,8 +85,9 @@ open class OverlayView: UIView {
 					   options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],
 					   animations: ({ [weak self] in
 			self?.alpha = 0
-		})) { ok in
-			super.removeFromSuperview()
+		})) { [weak self] ok in
+			self?.removeFromSuperview()
+			self?.dismissHandler?(sender != nil)
 			completion?()
 		}
 	}
