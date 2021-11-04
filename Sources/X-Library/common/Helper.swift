@@ -166,7 +166,7 @@ public struct Helper {
 			return x
 		})
 		
-		if tag == "cfg" { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
+		if tag.contains("|cfg") { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
 		
 		return device
 	}
@@ -187,7 +187,7 @@ public struct Helper {
 		
 		data["isProtectedDataAvailable"] = UIApplication.shared.isProtectedDataAvailable
 		
-		if tag == "cfg" { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
+		if tag.contains("|cfg") { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
 		
 		return data
 	}
@@ -349,36 +349,38 @@ public struct Helper {
 		return userSettings
 	}
 	
+	public static func buildBaseRequestBody(_ tag: String, _ errors: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
+		let app = buildAppInfo(tag, &errors)
+		let users = try buildUsersInfo(tag, &errors, suppressError)
+		let device = try buildDeviceInfo(tag, &errors, suppressError)
+		let system = buildSystemInfo(tag, &errors)
+		
+		var jsonObj: [String: Any] = [
+			"tag": tag,
+			"app": app,
+			"users": users,
+			"device": device,
+			"system": system
+		]
+#if DEBUG
+		jsonObj["env"] = "DEBUG"
+#endif
+		
+		return jsonObj
+	}
+	
 	public static func getConfig(_ tag: String, data: [String: Any?]?, completion: @escaping (Error?, [String: Any]?) -> Void) {
 		do {
 			var errors: [String: Any] = [:]
-			let app = buildAppInfo("cfg", &errors)
-			let users = try buildUsersInfo("cfg", &errors, false)
-			let device = try buildDeviceInfo("cfg", &errors, false)
-			let system = buildSystemInfo("cfg", &errors)
-			let process = buildProcessInfo(1, &errors)
-			let telephony = buildTelephonyInfo(1, &errors)
-			let connectivity = buildConnectivityInfo(1, &errors)
-			let audio = buildAudioInfo(1, &errors)
-			let userSettings = buildUserConfigInfo(1, &errors)
 			
-			var jsonObj: [String: Any] = [
-				"tag": tag,
-				"app": app,
-				"users": users,
-				"device": device,
-				"system": system,
-				"process": process,
-				"telephony": telephony,
-				"connectivity": connectivity,
-				"audio": audio,
-				"user-settings": userSettings
-			]
+			var jsonObj = try buildBaseRequestBody("\(tag)|cfg", &errors, false)
 			
-#if DEBUG
-			jsonObj["env"] = "DEBUG"
-#endif
 			jsonObj["data"] = data
+			jsonObj["process"] = buildProcessInfo(1, &errors)
+			jsonObj["telephony"] = buildTelephonyInfo(1, &errors)
+			jsonObj["connectivity"] = buildConnectivityInfo(1, &errors)
+			jsonObj["audio"] = buildAudioInfo(1, &errors)
+			jsonObj["user-settings"] = buildUserConfigInfo(1, &errors)
 			jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
 			
 			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
@@ -387,7 +389,7 @@ public struct Helper {
 			request.httpMethod = "POST"
 			request.setValue("ios", forHTTPHeaderField: "platform")
 			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-			request.httpBody = try? JSONSerialization.data(withJSONObject: jsonObj, options: [])
+			request.httpBody = try JSONSerialization.data(withJSONObject: jsonObj, options: [])
 			
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 				let stt = (response as? HTTPURLResponse)?.statusCode
@@ -412,7 +414,7 @@ public struct Helper {
 							return
 						}
 						
-						if device["uid"] == nil {
+						if (jsonObj["device"] as! [String: Any?])["uid"] == nil {
 							try! KeychainItem.saveUserInKeychain(AppConfig.keychainDeviceIdKey, dict["device-uid"] as! String)
 						}
 						
@@ -497,10 +499,9 @@ public struct Helper {
 	private static func logError(_ tag: String, _ errors: [String: Any]) {
 		var errors = errors
 		DispatchQueue.main.async {
-			let app = buildAppInfo(tag, &errors)
-			let users = try? buildUsersInfo(tag, &errors, true)
-			let device = try? buildDeviceInfo(tag, &errors, true)
-			let system = buildSystemInfo(tag, &errors)
+			var jsonObj = (try? buildBaseRequestBody(tag, &errors, true)) ?? [:]
+			
+			jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
 			
 			let url = URL(string: "https://xthang.xyz/app/log-api.php")!
 			
@@ -508,14 +509,7 @@ public struct Helper {
 			request.httpMethod = "POST"
 			request.setValue("ios", forHTTPHeaderField: "platform")
 			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-			request.httpBody = try? JSONSerialization.data(withJSONObject: [
-				"tag": tag,
-				"errors": !errors.isEmpty ? errors : nil,
-				"app": app,
-				"users": users,
-				"device": device,
-				"system": system
-			], options: [])
+			request.httpBody = try? JSONSerialization.data(withJSONObject: jsonObj, options: [])
 			
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 				let stt = (response as? HTTPURLResponse)?.statusCode

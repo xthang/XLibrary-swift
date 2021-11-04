@@ -116,10 +116,8 @@ public class Payment: NSObject {
 			
 			do {
 				var errors: [String: Any] = [:]
-				let app = Helper.buildAppInfo(tag, &errors)
-				let users = try Helper.buildUsersInfo(tag, &errors, false)
-				let device = try Helper.buildDeviceInfo(tag, &errors, false)
-				let system = Helper.buildSystemInfo(tag, &errors)
+				
+				var jsonObj = try Helper.buildBaseRequestBody(tag, &errors, false)
 				
 				var trans: [String: Any] = [:]
 				trans["product-identifier"] = productIdentifier
@@ -128,22 +126,18 @@ public class Payment: NSObject {
 				trans["transaction-date"] = transaction.transactionDate?.formatted(CommonConfig.dateFormat)
 				trans["transaction-state"] = state.rawValue
 				
+				jsonObj["transaction"] = trans
+				jsonObj["receipt"] = receiptString
+				
+				jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
+				
 				let url = URL(string: "https://xthang.xyz/app/verify-receipt-apple.php")!
 				
 				var request = URLRequest(url: url)
 				request.httpMethod = "POST"
 				request.setValue("ios", forHTTPHeaderField: "platform")
 				request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-				request.httpBody = try JSONSerialization.data(withJSONObject: [
-					"tag": tag,
-					"errors": !errors.isEmpty ? errors as Any : nil,
-					"app": app,
-					"users": users,
-					"device": device,
-					"system": system,
-					"transaction": trans,
-					"receipt": receiptString
-				], options: [])
+				request.httpBody = try JSONSerialization.data(withJSONObject: jsonObj, options: [])
 				
 				let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 					let stt = (response as? HTTPURLResponse)?.statusCode
