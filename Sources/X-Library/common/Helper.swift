@@ -362,16 +362,8 @@ public struct Helper {
 			let audio = buildAudioInfo(1, &errors)
 			let userSettings = buildUserConfigInfo(1, &errors)
 			
-			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
-			
-			var request = URLRequest(url: url)
-			request.httpMethod = "POST"
-			request.setValue("ios", forHTTPHeaderField: "platform")
-			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-			request.httpBody = try? JSONSerialization.data(withJSONObject: [
+			var jsonObj: [String: Any] = [
 				"tag": tag,
-				"data": data,
-				"errors": !errors.isEmpty ? errors as Any : nil,
 				"app": app,
 				"users": users,
 				"device": device,
@@ -381,7 +373,21 @@ public struct Helper {
 				"connectivity": connectivity,
 				"audio": audio,
 				"user-settings": userSettings
-			], options: [])
+			]
+			
+#if DEBUG
+			jsonObj["env"] = "DEBUG"
+#endif
+			jsonObj["data"] = data
+			jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
+			
+			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
+			
+			var request = URLRequest(url: url)
+			request.httpMethod = "POST"
+			request.setValue("ios", forHTTPHeaderField: "platform")
+			request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+			request.httpBody = try? JSONSerialization.data(withJSONObject: jsonObj, options: [])
 			
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 				let stt = (response as? HTTPURLResponse)?.statusCode
@@ -397,7 +403,7 @@ public struct Helper {
 				if let d = data {
 					do {
 						let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
-						NSLog("--  \(TAG) | getting Config [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
+						NSLog("--  \(TAG) | getting Config [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--")")
 						
 						if stt != 200 {
 							let msg = "[2] [code: \(stt as Any? ?? "")] Getting Config error"
@@ -409,6 +415,36 @@ public struct Helper {
 						if device["uid"] == nil {
 							try! KeychainItem.saveUserInKeychain(AppConfig.keychainDeviceIdKey, dict["device-uid"] as! String)
 						}
+						
+						if let deviceCheck = dict["device-check"] as? [String: Any] {
+							if deviceCheck["invalid-hardware"] as! Bool {
+								completion(NSError(domain: "", code: ERROR.InvalidHardware.rawValue, userInfo: [NSLocalizedDescriptionKey: "The device's hardware does not meet the app's requirement"]), dict)
+								return
+							}
+							if deviceCheck["banned"] as! Bool {
+								completion(NSError(domain: "", code: ERROR.BannedDevice.rawValue, userInfo: [NSLocalizedDescriptionKey: "Your device is banned"]), dict)
+								return
+							}
+						}
+						if let versionCheck = dict["version-check"] as? [String: Any] {
+							if versionCheck["update-required"] as! Bool {
+								completion(NSError(domain: "", code: ERROR.UpdateRequired.rawValue, userInfo: [NSLocalizedDescriptionKey: "To continue using the app, please update to newest version"]), dict)
+								return
+							}
+							if versionCheck["update-recommended"] as! Bool {
+								completion(NSError(domain: "", code: ERROR.UpdateRecommended.rawValue, userInfo: [NSLocalizedDescriptionKey: "New version is available. Do you want to update?"]), dict)
+								return
+							}
+						}
+						if let purchasesCheck = dict["purchases-check"] as? [String: Any] {
+							// TODO: store purchases on server side
+							if let refunded = purchasesCheck["refunded"] as? [[String: Any]] {
+								DispatchQueue.main.async {
+									Payment.shared.purchasesRefunded(TAG, refunded: refunded)
+								}
+							}
+						}
+						
 						completion(error, dict)
 					} catch {
 						NSLog("!-- \(TAG) | getting Config [\(tag)]: decode error: \(error)")
@@ -619,6 +655,7 @@ public struct Helper {
 					UIActivity.ActivityType.print,
 					UIActivity.ActivityType.addToReadingList,
 					UIActivity.ActivityType.postToFacebook,
+					UIActivity.ActivityType.postToTwitter,
 					UIActivity.ActivityType.postToFlickr,
 					UIActivity.ActivityType.postToVimeo,
 					UIActivity.ActivityType.postToWeibo,

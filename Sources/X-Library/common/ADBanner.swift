@@ -45,7 +45,7 @@ public class ADBanner: NSObject {
 		gAdBanner.adUnitID = AppConfig.GADUnit.main
 		gAdBanner.delegate = self
 		
-		NotificationCenter.default.addObserver(self, selector: #selector(self.purchased), name: .inAppPurchased, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged), name: .AdsStatusChanged, object: nil)
 	}
 	
 	public func show(viewController: UIViewController, position: BannerPosition? = nil) {
@@ -205,10 +205,12 @@ public class ADBanner: NSObject {
 		rootViewController = nil
 	}
 	
-	@objc func purchased(_ notification: NSNotification) {
-		if notification.object as? String == AdsStore.shared.adsRemovalID {
-			NSLog("--  \(TAG) | purchased: \(hash) - \(notification.object ?? "--")")
+	@objc func adsStatusChanged(_ notification: NSNotification) {
+		NSLog("--  \(TAG) | adsStatusChanged: \(notification.object ?? "--")")
+		
+		if notification.object as! Bool {
 			
+		} else {
 			remove()
 		}
 	}

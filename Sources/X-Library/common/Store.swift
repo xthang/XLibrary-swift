@@ -27,6 +27,9 @@ open class BaseStore: NSObject {
 		
 		super.init()
 		
+		NotificationCenter.default.addObserver(self, selector: #selector(purchased), name: .IAPPurchased, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(purchasesRefunded), name: .IAPRefunded, object: nil)
+		
 		requestProducts(TAG)
 	}
 	
@@ -38,6 +41,10 @@ open class BaseStore: NSObject {
 		productsRequest!.delegate = self
 		productsRequest!.start()
 	}
+	
+	@objc open func purchased(_ notification: NSNotification) {}
+	
+	@objc open func purchasesRefunded(_ notification: NSNotification) {}
 }
 
 extension BaseStore: SKProductsRequestDelegate {
@@ -112,6 +119,26 @@ public class AdsStore: BaseStore {
 			adsRemoval = product
 		} else {
 			fatalError("--  \(TAG) | Unknown product")
+		}
+	}
+	
+	public override func purchased(_ notification: NSNotification) {
+		super.purchased(notification)
+		
+		if let id = notification.object as? String, id == adsRemovalID {
+			NSLog("--  \(TAG) | purchased: \(id)")
+			
+			NotificationCenter.default.post(name: .AdsStatusChanged, object: false)
+		}
+	}
+	
+	public override func purchasesRefunded(_ notification: NSNotification) {
+		super.purchasesRefunded(notification)
+		
+		if let refunded = notification.object as? [[String: Any]], refunded.contains(where: { $0["product-identifier"] as! String == adsRemovalID }) {
+			NSLog("--  \(TAG) | purchasesRefunded: \(adsRemovalID)")
+			
+			NotificationCenter.default.post(name: .AdsStatusChanged, object: true)
 		}
 	}
 }

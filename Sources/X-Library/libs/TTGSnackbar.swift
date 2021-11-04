@@ -127,10 +127,10 @@ open class TTGSnackbar: UIView {
 	@objc open dynamic var dismissBlock: TTGDismissBlock? = nil
 	
 	/// Snackbar display duration. Default is Short = 1 second.
-	@objc open dynamic var duration: TTGSnackbarDuration = TTGSnackbarDuration.short
+	@objc open dynamic var duration: TTGSnackbarDuration = .short
 	
 	/// Snackbar animation type. Default is SlideFromBottomBackToBottom.
-	@objc open dynamic var animationType: TTGSnackbarAnimationType = TTGSnackbarAnimationType.slideFromBottomBackToBottom
+	@objc open dynamic var animationType: TTGSnackbarAnimationType = .slideFromBottomBackToBottom
 	
 	/// Show and hide animation duration. Default is 0.3
 	@objc open dynamic var animationDuration: TimeInterval = 0.3
@@ -426,6 +426,9 @@ open class TTGSnackbar: UIView {
 	public var centerYMultiplier: CGFloat?
 	public var centerYConstant: CGFloat?
 	
+	public var widthMultiplier: CGFloat?
+	public var widthConstant: CGFloat?
+	
 	// Content constraints.
 	fileprivate var iconImageViewWidthConstraint: NSLayoutConstraint? = nil
 	fileprivate var actionButtonMaxWidthConstraint: NSLayoutConstraint? = nil
@@ -597,15 +600,61 @@ public extension TTGSnackbar {
 		currentWindow = currentWindow ?? UIApplication.shared.windows.first
 		
 		// Get super view to show
-		if let superView = containerView ?? currentWindow {
-			superView.addSubview(self)
+		if let containerView = containerView ?? currentWindow {
+			var stackview = containerView.subviews.first(where: { $0.accessibilityIdentifier == "snackbars" }) as? UIStackView
 			
-			var relativeToItem: Any = superView
-			if #available(iOS 11.0, *) {
-				if shouldHonorSafeAreaLayoutGuides {
-					relativeToItem = superView.safeAreaLayoutGuide
+			if stackview == nil {
+				stackview = UIStackView()
+				stackview!.accessibilityIdentifier = "snackbars"
+				stackview!.axis = .vertical
+				stackview!.translatesAutoresizingMaskIntoConstraints = false
+				if widthMultiplier != nil || widthConstant != nil {
+					stackview!.alignment = .center
+				} else {
+					stackview!.alignment = .fill
+				}
+				// stackview!.distribution = .fill
+				containerView.addSubview(stackview!)
+				
+				var relativeToItem: Any = containerView
+				if #available(iOS 11.0, *) {
+					if shouldHonorSafeAreaLayoutGuides {
+						relativeToItem = containerView.safeAreaLayoutGuide
+					}
+				}
+				
+				NSLayoutConstraint(
+					item: stackview!, attribute: .centerX, relatedBy: .equal,
+					toItem: relativeToItem, attribute: .centerX, multiplier: 1, constant: 0).isActive = true
+				if centerYMultiplier != nil || centerYConstant != nil {
+					NSLayoutConstraint(
+						item: stackview!, attribute: .centerY, relatedBy: .equal,
+						toItem: relativeToItem, attribute: .centerY, multiplier: centerYMultiplier ?? 1, constant: centerYConstant ?? 0).isActive = true
+				} else if animationType == .slideFromBottomBackToBottom || animationType == .slideFromBottomToTop {
+					NSLayoutConstraint(
+						item: stackview!, attribute: .bottom, relatedBy: .equal,
+						toItem: relativeToItem, attribute: .bottom, multiplier: 1, constant: 0).isActive = true
+				} else {
+					NSLayoutConstraint(
+						item: stackview!, attribute: .top, relatedBy: .equal,
+						toItem: relativeToItem, attribute: .top, multiplier: 1, constant: 0).isActive = true
+				}
+				NSLayoutConstraint(
+					item: stackview!, attribute: .width, relatedBy: .lessThanOrEqual,
+					toItem: relativeToItem, attribute: .width, multiplier: 1, constant: 0).isActive = true
+				if widthMultiplier != nil || widthConstant != nil {
+					NSLayoutConstraint(
+						item: stackview!, attribute: .width, relatedBy: .equal,
+						toItem: relativeToItem, attribute: .width, multiplier: widthMultiplier ?? 1, constant: widthConstant ?? 0).isActive = true
 				}
 			}
+			
+			let superView = UIView()
+			stackview!.addArrangedSubview(superView)
+			
+			superView.addSubview(self)
+			
+			let relativeToItem = superView
 			
 			// Left margin constraint
 			leftMarginConstraint = NSLayoutConstraint.init(
@@ -630,14 +679,18 @@ public extension TTGSnackbar {
 			// Center X constraint
 			centerXConstraint = NSLayoutConstraint.init(
 				item: self, attribute: .centerX, relatedBy: .equal,
-				toItem: superView, attribute: .centerX, multiplier: 1, constant: 0)
+				toItem: relativeToItem, attribute: .centerX, multiplier: 1, constant: 0)
 			
 			// Center Y constraint
-			if centerYMultiplier != nil || centerYConstant != nil {
-				centerYConstraint = NSLayoutConstraint.init(
-					item: self, attribute: .centerY, relatedBy: .equal,
-					toItem: superView, attribute: .centerY, multiplier: centerYMultiplier ?? 1, constant: centerYConstant ?? 0)
-			}
+			//if centerYMultiplier != nil || centerYConstant != nil {
+			//	centerYConstraint = NSLayoutConstraint.init(
+			//		item: self, attribute: .centerY, relatedBy: .equal,
+			//		toItem: relativeToItem, attribute: .centerY, multiplier: 1, constant: 0)
+			//}
+			
+			NSLayoutConstraint(
+				item: self, attribute: .height, relatedBy: .equal,
+				toItem: relativeToItem, attribute: .height, multiplier: 1, constant: -topMargin - bottomMargin).isActive = true
 			
 			// Min height constraint
 			let minHeightConstraint = NSLayoutConstraint.init(
@@ -651,7 +704,7 @@ public extension TTGSnackbar {
 			topMarginConstraint?.priority = UILayoutPriority(990)
 			bottomMarginConstraint?.priority = UILayoutPriority(990)
 			centerXConstraint?.priority = UILayoutPriority(999)
-			centerYConstraint?.priority = UILayoutPriority(999)
+			// centerYConstraint?.priority = UILayoutPriority(999)
 			
 			// Add constraints
 			superView.addConstraint(leftMarginConstraint!)
@@ -659,7 +712,7 @@ public extension TTGSnackbar {
 			superView.addConstraint(bottomMarginConstraint!)
 			superView.addConstraint(topMarginConstraint!)
 			superView.addConstraint(centerXConstraint!)
-			if centerYConstraint != nil { superView.addConstraint(centerYConstraint!) }
+			// if centerYConstraint != nil { superView.addConstraint(centerYConstraint!) }
 			superView.addConstraint(minHeightConstraint)
 			
 			// Active or deactive
@@ -667,7 +720,6 @@ public extension TTGSnackbar {
 			leftMarginConstraint?.isActive = self.shouldActivateLeftAndRightMarginOnCustomContentView ? true : customContentView == nil
 			rightMarginConstraint?.isActive = self.shouldActivateLeftAndRightMarginOnCustomContentView ? true : customContentView == nil
 			centerXConstraint?.isActive = customContentView != nil
-			centerYConstraint?.isActive = true
 			
 			// Show
 			showWithAnimation()
@@ -776,9 +828,12 @@ public extension TTGSnackbar {
 			safeAreaInsets = self.superview?.safeAreaInsets ?? UIEdgeInsets.zero;
 		}
 		
+		let stackview = superview?.superview as? UIStackView
+		
 		if !animated {
 			dismissBlock?(self)
-			removeFromSuperview()
+			superview?.removeFromSuperview()
+			if stackview?.subviews.isEmpty ?? false { stackview!.removeFromSuperview() }
 			return
 		}
 		
@@ -828,7 +883,8 @@ public extension TTGSnackbar {
 			self.superview?.layoutIfNeeded()
 		}) { (finished) -> Void in
 			self.dismissBlock?(self)
-			self.removeFromSuperview()
+			self.superview?.removeFromSuperview()
+			if stackview?.subviews.isEmpty ?? false { stackview!.removeFromSuperview() }
 		}
 	}
 	

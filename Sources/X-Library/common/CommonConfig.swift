@@ -10,9 +10,10 @@ public struct CommonConfig {
 	public static let scoresKey = "scores"
 	public static let font = UIFont(name: "Chalkboard SE", size: 19)
 	
+	public static let dateFormat = "yyyy-MM-dd HH:mm:ss"
 	public static let dateFormatter: DateFormatter = {
 		let dft = DateFormatter()
-		dft.dateFormat = "yyyy-MM-dd HH:mm:ss"
+		dft.dateFormat = dateFormat
 		return dft
 	}()
 	
@@ -27,4 +28,13 @@ public struct CommonConfig {
 	public struct Keys {
 		public static let purchased = "purchased"
 	}
+}
+
+public enum ERROR: Int {
+	case unknown
+	case InvalidHardware
+	case BannedDevice
+	case UpdateRequired
+	case UpdateRecommended
+	case NoReceiptFound
 }

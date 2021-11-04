@@ -6,6 +6,15 @@ import AuthenticationServices
 import GoogleMobileAds
 
 
+extension Date {
+	
+	func formatted(_ format: String) -> String {
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = format
+		return dateFormatter.string(from: self)
+	}
+}
+
 extension Notification.Name {
 	
 	public static let sound = Notification.Name(rawValue: "sound")
@@ -23,7 +32,9 @@ extension Notification.Name {
 	public static let fbStateChanged = Notification.Name(rawValue: "fbStateChanged")
 	public static let eosLoginStatusChanged = Notification.Name(rawValue: "eosLoginStatusChanged")
 	
-	public static let inAppPurchased = Notification.Name("inAppPurchased")
+	public static let IAPPurchased = Notification.Name("IAP-Purchased")
+	public static let IAPRefunded = Notification.Name("IAP-Refunded")
+	public static let AdsStatusChanged = Notification.Name("AdsStatusChanged")
 	
 	public static let levelFinished = Notification.Name("levelFinished")
 }

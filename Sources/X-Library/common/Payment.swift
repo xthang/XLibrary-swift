@@ -96,7 +96,9 @@ public class Payment: NSObject {
 		SKPaymentQueue.default().restoreCompletedTransactions()
 	}
 	
-	public class func verifyReceipt(_ tag: String, completion: @escaping (Error?, [String: Any]?) -> Void) {
+	public class func verifyReceipt(_ tag: String, productIdentifier: String, type: String, transaction: SKPaymentTransaction, completion: @escaping (Error?, [String: Any]?) -> Void) {
+		let state = transaction.transactionState
+		
 		// Get the receipt if it's available
 		if let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
 		   FileManager.default.fileExists(atPath: appStoreReceiptURL.path) {
@@ -104,10 +106,10 @@ public class Payment: NSObject {
 			do {
 				let receiptData = try Data(contentsOf: appStoreReceiptURL, options: .alwaysMapped)
 				receiptString = receiptData.base64EncodedString(options: [])
-				NSLog("--  \(Payment.TAG) | verify-receipt (\(appStoreReceiptURL.path)) -> \(receiptString)")
+				NSLog("--  \(Payment.TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)] (\(appStoreReceiptURL.path)) -> \(receiptString)")
 			} catch {
-				NSLog("!-  \(Payment.TAG) | Couldn't read receipt data (\(appStoreReceiptURL.path)) with error: " + error.localizedDescription)
-				Snackbar.e("Couldn't read receipt data")
+				NSLog("!-  \(Payment.TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)]: Couldn't read receipt data (\(appStoreReceiptURL.path)) with error: " + error.localizedDescription)
+				Snackbar.e("[\(type)-\(state.rawValue)] Couldn't read receipt data")
 				completion(error, nil)
 				return
 			}
@@ -118,6 +120,13 @@ public class Payment: NSObject {
 				let users = try Helper.buildUsersInfo(tag, &errors, false)
 				let device = try Helper.buildDeviceInfo(tag, &errors, false)
 				let system = Helper.buildSystemInfo(tag, &errors)
+				
+				var trans: [String: Any] = [:]
+				trans["product-identifier"] = productIdentifier
+				trans["transaction-type"] = type
+				trans["transaction-identifier"] = transaction.transactionIdentifier
+				trans["transaction-date"] = transaction.transactionDate?.formatted(CommonConfig.dateFormat)
+				trans["transaction-state"] = state.rawValue
 				
 				let url = URL(string: "https://xthang.xyz/app/verify-receipt-apple.php")!
 				
@@ -132,16 +141,17 @@ public class Payment: NSObject {
 					"users": users,
 					"device": device,
 					"system": system,
+					"transaction": trans,
 					"receipt": receiptString
 				], options: [])
 				
 				let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 					let stt = (response as? HTTPURLResponse)?.statusCode
 					let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-					NSLog("<-- \(TAG) | verify-receipt [\(tag)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+					NSLog("<-- \(TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
 					
 					if error != nil {
-						let msg = "[1] Verifying receipt: Something is wrong"
+						let msg = "[1] Verifying receipt [\(type)-\(state.rawValue)]: Something is wrong"
 						Snackbar.e(msg)
 						completion(error, nil)
 						return
@@ -149,10 +159,10 @@ public class Payment: NSObject {
 					if let d = data {
 						do {
 							let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
-							NSLog("--  \(TAG) | verify-receipt [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
+							NSLog("--  \(TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--") | \(dict["update-required"] ?? "--") | \(dict["update-recommended"] ?? "--")")
 							
 							if stt != 200 {
-								let msg = "[code: \(stt as Any? ?? "")] Verifing receipt: error"
+								let msg = "[code: \(stt as Any? ?? "")] Verifing receipt [\(type)-\(state.rawValue)]: error"
 								Snackbar.e(msg)
 								completion(error, nil)
 								return
@@ -160,8 +170,8 @@ public class Payment: NSObject {
 							
 							completion(nil, dict)
 						} catch {
-							NSLog("!-- \(TAG) | verify-receipt [\(tag)]: decode error: \(error)")
-							Snackbar.e("[2] Verifying receipt: Something is wrong")
+							NSLog("!-- \(TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)]: decode error: \(error)")
+							Snackbar.e("[2] Verifying receipt [\(type)-\(state.rawValue)]: Something is wrong")
 							let idx = dataStr?.firstIndex(of: "{")
 							Helper.log("verify-receipt", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
 							completion(error, nil)
@@ -171,13 +181,21 @@ public class Payment: NSObject {
 				
 				task.resume()
 			} catch {
-				NSLog("!-  \(Payment.TAG) | Verify receipt with error: " + error.localizedDescription)
-				Snackbar.e("Verify receipt: error")
+				NSLog("!-  \(Payment.TAG) | verify-receipt [\(tag)] [\(type)-\(state.rawValue)]: Verify receipt with error: " + error.localizedDescription)
+				Snackbar.e("Verify receipt [\(type)-\(state.rawValue)]: error")
 				completion(error, nil)
 			}
 		} else {
-			completion(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No receipt"]), nil)
+			completion(NSError(domain: "", code: ERROR.NoReceiptFound.rawValue, userInfo: [NSLocalizedDescriptionKey: "No receipt"]), nil)
 		}
+	}
+	
+	public func purchasesRefunded(_ tag: String, refunded: [[String: Any]]) {
+		NSLog("--  \(TAG) | purchasesRefunded [\(tag)]: \(refunded)")
+		
+		refunded.forEach { purchasedIdentifiers.remove($0["product-identifier"] as! String) }
+		UserDefaults.standard.set(Array(self.purchasedIdentifiers), forKey: CommonConfig.Keys.purchased)
+		NotificationCenter.default.post(name: .IAPRefunded, object: refunded)
 	}
 }
 
@@ -192,7 +210,7 @@ extension Payment: SKPaymentTransactionObserver {
 				case .purchasing:
 					break
 				case .purchased:
-					updatePurchasedIdentifiers(identifier: transaction.payment.productIdentifier)
+					updatePurchasedIdentifiers(identifier: transaction.payment.productIdentifier, type: "purchase", transaction: transaction)
 					SKPaymentQueue.default().finishTransaction(transaction)
 				case .failed:
 					if let error = transaction.error as? SKError, error.code != .paymentCancelled {
@@ -203,7 +221,7 @@ extension Payment: SKPaymentTransactionObserver {
 				case .restored:
 					guard let productIdentifier = transaction.original?.payment.productIdentifier else { return }
 					
-					updatePurchasedIdentifiers(identifier: productIdentifier)
+					updatePurchasedIdentifiers(identifier: productIdentifier, type: "restore", transaction: transaction)
 					SKPaymentQueue.default().finishTransaction(transaction)
 				case .deferred:
 					break
@@ -232,13 +250,13 @@ extension Payment: SKPaymentTransactionObserver {
 		}
 	}
 	
-	func updatePurchasedIdentifiers(identifier: String) {
-		Payment.verifyReceipt("payment") { [weak self] error, data in
+	func updatePurchasedIdentifiers(identifier: String, type: String, transaction: SKPaymentTransaction) {
+		Payment.verifyReceipt("iap", productIdentifier: identifier, type: type, transaction: transaction) { [weak self] error, data in
 			DispatchQueue.main.async {
-				Snackbar.s(NSLocalizedString("Transaction is successful", comment: ""))
+				Snackbar.s(NSLocalizedString("Transaction is successful", comment: "") + " [\(type)-\(transaction.transactionState.rawValue)]")
 				self?.purchasedIdentifiers.insert(identifier)
 				if self != nil { UserDefaults.standard.set(Array(self!.purchasedIdentifiers), forKey: CommonConfig.Keys.purchased) }
-				NotificationCenter.default.post(name: .inAppPurchased, object: identifier)
+				NotificationCenter.default.post(name: .IAPPurchased, object: identifier)
 			}
 		}
 	}

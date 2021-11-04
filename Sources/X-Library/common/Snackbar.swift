@@ -16,8 +16,8 @@ public struct Snackbar {
 	public static func initSnackbar(_ msg: String, duration: TTGSnackbarDuration = .long) -> TTGSnackbar {
 		let snackbar = TTGSnackbar(message: msg, duration: duration)
 		
-		snackbar.leftMargin = 20
-		snackbar.rightMargin = 20
+		snackbar.leftMargin = 40
+		snackbar.rightMargin = 40
 		snackbar.messageTextAlign = .center
 		
 		return snackbar
