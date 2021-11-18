@@ -4,13 +4,18 @@
 
 import UIKit
 import AVFoundation
+import StoreKit
 
 public class Singletons {
+	
+	private static let TAG = "SgT"
 	private let TAG = "SgT"
 	
-	public static var instance = Singletons()
+	public static let instance = Singletons()
 	
 	private var musicOn = false
+	
+	private var sounds: [AVAudioPlayer] = []
 	
 	private let backgroundAudio : AVAudioPlayer? = {
 		var s: AVAudioPlayer? = nil
@@ -53,14 +58,23 @@ public class Singletons {
 		return s
 	}()
 	
+	public let paymentSuccessSound: AVAudioPlayer = {
+		let url = Bundle.module.url(forResource: "payment_success", withExtension: "wav")!
+		let s = try! AVAudioPlayer(contentsOf: url)
+		s.volume = Helper.soundVolume
+		return s
+	}()
+	
 	
 	private init() {
 		NSLog("-------  \(TAG)")
 		
-		let _ = backgroundAudio
-		let _ = btnSound
-		let _ = whooshSound
-		let _ = whooshSound2
+		_ = backgroundAudio
+		
+		if btnSound != nil { sounds.append(btnSound!) }
+		if whooshSound != nil { sounds.append(whooshSound!) }
+		if whooshSound2 != nil { sounds.append(whooshSound2!) }
+		sounds.append(paymentSuccessSound)
 		
 		if #available(iOS 13.0, *) {
 			NotificationCenter.default.addObserver(self, selector: #selector(self.enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
@@ -86,9 +100,7 @@ public class Singletons {
 	}
 	
 	@objc func changeSoundVolume(_ notification: NSNotification) {
-		btnSound?.volume = Float(notification.object as! CGFloat)
-		whooshSound?.volume = Float(notification.object as! CGFloat)
-		whooshSound2?.volume = Float(notification.object as! CGFloat)
+		sounds.forEach { $0.volume = Float(notification.object as! CGFloat) }
 	}
 	
 	@objc func toggleMusic(_ notification: NSNotification) {

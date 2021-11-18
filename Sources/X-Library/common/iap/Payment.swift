@@ -246,6 +246,8 @@ extension Payment: SKPaymentTransactionObserver {
 	
 	func updatePurchasedIdentifiers(identifier: String, type: String, transaction: SKPaymentTransaction) {
 		Payment.verifyReceipt("iap", productIdentifier: identifier, type: type, transaction: transaction) { [weak self] error, data in
+			Singletons.instance.paymentSuccessSound.play()
+			
 			DispatchQueue.main.async {
 				Snackbar.s(NSLocalizedString("Transaction is successful", comment: "") + " [\(type)-\(transaction.transactionState.rawValue)]")
 				self?.purchasedIdentifiers.insert(identifier)

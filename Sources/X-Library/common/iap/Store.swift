@@ -34,6 +34,8 @@ open class BaseStore: NSObject {
 	}
 	
 	open func requestProducts(_ tag: String, completion completionHandler: ((_ result: Result<[SKProduct], Error>) -> Void)? = nil) {
+		NSLog("--  \(TAG) | requestProducts [\(tag)] ...")
+		
 		productsRequest?.cancel()
 		productsRequestCompletionHandler = completionHandler
 		
@@ -127,6 +129,9 @@ public class AdsStore: BaseStore {
 		
 		if let id = notification.object as? String, id == adsRemovalID {
 			NSLog("--  \(TAG) | purchased: \(id)")
+			
+			// already show noti in Payment
+			Snackbar.s(NSLocalizedString("Ads are removed", comment: ""))
 			
 			NotificationCenter.default.post(name: .AdsStatusChanged, object: false)
 		}

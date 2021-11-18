@@ -27,9 +27,10 @@ let package = Package(
 						   .product(name: "FacebookAEM", package: "Facebook"),
 						   .product(name: "FacebookCore", package: "Facebook"),
 						   .product(name: "FacebookLogin", package: "Facebook")],
-			path: "Sources/X-Library"
+			path: "Sources/X-Library",
 			// sources: ["", "class", "libs", "common"]
 			// linkerSettings: [.unsafeFlags(["-ObjC"])]
+			resources: [ .process("audio") ]
 		),
 		.testTarget(
 			name: "X-LibraryTests",

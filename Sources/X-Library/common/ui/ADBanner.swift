@@ -135,6 +135,11 @@ public class ADBanner: NSObject {
 	}
 	
 	private func show(adBanner: UIView) {
+		if banner.superview == rootViewController?.view {
+			NSLog("!-  \(TAG) | already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
+			return
+		}
+		
 		banner.removeFromSuperview()
 		adBanner.removeFromSuperview()
 		banner.subviews.forEach({ $0.removeFromSuperview() })
