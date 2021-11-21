@@ -13,8 +13,11 @@ extension Date {
 		dateFormatter.dateFormat = format
 		return dateFormatter.string(from: self)
 	}
+	
+	public static func - (lhs: Date, rhs: Date) -> TimeInterval {
+		return lhs.timeIntervalSinceReferenceDate - rhs.timeIntervalSinceReferenceDate
+	}
 }
-
 extension Notification.Name {
 	
 	public static let sound = Notification.Name(rawValue: "sound")

@@ -13,7 +13,9 @@ open class BaseSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	private let TAG = "_🔵"
 	
 	public var window: UIWindow?
-	public var adBanner = ADBanner()
+	
+	public var adBanner: ADBanner!
+	public var adInterstitial: AdInterstitial!
 	
 	
 	open func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -32,6 +34,9 @@ open class BaseSceneDelegate: UIResponder, UIWindowSceneDelegate {
 			// Process the URL similarly to the UIApplicationDelegate example.
 			// example: myphotoapp:Vacation?index=1
 		}
+		
+		adBanner = ADBanner("scene")
+		adInterstitial = AdInterstitial("scene", scene: scene)
 	}
 	
 	public func sceneDidDisconnect(_ scene: UIScene) {
@@ -68,7 +73,7 @@ open class BaseSceneDelegate: UIResponder, UIWindowSceneDelegate {
 	}
 	
 	//
-	public func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+	open func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
 		NSLog("\(TAG) -- openURLContexts: \(URLContexts)")
 		
 		// Determine who sent the URL.

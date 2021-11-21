@@ -4,7 +4,7 @@
 
 import CoreGraphics
 
-enum SceneLayer: CGFloat {
+public enum SceneLayer: CGFloat {
 	case disableAllLayer = 99999
 	case top = 9999
 	case popup = 999, popupVFX = 1000

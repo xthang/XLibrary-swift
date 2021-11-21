@@ -112,7 +112,7 @@ open class BaseSKScene: SKScene {
 		}
 	}
 	
-	public func vibrate(_ feedbackGenerator : NSObject?) {
+	public func vibrate(_ feedbackGenerator : UIFeedbackGenerator?) {
 		if vibrationOn, #available(iOS 10.0, *) {
 			if let hapticGen = (feedbackGenerator as? UINotificationFeedbackGenerator) {
 				hapticGen.notificationOccurred(.success)
@@ -146,6 +146,41 @@ open class BaseSKScene: SKScene {
 		NSLog("--  \(TAG) | toggleVibration: \(notification.object ?? "--")")
 		vibrationOn = notification.object as! Bool
 	}
+	
+	//	private func takeScreenshot(_ shouldSave: Bool = false) -> UIImage? {
+	//		let layer = UIApplication.shared.keyWindow!.layer
+	//		let scale = UIScreen.main.scale
+	//
+	//		UIGraphicsBeginImageContextWithOptions(layer.frame.size, false, scale);
+	//		guard let context = UIGraphicsGetCurrentContext() else {return nil}
+	//		layer.render(in:context)
+	//		let screenshotImage = UIGraphicsGetImageFromCurrentImageContext()
+	//		UIGraphicsEndImageContext()
+	//
+	//		if let image = screenshotImage, shouldSave {
+	//			UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+	//		}
+	//		return screenshotImage
+	//	}
+	
+	//	private func getScreenshot() -> UIImage? {
+	//		let snapshotView = self.view!.snapshotView(afterScreenUpdates: true)
+	//		let bounds = UIScreen.main.bounds
+	//
+	//		UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
+	//		snapshotView?.drawHierarchy(in: bounds, afterScreenUpdates: true)
+	//		let screenshotImage = UIGraphicsGetImageFromCurrentImageContext()
+	//		UIGraphicsEndImageContext()
+	//
+	//		return screenshotImage;
+	//	}
+	
+	//	private func takeScreenshot() -> UIImage? {
+	//		if let img = view!.texture(from: self)?.cgImage() {
+	//			return UIImage(cgImage: img)
+	//		}
+	//		return nil
+	//	}
 	
 	@objc func handleAudioSessionRouteChange(_ notification: NSNotification) {
 		NSLog("--  \(TAG) | handleAudioSessionRouteChange: \(notification.object ?? "--") | \(notification.userInfo as Any? ?? "--") | audioEngine.isRunning: \(audioEngine.isRunning)")

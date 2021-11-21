@@ -2,15 +2,17 @@
 //  Created by Thang Nguyen on 6/28/21.
 //
 
-import GoogleMobileAds
-import UnityAds
 import CoreGraphics
 
+import GoogleMobileAds
+import UnityAds
+
 public class ADBanner: NSObject {
+	
 	private let TAG = "ADS"
 	private static let TAG = "ADS"
 	
-	public static var shared = ADBanner()
+	public static var shared = ADBanner("shared")
 	var rootViewController: UIViewController?
 	
 	private var banner: UIView
@@ -21,28 +23,15 @@ public class ADBanner: NSObject {
 	
 	var uAdLoaded = false
 	
-	public static func initiate() {
-		// Setup Google Mobile Ads
-		GADMobileAds.sharedInstance().start { status in
-			NSLog("--  \(ADBanner.TAG) | GADMobileAds: start: \(status.adapterStatusesByClassName)")
-		}
-		GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = AppConfig.gAdTestDevices
+	public init(_ tag: String) {
+		print("-------  \(TAG) | \(tag)")
 		
-		// UnityAds
-		if !UnityAds.isSupported() {
-			NSLog("!-  \(ADBanner.TAG) | UnityAds is not supported")
-		} else if AppConfig.unityAdEnabled {
-			UnityAds.initialize(AppConfig.unityGameID, testMode: false, enablePerPlacementLoad: true, initializationDelegate: ADBanner.shared)
-		}
-	}
-	
-	public override init() {
 		banner = UIView()
 		// banner.layer.zPosition = 990
 		gAdBanner = GADBannerView()
 		super.init()
 		
-		gAdBanner.adUnitID = AppConfig.GADUnit.main
+		gAdBanner.adUnitID = AppConfig.GADUnit.banner
 		gAdBanner.delegate = self
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged), name: .AdsStatusChanged, object: nil)
@@ -95,7 +84,7 @@ public class ADBanner: NSObject {
 			return
 		}
 		
-		NSLog("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(gAdBanner.adSize.size.width) -> \(newAdWidth)")
+		print("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(gAdBanner.adSize.size.width) -> \(newAdWidth)")
 		
 		// Step 3 - Get Adaptive GADAdSize and set the ad view.
 		// Here the current interface orientation is used. If the ad is being preloaded
@@ -125,9 +114,9 @@ public class ADBanner: NSObject {
 			return
 		}
 		
-		NSLog("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(uADSBanner?.size as Any? ?? "--") -> \(newAdSize)")
+		print("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(uADSBanner?.size as Any? ?? "--") -> \(newAdSize)")
 		
-		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.main, size: newAdSize)
+		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.banner, size: newAdSize)
 		uADSBanner!.delegate = self
 		
 		uADSBanner!.load()
@@ -136,7 +125,7 @@ public class ADBanner: NSObject {
 	
 	private func show(adBanner: UIView) {
 		if banner.superview == rootViewController?.view {
-			NSLog("!-  \(TAG) | already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
+			print("!-  \(TAG) | already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
 			return
 		}
 		
@@ -227,7 +216,7 @@ public enum BannerPosition: CaseIterable {
 
 extension ADBanner: GADBannerViewDelegate {
 	public func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
-		NSLog("<-- \(TAG) | GAds: bannerViewDidReceiveAd: \(rootViewController as Any? ?? "--") | \(bannerView.responseInfo?.adNetworkClassName as Any? ?? "--")")
+		print("<-- \(TAG) | GAds: bannerViewDidReceiveAd: \(rootViewController as Any? ?? "--") | \(bannerView.responseInfo?.adNetworkClassName as Any? ?? "--")")
 		
 		show(adBanner: bannerView)
 	}
@@ -239,19 +228,19 @@ extension ADBanner: GADBannerViewDelegate {
 	}
 	
 	public func bannerViewDidRecordImpression(_ bannerView: GADBannerView) {
-		NSLog("--  \(TAG) | GAds: bannerViewDidRecordImpression")
+		print("--  \(TAG) | GAds: bannerViewDidRecordImpression")
 	}
 	
 	public func bannerViewWillPresentScreen(_ bannerView: GADBannerView) {
-		NSLog("--  \(TAG) | GAds: bannerViewWillPresentScreen")
+		print("--  \(TAG) | GAds: bannerViewWillPresentScreen")
 	}
 	
 	public func bannerViewWillDismissScreen(_ bannerView: GADBannerView) {
-		NSLog("--  \(TAG) | GAds: bannerViewWillDIsmissScreen")
+		print("--  \(TAG) | GAds: bannerViewWillDIsmissScreen")
 	}
 	
 	public func bannerViewDidDismissScreen(_ bannerView: GADBannerView) {
-		NSLog("--  \(TAG) | GAds: bannerViewDidDismissScreen")
+		print("--  \(TAG) | GAds: bannerViewDidDismissScreen")
 	}
 }
 
@@ -268,51 +257,10 @@ extension ADBanner: GADBannerViewDelegate {
 //	}
 //}
 
-// Unity Ads
-extension ADBanner: UnityAdsInitializationDelegate {
-	public func initializationComplete() {
-		NSLog("--  \(TAG) | UAds: initializationComplete")
-	}
-	
-	public func initializationFailed(_ error: UnityAdsInitializationError, withMessage message: String) {
-		NSLog("!-  \(TAG) | UAds: initializationFailed: \(error) | withMessage: \(message)")
-	}
-}
-
-// For Interstitial display ads & Rewarded video ads
-extension ADBanner: UnityAdsLoadDelegate {
-	public func unityAdsAdLoaded(_ placementId: String) {
-		NSLog("<-- \(TAG) | UAds: unityAdsAdLoaded: \(placementId)")
-	}
-	
-	public func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
-		NSLog("!-- \(TAG) | UAds: unityAdsAdFailed: \(placementId) | error: \(error) | withMessage: \(message)")
-	}
-}
-
-// For Interstitial display ads & Rewarded video ads
-extension ADBanner: UnityAdsShowDelegate {
-	public func unityAdsShowComplete(_ placementId: String, withFinish state: UnityAdsShowCompletionState) {
-		NSLog("--  \(TAG) | UAds: unityAdsShowComplete: \(placementId) | withFinish: \(state)")
-	}
-	
-	public func unityAdsShowFailed(_ placementId: String, withError error: UnityAdsShowError, withMessage message: String) {
-		NSLog("!-  \(TAG) | UAds: unityAdsShowFailed: \(placementId) | error: \(error) | withMessage: \(message)")
-	}
-	
-	public func unityAdsShowStart(_ placementId: String) {
-		NSLog("--  \(TAG) | UAds: unityAdsShowStart: \(placementId)")
-	}
-	
-	public func unityAdsShowClick(_ placementId: String) {
-		NSLog("--  \(TAG) | UAds: unityAdsShowClick: \(placementId)")
-	}
-}
-
 // For Banner ads
 extension ADBanner: UADSBannerViewDelegate {
 	public func bannerViewDidLoad(_ bannerView: UADSBannerView) {
-		NSLog("<-- \(TAG) | UAds: bannerViewDidLoad: \(bannerView.placementId)")
+		print("<-- \(TAG) | UAds: bannerViewDidLoad: \(bannerView.placementId)")
 		
 		uAdLoaded = true
 		show(adBanner: bannerView)
@@ -323,7 +271,7 @@ extension ADBanner: UADSBannerViewDelegate {
 	}
 	
 	public func bannerViewDidLeaveApplication(_ bannerView: UADSBannerView) {
-		NSLog("--  \(TAG) | UAds: bannerViewDidLeaveApplication: \(bannerView.placementId)")
+		print("--  \(TAG) | UAds: bannerViewDidLeaveApplication: \(bannerView.placementId)")
 	}
 	
 	public func bannerViewDidError(_ bannerView: UADSBannerView, error: UADSBannerError) {

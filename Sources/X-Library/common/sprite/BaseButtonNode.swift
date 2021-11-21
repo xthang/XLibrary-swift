@@ -21,6 +21,7 @@ public protocol ButtonResponder {
 /// The complete set of button identifiers supported in the app.
 public enum ButtonIdentifier: String {
 	case close = "Close"
+	case DEV = "DEV"
 	case home = "Home"
 	case about = "About"
 	case play = "Play"
@@ -28,6 +29,7 @@ public enum ButtonIdentifier: String {
 	case pause = "Pause"
 	case resume = "Resume"
 	case replay = "Replay"
+	case back = "Back"
 	case hint = "Hint"
 	case settings = "Settings"
 	case sound = "Sound"
@@ -163,6 +165,14 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		
 		// Enable user interaction on the button node to detect tap and click events.
 		isUserInteractionEnabled = true
+		
+		switch buttonIdentifier {
+			case .DEV:
+#if !DEBUG
+				isHidden = true
+#endif
+			default: break
+		}
 	}
 	
 	open override func copy(with zone: NSZone? = nil) -> Any {
@@ -182,7 +192,7 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 			
 			// Forward the button press event through to the responder.
 			switch buttonIdentifier! {
-				case .close, .home, .play, .cancel, .pause, .resume, .replay, .hint, .share:
+				case .close, .home, .play, .cancel, .pause, .resume, .replay, .back, .hint, .share:
 					responder.buttonTriggered(self)
 				case .sound:
 					isSelected = !isSelected
@@ -190,7 +200,7 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 					labelNode?.text = title
 					UserDefaults.standard.set(isSelected, forKey: CommonConfig.Settings.sound)
 					NotificationCenter.default.post(name: .sound, object: isSelected)
-				case .about, .settings, .rate, .gameCenter, .leaderboards, .ads:
+				case .DEV, .about, .settings, .rate, .gameCenter, .leaderboards, .ads:
 					fatalError("\(TAG) | Unsupported buttonNode with id '\(buttonIdentifier.rawValue)'")
 			}
 		}

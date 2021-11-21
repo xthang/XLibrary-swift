@@ -43,13 +43,15 @@ public struct AppConfig {
 		
 		_ = GameCenter.LeaderBoard.all
 		
-		_ = GADUnit.main
+		_ = GADUnit.banner
+		_ = GADUnit.interstitial
 		gAdTestDevices.append(GADSimulatorID)
 		
 		_ = unityAppID
 		_ = unityGameID
 		_ = unityAdEnabled
-		_ = UnityAdUnit.main
+		_ = UnityAdUnit.banner
+		_ = UnityAdUnit.interstitial
 	}
 	
 	public struct GameCenter {
@@ -69,12 +71,14 @@ public struct AppConfig {
 	struct GADUnit {
 		static let dict1 = nsDictionary["GADUnits"] as! NSDictionary
 		
-		static var main: String = dict1["Main"] as! String
+		static var banner: String = dict1["Banner"] as! String
+		static var interstitial: String = dict1["Interstitial"] as! String
 	}
 	
 	struct UnityAdUnit {
 		static let dict1 = nsDictionary["UnityAdUnits"] as! NSDictionary
 		
-		static var main: String = dict1["Main"] as! String
+		static var banner: String = dict1["Banner"] as! String
+		static var interstitial: String = dict1["Interstitial"] as! String
 	}
 }

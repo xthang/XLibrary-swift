@@ -29,9 +29,10 @@ public struct Helper {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
 	public static var isFirstRun: Bool {
-		let x = UserDefaults.standard.object(forKey: "is_first_run") as? Bool ?? true
+		return UserDefaults.standard.object(forKey: "is_first_run") as? Bool ?? true
+	}
+	public static func setNotFirstRun() {
 		UserDefaults.standard.set(false, forKey: "is_first_run")
-		return x
 	}
 	public static var adsRemoved: Bool {
 		return UserDefaults.standard.stringArray(forKey: CommonConfig.Keys.purchased)?.contains(AdsStore.shared.adsRemovalID) ?? false

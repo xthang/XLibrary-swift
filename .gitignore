@@ -101,5 +101,6 @@ libs/GoogleUtilities.xcframework
 libs/GoogleAppMeasurement.xcframework
 libs/UserMessagingPlatform.xcframework
 libs/GoogleMobileAds.xcframework
+libs/GoogleAppMeasurementIdentitySupport.xcframework
 
 libs/UnityAds.xcframework

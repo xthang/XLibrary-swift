@@ -1,8 +1,5 @@
 //
-//  AppDelegate.swift
-//  Numbers
-//
-//  Created by Thang Nguyen on 10/15/21.
+//  Created by Thang Nguyen on 6/22/21.
 //
 
 import UIKit
@@ -69,7 +66,7 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		//		UIButton.appearance().titleLabel?.font = UIFont(name: AppConfig.defaultFont, size: UIFont.labelFontSize)
 		//		UITextView.appearance().font = UIFont(name: AppConfig.defaultFont, size: UIFont.labelFontSize)
 		
-		ADBanner.initiate()
+		AdManager.initiate(TAG)
 		
 		// Setup firebase
 		//		FirebaseApp.configure()
@@ -142,10 +139,8 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		NSLog("\(TAG) -- applicationDidBecomeActive: \(application)")
 	}
 	
-	public func applicationWillTerminate(_ application: UIApplication) {
+	open func applicationWillTerminate(_ application: UIApplication) {
 		NSLog("\(TAG) -- applicationWillTerminate: \(application)")
-		
-		SKPaymentQueue.default().remove(Payment.shared)
 		
 		EOSHelper.releasePlatform()
 		// Shutdown and cleanup EOS SDK, this also releases any created platforms
@@ -189,7 +184,7 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		completionHandler(UIBackgroundFetchResult.newData)
 	}
 	
-	public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+	open func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
 		
 		// Determine who sent the URL.
 		let sendingAppID = options[.sourceApplication]
