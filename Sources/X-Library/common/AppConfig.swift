@@ -17,8 +17,8 @@ public struct AppConfig {
 	
 	static let keychainAccessGroup: String = nsDictionary["KeychainAccessGroup"] as! String
 	static let keychainIdService: String = nsDictionary["KeychainIdService"] as! String
-	static let keychainDeviceIdKey: String = nsDictionary["KeychainDeviceIdKey"] as! String
-	static let keychainXUserIdKey: String = nsDictionary["KeychainXUserIdKey"] as! String
+	public static let keychainDeviceIdKey: String = nsDictionary["KeychainDeviceIdKey"] as! String
+	public static let keychainXUserIdKey: String = nsDictionary["KeychainXUserIdKey"] as! String
 	
 	static var gAdTestDevices: [ String ] = (nsDictionary["GADTestDevices"] as! Array<Dictionary<String, String>>).map({ item in
 		item["id"]!

@@ -2,6 +2,7 @@ import UIKit
 import SpriteKit
 import GameKit
 import AuthenticationServices
+import StoreKit
 
 import GoogleMobileAds
 
@@ -258,6 +259,17 @@ extension ASAuthorizationAppleIDProvider.CredentialState {
 			case .transferred: return .transferred
 			default: return .undefined
 				
+		}
+	}
+}
+
+@available(iOS 10.3, *)
+extension SKStoreReviewController {
+	public static func requestReviewInCurrentScene(_ tag: String) {
+		if #available(iOS 14.0, *), let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+			requestReview(in: scene)
+		} else {
+			requestReview()
 		}
 	}
 }

@@ -127,7 +127,7 @@ public struct KeychainItem {
 		return query
 	}
 	
-	static func getUserIdentifier(_ tag: String, _ account: String) throws -> String? {
+	public static func getUserIdentifier(_ tag: String, _ account: String) throws -> String? {
 		do {
 			let storedIdentifier = try KeychainItem(service: AppConfig.keychainIdService, account: account, accessGroup: AppConfig.keychainAccessGroup).readItem()
 			return storedIdentifier
@@ -144,7 +144,7 @@ public struct KeychainItem {
 		try KeychainItem(service: AppConfig.keychainIdService, account: account, accessGroup: AppConfig.keychainAccessGroup).saveItem(password)
 	}
 	
-	static func deleteUserIdentifierFromKeychain(_ account: String) throws {
+	public static func deleteUserIdentifierFromKeychain(_ account: String) throws {
 		try KeychainItem(service: AppConfig.keychainIdService, account: account, accessGroup: AppConfig.keychainAccessGroup).deleteItem()
 	}
 	
