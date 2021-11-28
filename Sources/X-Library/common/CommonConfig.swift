@@ -26,7 +26,11 @@ public struct CommonConfig {
 	}
 	
 	public struct Keys {
+		public static let isFirstRun = "is_first_run"
 		public static let purchased = "purchased"
+		public static let gameLevel = "gameLevel"
+		public static let hintCount = "hint-count"
+		public static let lastHintRewardingTime = "lastHintRewardingTime"
 	}
 }
 

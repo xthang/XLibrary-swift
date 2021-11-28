@@ -36,7 +36,7 @@ public class PopupAlert: PopupView {
 		return alert
 	}
 	
-	public func addAction(title: String?, style: UIAlertAction.Style, handler: (() -> Void)?) {
+	public func addAction(title: String?, style: UIAlertAction.Style, handler: (() -> Void)? = nil) {
 		let btn = buttonType.init()
 		// btn.soundEnabled = false
 		btn.setTitle(title, for: .normal)

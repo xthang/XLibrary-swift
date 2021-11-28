@@ -18,6 +18,13 @@ extension Date {
 	public static func - (lhs: Date, rhs: Date) -> TimeInterval {
 		return lhs.timeIntervalSinceReferenceDate - rhs.timeIntervalSinceReferenceDate
 	}
+	
+	public func removeTimeStamp(_ tag: String) -> Date {
+		guard let date = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month, .day], from: self)) else {
+			fatalError("!-  [\(tag)] Failed to strip time from Date object: \(self)")
+		}
+		return date
+	}
 }
 extension Notification.Name {
 	

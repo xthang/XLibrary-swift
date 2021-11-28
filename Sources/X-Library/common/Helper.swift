@@ -29,13 +29,24 @@ public struct Helper {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
 	public static var isFirstRun: Bool {
-		return UserDefaults.standard.object(forKey: "is_first_run") as? Bool ?? true
+		return UserDefaults.standard.object(forKey: CommonConfig.Keys.isFirstRun) as? Bool ?? true
 	}
 	public static func setNotFirstRun() {
-		UserDefaults.standard.set(false, forKey: "is_first_run")
+		UserDefaults.standard.set(false, forKey: CommonConfig.Keys.isFirstRun)
 	}
 	public static var adsRemoved: Bool {
 		return UserDefaults.standard.stringArray(forKey: CommonConfig.Keys.purchased)?.contains(AdsStore.shared.adsRemovalID) ?? false
+	}
+	public static func addHints(_ tag: String, _ h: Int) {
+		let hintCount = UserDefaults.standard.integer(forKey: CommonConfig.Keys.hintCount)
+		UserDefaults.standard.set(hintCount + h, forKey: CommonConfig.Keys.hintCount)
+	}
+	public static var lastHintRewardingTime: Date? {
+		return UserDefaults.standard.object(forKey: CommonConfig.Keys.lastHintRewardingTime) as? Date
+	}
+	public static func rewardDailyHint(_ tag: String, _ h: Int) {
+		addHints("rewardDailyHint|\(tag)", h)
+		UserDefaults.standard.set(Date(), forKey: CommonConfig.Keys.lastHintRewardingTime)
 	}
 	
 	public static func buildAppInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
