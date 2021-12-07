@@ -8,7 +8,7 @@ open class OverlayView: UIView {
 	
 	private let TAG = "OV"
 	
-	@IBOutlet public var contentView: UIView!
+	@IBOutlet public var contentView: PopupWindow?
 	
 	var dismissHandler: ((_ isButton: Bool) -> Void)?
 	
@@ -61,7 +61,7 @@ open class OverlayView: UIView {
 		guard let touch = touches.first else { return }
 		let location = touch.location(in: self)
 		// if touch.view != popupWindow {	// not work if view contain subview(s)
-		if contentView != nil && !contentView.frame.contains(location) {
+		if contentView != nil && !contentView!.frame.contains(location) {
 			dismissView(nil)
 		}
 	}
@@ -75,11 +75,11 @@ open class OverlayView: UIView {
 		self.dismissHandler = handler
 	}
 	
-	@IBAction public func dismissView(_ sender: UIButton?) {
+	@IBAction public func dismissView(_ sender: UIControl?) {
 		dismissView(sender, completion: nil)
 	}
 	
-	@objc public func dismissView(_ sender: UIButton?, completion: (() -> Void)? = nil) {
+	@objc public func dismissView(_ sender: UIControl?, completion: (() -> Void)? = nil) {
 		UIView.animate(withDuration: 0.25,
 					   delay: 0,
 					   options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],

@@ -7,14 +7,16 @@ import AVFoundation
 
 open class PopupView: OverlayView {
 	
-	private let TAG = "PopupView"
+	private let TAG = "\(PopupView.self)"
+	
+	@IBOutlet internal var closeBtn: BaseSceneButton?
 	
 	
 	open override func willMove(toSuperview newSuperview: UIView?) {
 		guard newSuperview != nil else { return }
 		
 		// alpha = 0
-		contentView.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
+		contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
 	}
 	
 	open override func didMoveToSuperview() {
@@ -35,18 +37,18 @@ open class PopupView: OverlayView {
 					   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
 					   animations: ({ [weak self] in
 			// self?.alpha = 1
-			self?.contentView.transform = CGAffineTransform.identity
+			self?.contentView!.transform = CGAffineTransform.identity
 		}), completion: nil)
 	}
 	
-	@objc public override func dismissView(_ sender: UIButton?, completion: (() -> Void)? = nil) {
+	@objc public override func dismissView(_ sender: UIControl?, completion: (() -> Void)? = nil) {
 		if Helper.soundOn { Singletons.instance.whooshSound?.play() }
 		UIView.animate(withDuration: 0.15,
 					   delay: 0,
 					   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
 					   animations: ({ [weak self] in
 			self?.alpha = 0
-			self?.contentView.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
+			self?.contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
 		})) { [weak self] _ in
 			self?.removeFromSuperview()
 			self?.dismissHandler?(sender != nil)

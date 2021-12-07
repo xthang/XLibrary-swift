@@ -35,6 +35,7 @@ public enum ButtonIdentifier: String {
 	case sound = "Sound"
 	case gameCenter = "GameCenter"
 	case leaderboards = "Leaderboards"
+	case achievements = "Achievements"
 	case rate = "Rate"
 	case share = "Share"
 	case ads = "Ads"
@@ -114,7 +115,7 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 	 button is pressed on indirect input devices such as game controllers
 	 and keyboards.
 	 */
-	var isFocused = false {
+	public var isFocused = false {
 		didSet {
 			if isFocused {
 				run(SKAction.scale(to: 1.08, duration: 0.20))
@@ -125,15 +126,20 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 			} else {
 				run(SKAction.scale(to: 1.0, duration: 0.20))
 				
-				focusRing?.isHidden = true
+				focusRing?.run(SKAction.sequence([
+					SKAction.fadeOut(withDuration: 0.5),
+					SKAction.hide()
+				]))
 			}
 		}
 	}
 	
+	public lazy var imgNode = self.childNode(withName: "img") as? SKSpriteNode
+	
 	public lazy var labelNode = self.childNode(withName: "labelNode") as? SKLabelNode
 	
 	/// A node to indicate when a button has the input focus.
-	lazy var focusRing: SKNode? = self.childNode(withName: "focusRing")
+	public lazy var focusRing = self.childNode(withName: "focusRing") as? SKSpriteNode
 	
 	// MARK: Initializers
 	
@@ -200,7 +206,7 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 					labelNode?.text = title
 					UserDefaults.standard.set(isSelected, forKey: CommonConfig.Settings.sound)
 					NotificationCenter.default.post(name: .sound, object: isSelected)
-				case .DEV, .about, .settings, .rate, .gameCenter, .leaderboards, .ads:
+				case .DEV, .about, .settings, .rate, .gameCenter, .leaderboards, .achievements, .ads:
 					fatalError("\(TAG) | Unsupported buttonNode with id '\(buttonIdentifier.rawValue)'")
 			}
 		}

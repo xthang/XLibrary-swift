@@ -61,6 +61,8 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		
 		//application.registerForRemoteNotifications()
 		
+		Theme.current = .light
+		
 		// Setup font
 		//		UILabel.appearance().font = UIFont(name: AppConfig.defaultFont, size: UIFont.labelFontSize)
 		//		UIButton.appearance().titleLabel?.font = UIFont(name: AppConfig.defaultFont, size: UIFont.labelFontSize)

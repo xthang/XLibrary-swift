@@ -47,6 +47,8 @@ extension Notification.Name {
 	public static let IAPRefunded = Notification.Name("IAP-Refunded")
 	public static let AdsStatusChanged = Notification.Name("AdsStatusChanged")
 	
+	public static let coinChanged = Notification.Name("coinChanged")
+	
 	public static let levelFinished = Notification.Name("levelFinished")
 }
 
@@ -81,13 +83,15 @@ extension UIColor {
 			alpha: alpha)
 	}
 	
-	public static var background = UIColor(red: 26/255, green: 26/255, blue: 26/255, alpha: 1)
-	public static var popupBackground = UIColor.rgb(0xf0f0f0)
-	public static var buttonBackground = UIColor.rgb(0xe5e5e5)
-	public static var buttonHighlightedBackground = UIColor.rgb(0xbababa)
-	public static var buttonDisabledBackground = UIColor.rgb(0xbbbbbb)
+	public static var blue1 = UIColor.rgb(0x63ACE5)
+	public static var blue2 = UIColor.rgb(0x1492FF)
+	public static var blue3 = UIColor.rgb(0x2ab7ca)
+	public static var blue4 = UIColor.rgb(0x6497b1)
 	
 	public static var sky = UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
+	public static var veanee1 = UIColor.rgb(0x63c5da)
+	
+	public static var link = UIColor.rgb(0x007AFF)
 }
 
 extension UIWindow {
@@ -110,8 +114,11 @@ extension UIWindow {
 
 extension UIView {
 	
-	struct Key {
+	private struct Key {
 		static var cornerRadiusRatio = "cornerRadiusRatio"
+		static var shadowColor = "shadowColor"
+		static var shadowRadius = "shadowRadius"
+		static var glowView = "glowView"
 	}
 	
 	//	@IBInspectable public var borderWidth: CGFloat {
@@ -132,9 +139,34 @@ extension UIView {
 		}
 		set {
 			objc_setAssociatedObject(self, &Key.cornerRadiusRatio, newValue, .OBJC_ASSOCIATION_RETAIN)
-			// Make sure that it's between 0.0 and 1.0. If not, restrict it to that range.
-			let normalizedRatio = max(0.0, min(1.0, newValue))
-			layer.cornerRadius = min(frame.width, frame.height) * normalizedRatio
+			updateCorner("set")
+		}
+	}
+	
+	@IBInspectable public var shadowRadius: CGFloat {
+		get {
+			return objc_getAssociatedObject(self, &Key.shadowRadius) as? CGFloat ?? 0
+		}
+		set {
+			objc_setAssociatedObject(self, &Key.shadowRadius, newValue, .OBJC_ASSOCIATION_RETAIN)
+		}
+	}
+	
+	@IBInspectable public var shadowColor: UIColor? {
+		get {
+			return objc_getAssociatedObject(self, &Key.shadowColor) as? UIColor
+		}
+		set {
+			objc_setAssociatedObject(self, &Key.shadowColor, newValue, .OBJC_ASSOCIATION_RETAIN)
+		}
+	}
+	
+	var glowView: UIView? {
+		get {
+			return objc_getAssociatedObject(self, &Key.glowView) as? UIView
+		}
+		set(newGlowView) {
+			objc_setAssociatedObject(self, &Key.glowView, newGlowView!, .OBJC_ASSOCIATION_RETAIN)
 		}
 	}
 	
@@ -169,6 +201,136 @@ extension UIView {
 		return renderer.pngData { rendererContext in
 			layer.render(in: rendererContext.cgContext)
 		}
+	}
+	
+	public func updateCorner(_ tag: String) {
+		// Make sure that it's between 0.0 and 1.0. If not, restrict it to that range.
+		let normalizedRatio = max(0.0, min(1.0, cornerRadiusRatio))
+		layer.cornerRadius = min(frame.width, frame.height) * normalizedRatio
+	}
+	
+	public func dropShadow(_ tag: String) {
+		dropShadow(tag, color: shadowColor, opacity: 0.7, offset: .zero, radius: shadowRadius)
+	}
+	
+	public func dropShadow(_ tag: String, color: UIColor?, opacity: Float?, offset: CGSize?, radius: CGFloat?) {
+		//let shadowLayer: CALayer
+		//if let s = layer.sublayers?.first(where: { $0.name == "shadow" }) {
+		//	shadowLayer = s
+		//} else {
+		//	shadowLayer = CALayer()
+		//	shadowLayer.name = "shadow"
+		//	// shadowLayer.shouldRasterize = true
+		//	// shadowLayer.rasterizationScale = UIScreen.main.scale
+		//
+		//	layer.insertSublayer(shadowLayer, at: 0)
+		//}
+		
+		layer.masksToBounds = false
+		
+		// if use shadowPath -> reset each time in layoutSubviews
+		// layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
+		layer.shadowColor = color?.cgColor
+		if opacity != nil { layer.shadowOpacity = opacity! }
+		if offset != nil { layer.shadowOffset = offset! }
+		if radius != nil { layer.shadowRadius = radius! }
+		
+		// layer.shouldRasterize = true
+		// layer.rasterizationScale = UIScreen.main.scale
+	}
+	
+	public func startGlowingWithColor(color: UIColor, intensity: CGFloat) {
+		self.startGlowingWithColor(color: color, fromIntensity: 0.1, toIntensity: intensity, repeat: true)
+	}
+	
+	public func startGlowingWithColor(color: UIColor, fromIntensity: CGFloat, toIntensity: CGFloat, repeat shouldRepeat: Bool) {
+		// If we're already glowing, don't bother
+		if self.glowView != nil {
+			return
+		}
+		
+		// The glow image is taken from the current view's appearance.
+		// As a side effect, if the view's content, size or shape changes,
+		// the glow won't update.
+		var image: UIImage
+		
+		UIGraphicsBeginImageContextWithOptions(self.bounds.size, false, UIScreen.main.scale)
+		do {
+			self.layer.render(in: UIGraphicsGetCurrentContext()!)
+			
+			let path = UIBezierPath(rect: CGRect(x: 0, y: 0, width: self.bounds.size.width, height: self.bounds.size.height))
+			
+			color.setFill()
+			
+			path.fill(with: .sourceAtop, alpha: 1.0)
+			
+			image = UIGraphicsGetImageFromCurrentImageContext()!
+		}
+		
+		UIGraphicsEndImageContext()
+		
+		// Make the glowing view itself, and position it at the same
+		// point as ourself. Overlay it over ourself.
+		let glowView = UIImageView(image: image)
+		glowView.center = self.center
+		self.superview!.insertSubview(glowView, aboveSubview:self)
+		
+		// We don't want to show the image, but rather a shadow created by
+		// Core Animation. By setting the shadow to white and the shadow radius to
+		// something large, we get a pleasing glow.
+		glowView.alpha = 0
+		glowView.layer.shadowColor = color.cgColor
+		glowView.layer.shadowOffset = .zero
+		glowView.layer.shadowRadius = 10
+		glowView.layer.shadowOpacity = 1.0
+		
+		// Create an animation that slowly fades the glow view in and out forever.
+		let animation = CABasicAnimation(keyPath: "opacity")
+		animation.fromValue = fromIntensity
+		animation.toValue = toIntensity
+		animation.repeatCount = shouldRepeat ? .infinity : 0 // HUGE_VAL = .infinity / Thanks http://stackoverflow.com/questions/7082578/cabasicanimation-unlimited-repeat-without-huge-valf
+		animation.duration = 1.0
+		animation.autoreverses = true
+		animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+		
+		glowView.layer.add(animation, forKey: "pulse")
+		
+		// Finally, keep a reference to this around so it can be removed later
+		self.glowView = glowView
+	}
+	
+	public func glowOnceAtLocation(point: CGPoint, inView view: UIView) {
+		self.startGlowingWithColor(color: .white, fromIntensity: 0, toIntensity: 0.6, repeat: false)
+		
+		self.glowView!.center = point
+		view.addSubview(self.glowView!)
+		
+		let delay: Double = 2 * Double(Int64(NSEC_PER_SEC))
+		DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
+			self.stopGlowing()
+		}
+	}
+	
+	public func glowOnce() {
+		self.startGlowing()
+		
+		let delay: Double = 2 * Double(Int64(NSEC_PER_SEC))
+		DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + delay) {
+			self.stopGlowing()
+		}
+		
+	}
+	
+	// Create a pulsing, glowing view based on this one.
+	public func startGlowing() {
+		self.startGlowingWithColor(color: UIColor.white, intensity: 0.6);
+	}
+	
+	// Stop glowing by removing the glowing view from the superview
+	// and removing the association between it and this object.
+	public func stopGlowing() {
+		self.glowView!.removeFromSuperview()
+		self.glowView = nil
 	}
 }
 
@@ -229,6 +391,12 @@ extension UIImage {
 		UIGraphicsEndImageContext()
 		
 		return newImage
+	}
+	
+	public func resized(to size: CGSize) -> UIImage {
+		return UIGraphicsImageRenderer(size: size).image { _ in
+			draw(in: CGRect(origin: .zero, size: size))
+		}
 	}
 }
 

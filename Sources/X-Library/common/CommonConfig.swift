@@ -2,13 +2,14 @@
 //  Created by Thang Nguyen on 6/27/21.
 //
 
-import GoogleMobileAds
+import Foundation
 
 public struct CommonConfig {
 	
 	public static let gcmMessageIDKey: String = "gcm.message_id"
 	public static let scoresKey = "scores"
-	public static let font = UIFont(name: "Chalkboard SE", size: 19)
+	
+	public static let fontName = "Chalkboard SE"
 	
 	public static let dateFormat = "yyyy-MM-dd HH:mm:ss"
 	public static let dateFormatter: DateFormatter = {
@@ -29,8 +30,8 @@ public struct CommonConfig {
 		public static let isFirstRun = "is_first_run"
 		public static let purchased = "purchased"
 		public static let gameLevel = "gameLevel"
-		public static let hintCount = "hint-count"
-		public static let lastHintRewardingTime = "lastHintRewardingTime"
+		public static let coinCount = "coin-count"
+		public static let lastDailyRewardingTime = "lastDailyRewardingTime"
 	}
 }
 

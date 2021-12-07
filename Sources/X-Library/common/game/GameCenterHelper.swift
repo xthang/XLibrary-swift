@@ -5,7 +5,8 @@
 import GameKit
 
 public struct GameCenterHelper {
-	static let TAG = "🕹"
+	
+	fileprivate static let TAG = "🕹"
 	
 	public static func authenticateLocalPlayer(_ fromView: UIViewController) {
 		GKLocalPlayer.local.authenticateHandler = { viewController, error in
@@ -30,7 +31,21 @@ public struct GameCenterHelper {
 		}
 	}
 	
-	public static func showGameCenterLeaderBoard() {
+	public static func showGameCenter(_ tag: String) {
+		// NSLog("--  \(TAG) | showGameCenter: \(GKLocalPlayer.local.isAuthenticated)")
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
+			
+			let gcVC = GKGameCenterViewController()
+			gcVC.gameCenterDelegate = xGKGameCenterControllerDelegate.instance
+			gcVC.viewState = .default
+			topController.present(gcVC, animated: true)
+		}
+	}
+	
+	public static func showGameCenterLeaderBoard(_ tag: String) {
 		// NSLog("--  \(TAG) | showGameCenterLeaderBoard: \(GKLocalPlayer.local.isAuthenticated)")
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {

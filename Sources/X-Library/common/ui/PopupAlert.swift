@@ -6,29 +6,50 @@ import UIKit
 
 public class PopupAlert: PopupView {
 	
-	public enum UIType {
-		case type1
-		case type2
+	public enum Style {
+		case style1
+		case style2
 	}
-	public enum ButtonType {
-		case type1
-		case type2
+	public enum ButtonStyle {
+		case style1
+		case style2
+		case style3
 	}
+	
+	private var font = UIFont(name: CommonConfig.fontName, size: 19)!
 	
 	@IBOutlet var title: UILabel!
 	@IBOutlet var message: UILabel!
 	@IBOutlet public var buttons: UIStackView!
 	
-	var buttonType: XButton.Type = XButton.self
+	private var buttonType: IXButton.Type = XButton.self
 	
-	public static func initiate(type: UIType, title: String?, message: String?, preferredStyle: UIAlertController.Style, buttonType: ButtonType? = nil) -> PopupAlert {
-		let alert = UINib(nibName: type == .type1 ? "PopupAlert" : "PopupAlert2", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
-		alert.title.text = title
-		alert.message.text = message
+	public static func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonStyle: ButtonStyle? = nil, showCloseButton: Bool = false) -> PopupAlert {
+		let alert = UINib(nibName: style == .style1 ? "PopupAlert" : "PopupAlert2", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		
-		switch buttonType {
-			case .type2:
-				alert.buttonType = CustomButton.self
+		if let closeIcon = UIImage(named: "close") {
+			alert.closeBtn!.setImage(closeIcon, for: .normal)
+		}
+		if !showCloseButton {
+			alert.closeBtn!.removeFromSuperview()
+		}
+		
+		if title == nil { alert.title.isHidden = true }
+		else { alert.title.text = title }
+		if message == nil { alert.message.isHidden = true }
+		else { alert.message.text = message }
+		
+		if font != nil {
+			alert.font = font!
+			alert.title.font = font
+			alert.message.font = font
+		}
+		
+		switch buttonStyle {
+			case .style2:
+				alert.buttonType = ImageButton.self
+			case .style3:
+				alert.buttonType = XButton2.self
 			default:
 				break
 		}
@@ -36,21 +57,35 @@ public class PopupAlert: PopupView {
 		return alert
 	}
 	
-	public func addAction(title: String?, style: UIAlertAction.Style, handler: (() -> Void)? = nil) {
+	public func addAction(title: String?, style: ButtonStyle? = nil, icon: UIImage? = nil, cornerRadiusRatio: CGFloat? = nil, shadowRadius: CGFloat? = nil, handler: (() -> Void)? = nil) -> IXButton {
+		let buttonType: IXButton.Type
+		switch style {
+			case .style1:
+				buttonType = XButton.self
+			case .style2:
+				buttonType = ImageButton.self
+			case .style3:
+				buttonType = XButton2.self
+			default:
+				buttonType = self.buttonType
+		}
+		
 		let btn = buttonType.init()
+		
 		// btn.soundEnabled = false
 		btn.setTitle(title, for: .normal)
-		btn.titleLabel?.font = CommonConfig.font
-		btn.setTitleColor(.darkGray, for: .normal)
-		if buttonType == CustomButton.self {
+		btn.titleLabel?.font = font
+		if btn is ImageButton {
 			btn.setBackgroundImage(#imageLiteral(resourceName: "button"), for: .normal)
 			btn.setBackgroundImage(#imageLiteral(resourceName: "button-pressed"), for: .highlighted)
-		} else {
-			btn.cornerRadiusRatio = 0.1
-			btn.backgroundColor = .buttonBackground
-			btn.highlightedColor = .buttonHighlightedBackground
-			btn.diabledColor = .buttonDisabledBackground
 		}
+		
+		if btn is XButton2 {
+			btn.setImage(icon, for: .normal)
+		}
+		
+		if cornerRadiusRatio != nil { btn.cornerRadiusRatio = cornerRadiusRatio! }
+		if shadowRadius != nil { btn.shadowRadius = shadowRadius! }
 		
 		if #available(iOS 14.0, *) {
 			btn.addAction(UIAction { [weak self, weak btn] _ in
@@ -85,5 +120,7 @@ public class PopupAlert: PopupView {
 		NSLayoutConstraint(item: btn, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 0, constant: 50).isActive = true
 		
 		buttons.addArrangedSubview(btn)
+		
+		return btn
 	}
 }
