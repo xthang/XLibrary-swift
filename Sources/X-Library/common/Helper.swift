@@ -13,6 +13,12 @@ public struct Helper {
 	
 	private static let TAG = "🧰"
 	
+	public static var appVersion: String {
+		return Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+	}
+	public static var appDataVersion: String? {
+		return UserDefaults.standard.object(forKey: CommonConfig.Keys.appDataVersion) as? String
+	}
 	public static var soundOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.sound) as? Bool ?? true
 	}
@@ -44,13 +50,13 @@ public struct Helper {
 		let before = getCoins("addCoins|\(tag)")
 		UserDefaults.standard.set(before + count, forKey: CommonConfig.Keys.coinCount)
 		
-		NotificationCenter.default.post(name: .coinChanged, object: before + count)
+		NotificationCenter.default.post(name: .coinChanged, object: before + count, userInfo: ["tag": tag])
 	}
 	public static func decrementCoins(_ tag: String, _ count: Int) {
 		let before = getCoins("decrementCoins|\(tag)")
 		UserDefaults.standard.set(before - count, forKey: CommonConfig.Keys.coinCount)
 		
-		NotificationCenter.default.post(name: .coinChanged, object: before - count)
+		NotificationCenter.default.post(name: .coinChanged, object: before - count, userInfo: ["tag": tag])
 	}
 	public static var lastDailyRewardingTime: Date? {
 		return UserDefaults.standard.object(forKey: CommonConfig.Keys.lastDailyRewardingTime) as? Date
@@ -613,11 +619,11 @@ public struct Helper {
 				topController = presentedViewController
 			}
 			
-			let buttonStyle: PopupAlert.ButtonStyle = style == .style1 ? .style1 : .style2
+			let buttonLayout: PopupAlert.ButtonLayout = style == .style1 ? .style1 : .style2
 			
-			let alert = PopupAlert.initiate(style: style, title: title, message: NSLocalizedString("You need to open Settings to change this", comment: ""), buttonStyle: buttonStyle)
+			let alert = PopupAlert.initiate(style: style, title: title, message: NSLocalizedString("You need to open Settings to change this", comment: ""), buttonLayout: buttonLayout)
 			
-			let okBtn = alert.addAction(title: NSLocalizedString("Open", comment: "")) {
+			_ = alert.addAction(title: NSLocalizedString("Open", comment: ""), style: .primary1) {
 				guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
 					return
 				}
@@ -632,7 +638,6 @@ public struct Helper {
 					}
 				}
 			}
-			okBtn.style = .primary1
 			_ = alert.addAction(title: NSLocalizedString("Cancel", comment: ""))
 			
 			topController.view.addSubview(alert)
@@ -695,16 +700,15 @@ public struct Helper {
 			}
 			let view = topController.view!
 			
-			let buttonStyle: PopupAlert.ButtonStyle = style == .style1 ? .style1 : .style2
+			let buttonLayout: PopupAlert.ButtonLayout = style == .style1 ? .style1 : .style2
 			
 			if let url = URL(string: "itms-apps://itunes.apple.com/app/id\(AppConfig.appleID)?action=write-review") {
 				if confirm {
-					let alert = PopupAlert.initiate(style: style, title: "⭐️", message: NSLocalizedString("Rate us on AppStore", comment: ""), buttonStyle: buttonStyle)
+					let alert = PopupAlert.initiate(style: style, title: "⭐️", message: NSLocalizedString("Rate us on AppStore", comment: ""), buttonLayout: buttonLayout)
 					
-					let okBtn = alert.addAction(title: "OK", style: nil) {
+					_ = alert.addAction(title: "OK", style: .primary1) {
 						openAppRating("showAppRatingDialog|\(tag)", url: url, view: view, style: style)
 					}
-					okBtn.style = .primary1
 					_ = alert.addAction(title: "Cancel")
 					view.addSubview(alert)
 				} else {
@@ -712,7 +716,7 @@ public struct Helper {
 				}
 			} else {
 				NSLog("!-  \(TAG) | rateApp [\(tag)]: AppStore url not available: \(AppConfig.appleID)")
-				let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), buttonStyle: buttonStyle)
+				let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), buttonLayout: buttonLayout)
 				
 				_ = alert.addAction(title: NSLocalizedString("OK", comment: ""))
 				view.addSubview(alert)
@@ -721,12 +725,12 @@ public struct Helper {
 	}
 	
 	private static func openAppRating(_ tag: String, url: URL, view: UIView, style: PopupAlert.Style) {
-		let buttonStyle: PopupAlert.ButtonStyle = style == .style1 ? .style1 : .style2
+		let buttonLayout: PopupAlert.ButtonLayout = style == .style1 ? .style1 : .style2
 		
 		if #available(iOS 10, *) {
 			UIApplication.shared.open(url, options: [:], completionHandler: { [weak view] success in
 				if !success {
-					let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), buttonStyle: buttonStyle)
+					let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Something is wrong", comment: ""), message: NSLocalizedString("Failed to open AppStore page", comment: ""), buttonLayout: buttonLayout)
 					_ = alert.addAction(title: NSLocalizedString("OK", comment: ""))
 					view?.addSubview(alert)
 				}
@@ -750,26 +754,36 @@ public struct Helper {
 				msg = NSLocalizedString("[Ads removal is not available. Please try again later!]", comment: "")
 			}
 			
-			let buttonStyle: PopupAlert.ButtonStyle = style == .style1 ? .style1 : .style2
+			let buttonLayout: PopupAlert.ButtonLayout = style == .style1 ? .style1 : .style2
 			
-			let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Ads removal", comment: ""), message: msg, buttonStyle: buttonStyle)
+			let alert = PopupAlert.initiate(style: style, title: NSLocalizedString("Ads removal", comment: ""), message: msg, buttonLayout: buttonLayout)
 			
 			alert.buttons.axis = .vertical
 			
 			if let adsRemoval = AdsStore.shared.adsRemoval {
-				let okBtn = alert.addAction(title: NSLocalizedString("OK", comment: "") + " [\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price)]") {
+				_ = alert.addAction(title: NSLocalizedString("OK", comment: "") + " [\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price)]", style: .primary1) {
 					_ = Payment.purchase(adsRemoval)
 				}
-				okBtn.style = .primary1
 			} else {
 				AdsStore.shared.requestProducts(TAG)
 			}
-			let restoreBtn = alert.addAction(title: NSLocalizedString("RESTORE", comment: "")) {
+			_ = alert.addAction(title: NSLocalizedString("RESTORE", comment: ""), style: .primary1) {
 				Payment.restorePurchases()
 			}
-			restoreBtn.style = .primary1
 			_ = alert.addAction(title: NSLocalizedString("Cancel", comment: ""))
 			view.addSubview(alert)
+		}
+	}
+	
+	public static func showDevView(_ tag: String) {
+		if var topController = UIApplication.shared.keyWindow?.rootViewController {
+			while let presentedViewController = topController.presentedViewController {
+				topController = presentedViewController
+			}
+			let view = topController.view!
+			
+			let devView = UINib(nibName: "DEV", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+			view.addSubview(devView)
 		}
 	}
 	

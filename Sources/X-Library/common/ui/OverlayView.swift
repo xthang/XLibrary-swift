@@ -10,6 +10,8 @@ open class OverlayView: UIView {
 	
 	@IBOutlet public var contentView: PopupWindow?
 	
+	@IBInspectable public var dismissOutside = true
+	
 	var dismissHandler: ((_ isButton: Bool) -> Void)?
 	
 	
@@ -61,7 +63,7 @@ open class OverlayView: UIView {
 		guard let touch = touches.first else { return }
 		let location = touch.location(in: self)
 		// if touch.view != popupWindow {	// not work if view contain subview(s)
-		if contentView != nil && !contentView!.frame.contains(location) {
+		if dismissOutside && contentView != nil && !contentView!.frame.contains(location) {
 			dismissView(nil)
 		}
 	}

@@ -10,7 +10,7 @@ public class PopupAlert: PopupView {
 		case style1
 		case style2
 	}
-	public enum ButtonStyle {
+	public enum ButtonLayout {
 		case style1
 		case style2
 		case style3
@@ -24,7 +24,7 @@ public class PopupAlert: PopupView {
 	
 	private var buttonType: IXButton.Type = XButton.self
 	
-	public static func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonStyle: ButtonStyle? = nil, showCloseButton: Bool = false) -> PopupAlert {
+	public static func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
 		let alert = UINib(nibName: style == .style1 ? "PopupAlert" : "PopupAlert2", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		
 		if let closeIcon = UIImage(named: "close") {
@@ -45,7 +45,7 @@ public class PopupAlert: PopupView {
 			alert.message.font = font
 		}
 		
-		switch buttonStyle {
+		switch buttonLayout {
 			case .style2:
 				alert.buttonType = ImageButton.self
 			case .style3:
@@ -57,9 +57,9 @@ public class PopupAlert: PopupView {
 		return alert
 	}
 	
-	public func addAction(title: String?, style: ButtonStyle? = nil, icon: UIImage? = nil, cornerRadiusRatio: CGFloat? = nil, shadowRadius: CGFloat? = nil, handler: (() -> Void)? = nil) -> IXButton {
+	public func addAction(title: String?, layout: ButtonLayout? = nil, style: ButtonStyle? = nil, icon: UIImage? = nil, cornerRadiusRatio: CGFloat? = nil, shadowRadius: CGFloat? = nil, handler: (() -> Void)? = nil) -> IXButton {
 		let buttonType: IXButton.Type
-		switch style {
+		switch layout {
 			case .style1:
 				buttonType = XButton.self
 			case .style2:
@@ -71,6 +71,7 @@ public class PopupAlert: PopupView {
 		}
 		
 		let btn = buttonType.init()
+		if style != nil { btn.style = style }
 		
 		// btn.soundEnabled = false
 		btn.setTitle(title, for: .normal)

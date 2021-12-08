@@ -46,6 +46,7 @@ open class BaseSceneButton: XButton, IButton {
 #if !DEBUG
 				isHidden = true
 #endif
+				break
 			case .sound, .ads:
 				if #available(iOS 13.0, *) {
 					NotificationCenter.default.addObserver(self, selector: #selector(self.enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
@@ -91,8 +92,7 @@ open class BaseSceneButton: XButton, IButton {
 		
 		switch buttonIdentifier! {
 			case .DEV:
-				let devView = UINib(nibName: "DEV", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
-				rootView.addSubview(devView)
+				Helper.showDevView(TAG)
 			case .close, .home, .play, .cancel, .pause, .resume, .replay:
 				let responder = self.responder
 				

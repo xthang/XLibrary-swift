@@ -177,6 +177,7 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 #if !DEBUG
 				isHidden = true
 #endif
+				break
 			default: break
 		}
 	}

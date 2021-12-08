@@ -8,31 +8,31 @@ public struct GameCenterHelper {
 	
 	fileprivate static let TAG = "🕹"
 	
-	public static func authenticateLocalPlayer(_ fromView: UIViewController) {
+	public static func authenticateLocalPlayer(_ tag: String, _ fromView: UIViewController) {
 		GKLocalPlayer.local.authenticateHandler = { viewController, error in
 			var state : Bool = false
 			
 			if let vc = viewController {
-				NSLog("--  \(TAG) | authen: 1: \(vc)")
+				NSLog("--  \(TAG) | authen [\(tag)]: 1: \(vc)")
 				// fromView.present(vc, animated: true)
 			} else if let err = error {
-				NSLog("!-  \(TAG) | authen: Error: \(err.localizedDescription)")
+				NSLog("!-  \(TAG) | authen [\(tag)]: Error: \(err.localizedDescription)")
 			} else if GKLocalPlayer.local.isAuthenticated {
-				NSLog("--  \(TAG) | authen: OK: \(GKLocalPlayer.local.isAuthenticated)")
+				NSLog("--  \(TAG) | authen [\(tag)]: OK: \(GKLocalPlayer.local.isAuthenticated)")
 				GKLocalPlayer.local.register(xGKLocalPlayerListener())
-				if let bestLocal = ScoreData.getHishest() { submitScore(bestLocal.score) }
+				if let bestLocal = ScoreData.getHishest() { submitScore("authenticateLocalPlayer", bestLocal.score) }
 				state = true
 			} else {
-				NSLog("--  \(TAG) | authen: NotOK: \(GKLocalPlayer.local.isAuthenticated)")
+				NSLog("!-  \(TAG) | authen [\(tag)]: NotOK: \(GKLocalPlayer.local.isAuthenticated)")
 			}
 			
-			NSLog("--  \(TAG) | player: \(GKLocalPlayer.local.playerID) | \(GKLocalPlayer.local)")
+			NSLog("--  \(TAG) | [\(tag)] player: \(GKLocalPlayer.local.playerID) | \(GKLocalPlayer.local)")
 			NotificationCenter.default.post(name: .gcAuthenticationChanged, object: state)
 		}
 	}
 	
 	public static func showGameCenter(_ tag: String) {
-		// NSLog("--  \(TAG) | showGameCenter: \(GKLocalPlayer.local.isAuthenticated)")
+		// NSLog("--  \(TAG) | showGameCenter [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -46,7 +46,7 @@ public struct GameCenterHelper {
 	}
 	
 	public static func showGameCenterLeaderBoard(_ tag: String) {
-		// NSLog("--  \(TAG) | showGameCenterLeaderBoard: \(GKLocalPlayer.local.isAuthenticated)")
+		// NSLog("--  \(TAG) | showGameCenterLeaderBoard [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -60,24 +60,24 @@ public struct GameCenterHelper {
 		}
 	}
 	
-	public static func submitScore(_ score: Int) {
+	public static func submitScore(_ tag: String, _ score: Int) {
 		// Submit score to GC leaderboard
 		let bestScoreInt = GKScore(leaderboardIdentifier: AppConfig.GameCenter.LeaderBoard.all, player: GKLocalPlayer.local)
 		bestScoreInt.value = Int64(score)
 		
 		GKScore.report([bestScoreInt]) { error in
 			if let err = error {
-				NSLog("--> \(TAG) | updateScore (\(score)): error: \(err.localizedDescription)")
+				NSLog("!-> \(TAG) | [\(tag)] updateScore (\(score)): error: \(err.localizedDescription)")
 			} else {
-				NSLog("--> \(TAG) | Best Score (\(score)) submitted to your Leaderboard!")
+				NSLog("--> \(TAG) | [\(tag)] Best Score (\(score)) submitted to your Leaderboard!")
 			}
 		}
 	}
 	
-	public static func loadScores(_ scope: GKLeaderboard.PlayerScope?, finished: @escaping (GKLeaderboard?, [GKScore]?, Error?)->()) {
-		// NSLog("--  \(TAG) | loadScores: \(GKLocalPlayer.local.isAuthenticated)")
+	public static func loadScores(_ tag: String, _ scope: GKLeaderboard.PlayerScope?, finished: @escaping (GKLeaderboard?, [GKScore]?, Error?)->()) {
+		// NSLog("--  \(TAG) | loadScores [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		
-		GameCenterHelper.fetchLeaderboardBestScore { (leaderboard, e) in
+		GameCenterHelper.fetchLeaderboardBestScore("loadScores") { (leaderboard, e) in
 			if e != nil {
 				finished(leaderboard, nil, e)
 			}
@@ -86,37 +86,37 @@ public struct GameCenterHelper {
 			leaderboard?.loadScores { (scores, error) in
 				// check for errors
 				if error != nil {
-					NSLog("!-- \(TAG) | loadScores -- \(error!)")
+					NSLog("!-> \(TAG) | loadScores [\(tag)]: error: \(error!)")
 				}
 				finished(leaderboard, scores, error)
 			}
 		}
 	}
 	
-	static func fetchLeaderboards(finished: @escaping ([GKLeaderboard]?, Error?) -> ()) {
+	static func fetchLeaderboards(_ tag: String, finished: @escaping ([GKLeaderboard]?, Error?) -> ()) {
 		// NSLog("--  \(TAG) | fetchLeaderboard: \(GKLocalPlayer.local.isAuthenticated)")
 		
 		GKLeaderboard.loadLeaderboards { (leaderboards, error) in
 			if error != nil {
-				NSLog("!-- \(TAG) | Fetching leaderboards: ERROR: \(error!)")
+				NSLog("!-> \(TAG) | Fetching leaderboards [\(tag)]: ERROR: \(error!)")
 			}
 			finished(leaderboards, error)
 		}
 	}
 	
-	static func fetchLeaderboardBestScore(finished: @escaping (GKLeaderboard?, Error?) -> ()) {
-		// NSLog("--  \(TAG) | fetchLeaderboard: \(GKLocalPlayer.local.isAuthenticated)")
+	static func fetchLeaderboardBestScore(_ tag: String, finished: @escaping (GKLeaderboard?, Error?) -> ()) {
+		// NSLog("--  \(TAG) | fetchLeaderboard [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		
 		GKLeaderboard.loadLeaderboards { (leaderboards, error) in
 			if error != nil {
-				NSLog("!-- \(TAG) | Fetching leaderboard: ERROR: \(error!)")
+				NSLog("!-> \(TAG) | Fetching leaderboard [\(tag)]: ERROR: \(error!)")
 			}
 			finished(leaderboards?[0], error)
 		}
 	}
 	
 	public static func showGameCenterAchievement(_ tag: String) {
-		// NSLog("--  \(TAG) | showGameCenterAchievement: \(GKLocalPlayer.local.isAuthenticated)")
+		// NSLog("--  \(TAG) | showGameCenterAchievement [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -129,22 +129,22 @@ public struct GameCenterHelper {
 		}
 	}
 	
-	public static func reportAchievement(_ identifier: String) {
+	public static func reportAchievement(_ tag: String, _ identifier: String) {
 		let achievement = GKAchievement(identifier: identifier)
 		achievement.showsCompletionBanner = true
 		achievement.percentComplete = 100
 		
 		GKAchievement.report([achievement]) { error in
 			if let err = error {
-				NSLog("--> \(TAG) | report achievement (\(identifier)): error: \(err.localizedDescription)")
+				NSLog("!-> \(TAG) | [\(tag)] report achievement (\(identifier)): error: \(err.localizedDescription)")
 			} else {
-				NSLog("--> \(TAG) | Achievement (\(identifier)) submitted!")
+				NSLog("--> \(TAG) | [\(tag)] Achievement (\(identifier)) submitted!")
 			}
 		}
 	}
 	
-	public static func presentMatchmaker(_ fromView: UIViewController) {
-		// NSLog("--  \(TAG) | presentMatchmaker: \(GKLocalPlayer.local.isAuthenticated)")
+	public static func presentMatchmaker(_ tag: String, _ fromView: UIViewController) {
+		// NSLog("--  \(TAG) | presentMatchmaker [\(tag)]: \(GKLocalPlayer.local.isAuthenticated)")
 		
 		let request = GKMatchRequest()
 		request.minPlayers = 2
