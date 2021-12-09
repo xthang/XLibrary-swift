@@ -9,50 +9,23 @@ open class PopupView: OverlayView {
 	
 	private let TAG = "\(PopupView.self)"
 	
-	@IBOutlet internal var closeBtn: BaseSceneButton?
+	@IBOutlet public var closeBtn: BaseSceneButton?
 	
 	
-	open override func willMove(toSuperview newSuperview: UIView?) {
-		guard newSuperview != nil else { return }
+	public required init?(coder: NSCoder) {
+		super.init(coder: coder)
 		
-		// alpha = 0
-		contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
+		animationStyle = .scale
+		
+		dismissSoundEnabled = true
 	}
 	
-	open override func didMoveToSuperview() {
-		// NSLog("--  \(TAG) | Popup: didMoveToSuperview: \(hash)")
-		super.didMoveToSuperview()
-		if superview == nil { return }
+	open override func awakeFromNib() {
+		super.awakeFromNib()
 		
-		//if #available(iOS 13.0, *) {
-		//	NotificationCenter.default.addObserver(self, selector: #selector(self.test), name: UIScene.willDeactivateNotification, object: window!.windowScene!)
-		//} else {
-		//	NotificationCenter.default.addObserver(self, selector: #selector(self.test), name: UIApplication.willResignActiveNotification, object: nil)
-		//}
+		if let sr = Theme.current.settings.popupShadowRadius { contentView!.shadowRadius = sr }
 		
-		UIView.animate(withDuration: 0.3,
-					   delay: 0,
-					   usingSpringWithDamping: 0.6,
-					   initialSpringVelocity: 0.5,
-					   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-					   animations: ({ [weak self] in
-			// self?.alpha = 1
-			self?.contentView!.transform = CGAffineTransform.identity
-		}), completion: nil)
-	}
-	
-	@objc public override func dismissView(_ sender: UIControl?, completion: (() -> Void)? = nil) {
-		if Helper.soundOn { Singletons.instance.whooshSound?.play() }
-		UIView.animate(withDuration: 0.15,
-					   delay: 0,
-					   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-					   animations: ({ [weak self] in
-			self?.alpha = 0
-			self?.contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
-		})) { [weak self] _ in
-			self?.removeFromSuperview()
-			self?.dismissHandler?(sender != nil)
-			completion?()
-		}
+		// closeBtn is assigned only after awakeFromNib
+		closeBtn?.soundEnabled = false
 	}
 }

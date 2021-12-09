@@ -8,14 +8,22 @@ open class OverlayView: UIView {
 	
 	private let TAG = "OV"
 	
+	@objc public enum AnimationStyle: Int {
+		case fade
+		case scale
+	}
+	
 	@IBOutlet public var contentView: PopupWindow?
 	
-	@IBInspectable public var dismissOutside = true
+	@IBInspectable public var animationStyle: AnimationStyle = .fade
+	
+	@IBInspectable public var dismissOutside: Bool = true
+	@IBInspectable public var dismissSoundEnabled: Bool = false
 	
 	var dismissHandler: ((_ isButton: Bool) -> Void)?
 	
 	
-	open class func initiate(_ fileName: String) -> OverlayView {
+	open class func initiate(fileName: String) -> OverlayView {
 		return UINib(nibName: fileName, bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! OverlayView
 	}
 	
@@ -26,9 +34,13 @@ open class OverlayView: UIView {
 	}
 	
 	open override func willMove(toSuperview newSuperview: UIView?) {
-		guard let _ = newSuperview else { return }
+		if newSuperview == nil { return }
 		
-		alpha = 0
+		if animationStyle == .scale {
+			contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
+		} else {
+			alpha = 0
+		}
 	}
 	
 	open override func didMoveToSuperview() {
@@ -44,13 +56,31 @@ open class OverlayView: UIView {
 			bottomAnchor.constraint(equalTo: view.bottomAnchor),
 		])
 		
-		UIView.animate(withDuration: 0.3,
-					   delay: 0,
-					   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-					   animations: ({ [weak self] in
-			self?.alpha = 1
-			self?.transform = CGAffineTransform.identity
-		}), completion: nil)
+		if animationStyle == .fade {
+			UIView.animate(withDuration: 0.3,
+						   delay: 0,
+						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+						   animations: ({ [weak self] in
+				self?.alpha = 1
+				self?.transform = CGAffineTransform.identity
+			}), completion: nil)
+		} else {
+			UIView.animate(withDuration: 0.3,
+						   delay: 0,
+						   usingSpringWithDamping: 0.6,
+						   initialSpringVelocity: 0.5,
+						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+						   animations: ({ [weak self] in
+				// self?.alpha = 1
+				self?.contentView!.transform = CGAffineTransform.identity
+			}), completion: nil)
+		}
+		
+		//if #available(iOS 13.0, *) {
+		//	NotificationCenter.default.addObserver(self, selector: #selector(self.test), name: UIScene.willDeactivateNotification, object: window!.windowScene!)
+		//} else {
+		//	NotificationCenter.default.addObserver(self, selector: #selector(self.test), name: UIApplication.willResignActiveNotification, object: nil)
+		//}
 	}
 	
 	//open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -82,15 +112,34 @@ open class OverlayView: UIView {
 	}
 	
 	@objc public func dismissView(_ sender: UIControl?, completion: (() -> Void)? = nil) {
-		UIView.animate(withDuration: 0.25,
-					   delay: 0,
-					   options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],
-					   animations: ({ [weak self] in
-			self?.alpha = 0
-		})) { [weak self] ok in
-			self?.removeFromSuperview()
-			self?.dismissHandler?(sender != nil)
-			completion?()
+		if dismissSoundEnabled && Helper.soundOn
+			&& (sender == nil || (sender as? IXButton)?.soundEnabled != true) {
+			Singletons.instance.whooshSound?.play()
+		}
+		
+		if animationStyle == .fade {
+			UIView.animate(withDuration: 0.25,
+						   delay: 0,
+						   options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],
+						   animations: ({ [weak self] in
+				self?.alpha = 0
+			})) { [weak self] ok in
+				self?.removeFromSuperview()
+				self?.dismissHandler?(sender != nil)
+				completion?()
+			}
+		} else {
+			UIView.animate(withDuration: 0.15,
+						   delay: 0,
+						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+						   animations: ({ [weak self] in
+				self?.alpha = 0
+				self?.contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
+			})) { [weak self] _ in
+				self?.removeFromSuperview()
+				self?.dismissHandler?(sender != nil)
+				completion?()
+			}
 		}
 	}
 	

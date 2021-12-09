@@ -24,7 +24,7 @@ public class PopupAlert: PopupView {
 	
 	private var buttonType: IXButton.Type = XButton.self
 	
-	public static func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
+	open class func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
 		let alert = UINib(nibName: style == .style1 ? "PopupAlert" : "PopupAlert2", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		
 		if let closeIcon = UIImage(named: "close") {
