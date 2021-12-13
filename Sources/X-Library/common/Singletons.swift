@@ -96,7 +96,7 @@ public class Singletons {
 	}
 	
 	@objc func toggleSound(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | toggleSound")
+		NSLog("--  \(TAG) | toggleSound: \(notification.object as? Any ?? "--")")
 	}
 	
 	@objc func changeSoundVolume(_ notification: NSNotification) {
@@ -104,7 +104,7 @@ public class Singletons {
 	}
 	
 	@objc func toggleMusic(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | toggleMusic")
+		NSLog("--  \(TAG) | toggleMusic: \(notification.object as? Any ?? "--")")
 		
 		if notification.object as! Bool {
 			playMusic()

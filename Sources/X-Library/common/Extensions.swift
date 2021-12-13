@@ -199,6 +199,7 @@ extension UIView {
 	public func asPngData() -> Data {
 		let renderer = UIGraphicsImageRenderer(bounds: bounds)
 		return renderer.pngData { rendererContext in
+			// EXC_BAD_ACCESS (code=2, address=0x1234567891) when set layer.[some-property]
 			layer.render(in: rendererContext.cgContext)
 		}
 	}

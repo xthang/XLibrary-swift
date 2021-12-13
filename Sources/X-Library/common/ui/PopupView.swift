@@ -26,6 +26,9 @@ open class PopupView: OverlayView {
 		if let sr = Theme.current.settings.popupShadowRadius { contentView!.shadowRadius = sr }
 		
 		// closeBtn is assigned only after awakeFromNib
+		if let closeIcon = UIImage(named: "close") {
+			closeBtn?.setImage(closeIcon, for: .normal)
+		}
 		closeBtn?.soundEnabled = false
 	}
 }

@@ -20,12 +20,12 @@ public protocol ButtonResponder {
 
 /// The complete set of button identifiers supported in the app.
 public enum ButtonIdentifier: String {
-	case close = "Close"
 	case DEV = "DEV"
+	case close = "Close"
+	case cancel = "Cancel"
 	case home = "Home"
 	case about = "About"
 	case play = "Play"
-	case cancel = "Cancel"
 	case pause = "Pause"
 	case resume = "Resume"
 	case replay = "Replay"

@@ -24,14 +24,11 @@ public class PopupAlert: PopupView {
 	
 	private var buttonType: IXButton.Type = XButton.self
 	
-	open class func initiate(style: Style, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
-		let alert = UINib(nibName: style == .style1 ? "PopupAlert" : "PopupAlert2", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
+	open class func initiate(style: Style? = nil, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
+		let alert = UINib(nibName: style == .style2 ? "PopupAlert2" : "PopupAlert", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		
-		if let closeIcon = UIImage(named: "close") {
-			alert.closeBtn!.setImage(closeIcon, for: .normal)
-		}
 		if !showCloseButton {
-			alert.closeBtn!.removeFromSuperview()
+			alert.closeBtn?.removeFromSuperview()
 		}
 		
 		if title == nil { alert.title.isHidden = true }

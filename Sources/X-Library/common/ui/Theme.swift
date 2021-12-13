@@ -49,6 +49,9 @@ public struct ThemeSettings {
 	public var buttonShadowRadius: CGFloat?
 	public var buttonShadowColor: UIColor?
 	
+	// Snackbar
+	
+	public var snackbarFont: UIFont?
 	
 	init(filename: String) {
 		NSLog("-------  \(Theme.self) | \(filename)")
@@ -94,13 +97,17 @@ public struct ThemeSettings {
 		if let i = themeItems["buttonDisabledBackgroundColor"], i as? String != "" {
 			buttonDisabledBackgroundColor = try! ThemeSettings.getColor(i)
 		}
-		if let c = themeItems["buttonDisabledTextColor"], c as? String != "" {
-			buttonDisabledTextColor = try! ThemeSettings.getColor(c)
+		if let f = themeItems["snackbarFont"] as? String, f != "", let fs = themeItems["snackbarFontSize"] as? CGFloat {
+			snackbarFont = UIFont(name: f, size: fs)
 		}
 		
 		buttonCornerRadiusRatio = themeItems["buttonCornerRadiusRatio"] as? CGFloat
 		
 		buttonShadowRadius = themeItems["buttonShadowRadius"] as? CGFloat
+		if let i = themeItems["buttonShadowColor"], i as? String != "" {
+			buttonShadowColor = try! ThemeSettings.getColor(i)
+		}
+		
 		if let i = themeItems["buttonShadowColor"], i as? String != "" {
 			buttonShadowColor = try! ThemeSettings.getColor(i)
 		}

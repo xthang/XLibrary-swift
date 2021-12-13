@@ -96,7 +96,7 @@ open class BaseSceneButton: XButton, IButton {
 			case .close, .home, .play, .cancel, .pause, .resume, .replay:
 				let responder = self.responder
 				
-				rootView.dismissView(nil) { [weak self] in
+				rootView.dismissView(self) { [weak self] in
 					responder?.buttonTriggered(self!)
 				}
 			case .about:

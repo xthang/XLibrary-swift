@@ -487,7 +487,9 @@ public struct Helper {
 				}
 			})
 			
+#if !DEBUG
 			task.resume()
+#endif
 		} catch { /// possible error: KeychainError.unhandledError(25308): errSecInteractionNotAllowed
 			NSLog("!-- \(TAG) | cfg [\(tag)] | error: \(error)")
 			log(tag, error, data == nil ? nil : "\(data!)")

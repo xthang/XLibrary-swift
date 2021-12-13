@@ -78,7 +78,7 @@ extension UIColor {
 	}
 }
 
-open class TTGSnackbar: UIView {
+public class TTGSnackbar: XView {
 	// MARK: - Class property.
 	
 	/// Snackbar default frame
@@ -190,6 +190,10 @@ open class TTGSnackbar: UIView {
 		}
 	}
 	
+	// by XT
+	@objc open dynamic var stackTopMargin: CGFloat = 10
+	@objc open dynamic var stackBottomMargin: CGFloat = 10
+	
 	/// Content inset. Default is (0, 4, 0, 4)
 	@objc open dynamic var contentInset: UIEdgeInsets = UIEdgeInsets.init(top: 0, left: 4, bottom: 0, right: 4) {
 		didSet {
@@ -227,7 +231,7 @@ open class TTGSnackbar: UIView {
 	}
 	
 	/// Message text font. Default is Bold system font (14).
-	@objc open dynamic var messageTextFont: UIFont = UIFont.boldSystemFont(ofSize: 14) {
+	@objc open dynamic var messageTextFont: UIFont = Theme.current.settings.snackbarFont ?? UIFont.boldSystemFont(ofSize: 14) {
 		didSet {
 			messageLabel.font = messageTextFont
 		}
@@ -633,11 +637,11 @@ public extension TTGSnackbar {
 				} else if animationType == .slideFromBottomBackToBottom || animationType == .slideFromBottomToTop {
 					NSLayoutConstraint(
 						item: stackview!, attribute: .bottom, relatedBy: .equal,
-						toItem: relativeToItem, attribute: .bottom, multiplier: 1, constant: 0).isActive = true
+						toItem: relativeToItem, attribute: .bottom, multiplier: 1, constant: -stackBottomMargin).isActive = true
 				} else {
 					NSLayoutConstraint(
 						item: stackview!, attribute: .top, relatedBy: .equal,
-						toItem: relativeToItem, attribute: .top, multiplier: 1, constant: 0).isActive = true
+						toItem: relativeToItem, attribute: .top, multiplier: 1, constant: -stackTopMargin).isActive = true
 				}
 				NSLayoutConstraint(
 					item: stackview!, attribute: .width, relatedBy: .lessThanOrEqual,
@@ -846,13 +850,13 @@ public extension TTGSnackbar {
 				}
 				
 			case .slideFromBottomBackToBottom:
-				bottomMarginConstraint?.constant = snackbarHeight + safeAreaInsets.bottom
+				bottomMarginConstraint?.constant = stackBottomMargin + snackbarHeight + safeAreaInsets.bottom
 				
 			case .slideFromBottomToTop:
 				animationBlock = {
 					self.alpha = 0.0
 				}
-				bottomMarginConstraint?.constant = -snackbarHeight - bottomMargin
+				bottomMarginConstraint?.constant = -stackBottomMargin - snackbarHeight - bottomMargin
 				
 			case .slideFromLeftToRight:
 				leftMarginConstraint?.constant = leftMargin + superViewWidth + safeAreaInsets.left
@@ -867,10 +871,10 @@ public extension TTGSnackbar {
 			case .slideFromTopToBottom:
 				topMarginConstraint?.isActive = false
 				bottomMarginConstraint?.isActive = true
-				bottomMarginConstraint?.constant = snackbarHeight + safeAreaInsets.bottom
+				bottomMarginConstraint?.constant = stackBottomMargin + snackbarHeight + safeAreaInsets.bottom
 				
 			case .slideFromTopBackToTop:
-				topMarginConstraint?.constant = -snackbarHeight - safeAreaInsets.top
+				topMarginConstraint?.constant = -stackTopMargin - snackbarHeight - safeAreaInsets.top
 		}
 		
 		setNeedsLayout()

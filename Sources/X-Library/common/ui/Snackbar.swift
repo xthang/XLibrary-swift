@@ -19,6 +19,8 @@ public struct Snackbar {
 		snackbar.leftMargin = 40
 		snackbar.rightMargin = 40
 		snackbar.messageTextAlign = .center
+		snackbar.cornerRadiusRatio = 0.5
+		snackbar.messageContentInset = .init(top: 0, left: 10, bottom: 0, right: 10)
 		
 		return snackbar
 	}
