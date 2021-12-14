@@ -67,10 +67,10 @@ public class AdInterstitial: NSObject {
 		UnityAds.load(AppConfig.UnityAdUnit.interstitial, loadDelegate: self)
 	}
 	
-	public func present(_ tag: String, in viewController: UIViewController) {
+	public func present(_ tag: String, in viewController: UIViewController) -> Bool {
 		if Helper.adsRemoved {
 			NSLog("!-  \(TAG) | present [\(tag)]: ads are removed")
-			return
+			return false
 		}
 		print("--  \(TAG) | present [\(tag)]")
 		
@@ -85,14 +85,16 @@ public class AdInterstitial: NSObject {
 			}
 			if canPresent {
 				gAdInterstitial!.present(fromRootViewController: viewController)
-				return
+				return true
 			}
 		}
 		if uAdLoaded {
 			UnityAds.show(viewController, placementId: AppConfig.UnityAdUnit.interstitial, showDelegate: self)
+			return true
 		} else {
 			NSLog("!-  \(TAG) | Ad wasn't ready [\(tag)]")
 			loadGAd("present|\(tag)")
+			return false
 		}
 	}
 }
