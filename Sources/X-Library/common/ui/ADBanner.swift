@@ -13,7 +13,7 @@ public class ADBanner: NSObject {
 	private static let TAG = "ADS"
 	
 	public static var shared = ADBanner("shared")
-	var rootViewController: UIViewController?
+	private var rootViewController: UIViewController?
 	
 	private var banner: UIView
 	private var gAdBanner: GADBannerView
@@ -37,7 +37,7 @@ public class ADBanner: NSObject {
 		NotificationCenter.default.addObserver(self, selector: #selector(self.adsStatusChanged), name: .AdsStatusChanged, object: nil)
 	}
 	
-	public func show(viewController: UIViewController, position: BannerPosition? = nil) {
+	public func show(_ tag: String, viewController: UIViewController, position: BannerPosition? = nil) {
 		if Helper.adsRemoved {
 			NSLog("!-  \(TAG) | show in viewController: ads are removed")
 			return
@@ -48,22 +48,22 @@ public class ADBanner: NSObject {
 		self.position = position
 		
 		if gAdBanner.responseInfo?.responseIdentifier != nil {
-			show(adBanner: gAdBanner)
+			show("show|\(tag)|1", adBanner: gAdBanner)
 		} else if uAdLoaded {
-			show(adBanner: uADSBanner!)
+			show("show|\(tag)|2", adBanner: uADSBanner!)
 		} else {
-			reloadAd()
+			reloadAd("show|\(tag)")
 		}
 	}
 	
-	public func reloadAd() {
+	public func reloadAd(_ tag: String) {
 		if Helper.adsRemoved {
-			NSLog("!-  \(TAG) | reloadAd: ads are removed")
+			NSLog("!-  \(TAG) | reloadAd [\(tag)]: ads are removed")
 			return
 		}
 		guard let viewController = rootViewController, let view = viewController.view
 		else {
-			NSLog("!-  \(TAG) | reloadAd: viewController/view is nil")
+			NSLog("!-  \(TAG) | reloadAd [\(tag)]: viewController/view is nil")
 			return
 		}
 		
@@ -80,11 +80,11 @@ public class ADBanner: NSObject {
 		let viewWidth = min(frame.size.width, frame.size.height)
 		let newAdWidth = floor(viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85))
 		if gAdBanner.adSize.size.width == newAdWidth && gAdBanner.responseInfo != nil {
-			NSLog("!-  \(TAG) | reloadAd: adSize.size.width == viewWidth == \(newAdWidth) && responseInfo != nil")
+			NSLog("!-  \(TAG) | reloadAd [\(tag)]: adSize.size.width == viewWidth == \(newAdWidth) && responseInfo != nil")
 			return
 		}
 		
-		print("--  \(TAG) | reloading Ad: \(viewController) | \(viewWidth) | \(gAdBanner.adSize.size.width) -> \(newAdWidth)")
+		print("--  \(TAG) | reloading Ad [\(tag)]: \(viewController) | \(viewWidth) | \(gAdBanner.adSize.size.width) -> \(newAdWidth)")
 		
 		// Step 3 - Get Adaptive GADAdSize and set the ad view.
 		// Here the current interface orientation is used. If the ad is being preloaded
@@ -101,20 +101,20 @@ public class ADBanner: NSObject {
 		gAdBanner.load(request)
 	}
 	
-	func reloadUAd() {
+	func reloadUAd(_ tag: String) {
 		if Helper.adsRemoved {
-			NSLog("!-  \(TAG) | reloadUAd: ads are removed")
+			NSLog("!-  \(TAG) | reloadUAd [\(tag)]: ads are removed")
 			return
 		}
 		
 		let size = gAdBanner.adSize.size
 		let newAdSize = CGSize(width: max(320, size.width), height: max(50, size.height))
 		if uAdLoaded && uADSBanner!.size == newAdSize {
-			NSLog("!-  \(TAG) | reload UAd: uAdLoaded && uADSBanner.size == newAdSize == \(newAdSize)")
+			NSLog("!-  \(TAG) | reload UAd [\(tag)]: uAdLoaded && uADSBanner.size == newAdSize == \(newAdSize)")
 			return
 		}
 		
-		print("--  \(TAG) | reloading UAd: \(rootViewController as Any? ?? "--") | \(uADSBanner?.size as Any? ?? "--") -> \(newAdSize)")
+		print("--  \(TAG) | reloading UAd [\(tag)]: \(rootViewController as Any? ?? "--") | \(uADSBanner?.size as Any? ?? "--") -> \(newAdSize)")
 		
 		uADSBanner = UADSBannerView(placementId: AppConfig.UnityAdUnit.banner, size: newAdSize)
 		uADSBanner!.delegate = self
@@ -123,9 +123,9 @@ public class ADBanner: NSObject {
 		uAdLoaded = false
 	}
 	
-	private func show(adBanner: UIView) {
-		if banner.superview == rootViewController?.view {
-			print("!-  \(TAG) | already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
+	private func show(_ tag: String, adBanner: UIView) {
+		if banner.superview != nil && banner.superview == rootViewController?.view {
+			print("!-  \(TAG) | [\(tag)] already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
 			return
 		}
 		
@@ -135,7 +135,7 @@ public class ADBanner: NSObject {
 		
 		guard let viewController = rootViewController, let view = viewController.view
 		else {
-			NSLog("!-  \(TAG) | show in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
+			NSLog("!-  \(TAG) | [\(tag)] show in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
 			return
 		}
 		
@@ -155,36 +155,36 @@ public class ADBanner: NSObject {
 		
 		banner.addConstraints(
 			[NSLayoutConstraint(item: adBanner,
-								attribute: attribute,
-								relatedBy: .equal,
-								toItem: banner,
-								attribute: attribute,
-								multiplier: 1,
-								constant: 0),
+									  attribute: attribute,
+									  relatedBy: .equal,
+									  toItem: banner,
+									  attribute: attribute,
+									  multiplier: 1,
+									  constant: 0),
 			 NSLayoutConstraint(item: adBanner,
-								attribute: .centerX,
-								relatedBy: .equal,
-								toItem: banner,
-								attribute: .centerX,
-								multiplier: 1,
-								constant: 0)
+									  attribute: .centerX,
+									  relatedBy: .equal,
+									  toItem: banner,
+									  attribute: .centerX,
+									  multiplier: 1,
+									  constant: 0)
 			])
 		
 		view.addConstraints(
 			[NSLayoutConstraint(item: banner,
-								attribute: attribute,
-								relatedBy: .equal,
-								toItem: layoutGuide,
-								attribute: attribute,
-								multiplier: 1,
-								constant: 0),
+									  attribute: attribute,
+									  relatedBy: .equal,
+									  toItem: layoutGuide,
+									  attribute: attribute,
+									  multiplier: 1,
+									  constant: 0),
 			 NSLayoutConstraint(item: banner,
-								attribute: .centerX,
-								relatedBy: .equal,
-								toItem: view,
-								attribute: .centerX,
-								multiplier: 1,
-								constant: 0)
+									  attribute: .centerX,
+									  relatedBy: .equal,
+									  toItem: view,
+									  attribute: .centerX,
+									  multiplier: 1,
+									  constant: 0)
 			])
 		
 		banner.alpha = 0
@@ -194,7 +194,9 @@ public class ADBanner: NSObject {
 		})
 	}
 	
-	public func remove() {
+	public func remove(_ tag: String) {
+		NSLog("--  \(TAG) | remove [\(tag)]")
+		
 		banner.removeFromSuperview()
 		rootViewController = nil
 	}
@@ -205,7 +207,7 @@ public class ADBanner: NSObject {
 		if notification.object as! Bool {
 			
 		} else {
-			remove()
+			remove("adsStatusChanged")
 		}
 	}
 }
@@ -218,13 +220,13 @@ extension ADBanner: GADBannerViewDelegate {
 	public func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
 		print("<-- \(TAG) | GAds: bannerViewDidReceiveAd: \(rootViewController as Any? ?? "--") | \(bannerView.responseInfo?.adNetworkClassName as Any? ?? "--")")
 		
-		show(adBanner: bannerView)
+		show("bannerViewDidReceiveAd", adBanner: bannerView)
 	}
 	
 	public func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
 		NSLog("<-- \(TAG) | GAds: bannerView: didFailToReceiveAdWithError: \(error.localizedDescription)")
 		
-		reloadUAd()
+		reloadUAd("didFailToReceiveAdWithError")
 	}
 	
 	public func bannerViewDidRecordImpression(_ bannerView: GADBannerView) {
@@ -263,7 +265,7 @@ extension ADBanner: UADSBannerViewDelegate {
 		print("<-- \(TAG) | UAds: bannerViewDidLoad: \(bannerView.placementId)")
 		
 		uAdLoaded = true
-		show(adBanner: bannerView)
+		show("bannerViewDidLoad", adBanner: bannerView)
 	}
 	
 	public func bannerViewDidClick(_ bannerView: UADSBannerView) {

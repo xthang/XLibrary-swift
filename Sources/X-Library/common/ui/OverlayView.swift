@@ -58,22 +58,26 @@ open class OverlayView: UIView {
 		
 		if animationStyle == .fade {
 			UIView.animate(withDuration: 0.3,
-						   delay: 0,
-						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-						   animations: ({ [weak self] in
+								delay: 0,
+								options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+								animations: ({ [weak self] in
 				self?.alpha = 1
 				self?.transform = CGAffineTransform.identity
-			}), completion: nil)
+			})) { [weak self] _ in
+				self?.popupDidShow("1")
+			}
 		} else {
 			UIView.animate(withDuration: 0.3,
-						   delay: 0,
-						   usingSpringWithDamping: 0.6,
-						   initialSpringVelocity: 0.5,
-						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-						   animations: ({ [weak self] in
+								delay: 0,
+								usingSpringWithDamping: 0.6,
+								initialSpringVelocity: 0.5,
+								options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+								animations: ({ [weak self] in
 				// self?.alpha = 1
 				self?.contentView!.transform = CGAffineTransform.identity
-			}), completion: nil)
+			})) { [weak self] _ in
+				self?.popupDidShow("2")
+			}
 		}
 		
 		//if #available(iOS 13.0, *) {
@@ -82,6 +86,8 @@ open class OverlayView: UIView {
 		//	NotificationCenter.default.addObserver(self, selector: #selector(self.test), name: UIApplication.willResignActiveNotification, object: nil)
 		//}
 	}
+	
+	open func popupDidShow(_ tag: String) {}
 	
 	//open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
 	//	NSLog("~~  \(TAG) | traitCollectionDidChange")
@@ -113,15 +119,15 @@ open class OverlayView: UIView {
 	
 	@objc public func dismissView(_ sender: UIControl?, completion: (() -> Void)? = nil) {
 		if dismissSoundEnabled && Helper.soundOn
-			&& (sender == nil || (sender as? IXButton)?.soundEnabled != true) {
+				&& (sender == nil || (sender as? IXButton)?.soundEnabled != true) {
 			Singletons.instance.whooshSound?.play()
 		}
 		
 		if animationStyle == .fade {
 			UIView.animate(withDuration: 0.25,
-						   delay: 0,
-						   options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],
-						   animations: ({ [weak self] in
+								delay: 0,
+								options: [.curveEaseOut, .layoutSubviews, .allowAnimatedContent],
+								animations: ({ [weak self] in
 				self?.alpha = 0
 			})) { [weak self] ok in
 				self?.removeFromSuperview()
@@ -130,9 +136,9 @@ open class OverlayView: UIView {
 			}
 		} else {
 			UIView.animate(withDuration: 0.15,
-						   delay: 0,
-						   options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
-						   animations: ({ [weak self] in
+								delay: 0,
+								options: [.curveEaseIn, .layoutSubviews, .allowAnimatedContent],
+								animations: ({ [weak self] in
 				self?.alpha = 0
 				self?.contentView!.transform = CGAffineTransform.identity.scaledBy(x: 0.001, y: 0.001)
 			})) { [weak self] _ in

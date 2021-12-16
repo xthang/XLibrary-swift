@@ -146,7 +146,7 @@ open class XButton: UIButton, IXButton {
 	open override func layoutSubviews() {
 		super.layoutSubviews()
 		
-		if cornerRadiusRatio != 0 { cornerRadiusRatio = cornerRadiusRatio }
+		if cornerRadiusRatio != 0 { updateCorner("layoutSubviews") }
 		if shadowRadius != 0 { dropShadow(TAG) }
 	}
 	
@@ -375,7 +375,7 @@ open class XButton2: UIControl, IXButton {
 	open override func layoutSubviews() {
 		super.layoutSubviews()
 		
-		if cornerRadiusRatio != 0 { cornerRadiusRatio = cornerRadiusRatio }
+		if cornerRadiusRatio != 0 { updateCorner("layoutSubviews") }
 		if shadowRadius != 0 { dropShadow(TAG) }
 	}
 	
@@ -413,7 +413,8 @@ open class XButton2: UIControl, IXButton {
 	}
 	
 	open func setTitleColor(_ color: UIColor?, for state: UIControl.State) {
-		
+        // TODO: this
+        titleLabel?.textColor = color
 	}
 	
 	open func setTitleShadowColor(_ color: UIColor?, for state: UIControl.State) {
