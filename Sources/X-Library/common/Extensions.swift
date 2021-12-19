@@ -87,6 +87,8 @@ extension UIColor {
 	public static var blue2 = UIColor.rgb(0x1492FF)
 	public static var blue3 = UIColor.rgb(0x2ab7ca)
 	public static var blue4 = UIColor.rgb(0x6497b1)
+	public static var blackTransparent = UIColor.rgb(0x000000, alpha: 0.5)
+	public static var blackTransparent70 = UIColor.rgb(0x000000, alpha: 0.7)
 	
 	public static var sky = UIColor(red: 112/255, green: 196/255, blue: 254/255, alpha: 1)
 	public static var veanee1 = UIColor.rgb(0x63c5da)

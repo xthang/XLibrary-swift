@@ -4,7 +4,7 @@
 
 import UIKit
 
-public class PopupAlert: PopupView {
+open class PopupAlert: PopupView {
 	
 	public enum Style {
 		case style1

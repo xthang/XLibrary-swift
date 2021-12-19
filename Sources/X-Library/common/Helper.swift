@@ -763,14 +763,14 @@ public struct Helper {
 			alert.buttons.axis = .vertical
 			
 			if let adsRemoval = AdsStore.shared.adsRemoval {
-				_ = alert.addAction(title: NSLocalizedString("OK", comment: "") + " [\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price)]", style: .primary1) {
-					_ = Payment.purchase(adsRemoval)
+				_ = alert.addAction(title: NSLocalizedString("OK", comment: "") + " [\(adsRemoval.priceLocale.currencySymbol ?? adsRemoval.priceLocale.currencyCode ?? "🪙")\(adsRemoval.price)]", style: .primary1) { [weak view] in
+					_ = Payment.purchase("\(TAG)|\(tag)", adsRemoval, window: view?.window)
 				}
 			} else {
 				AdsStore.shared.requestProducts(TAG)
 			}
-			_ = alert.addAction(title: NSLocalizedString("RESTORE", comment: ""), style: .primary1) {
-				Payment.restorePurchases()
+			_ = alert.addAction(title: NSLocalizedString("RESTORE", comment: ""), style: .primary1) { [weak view] in
+				Payment.restorePurchases("\(TAG)|\(tag)", window: view?.window)
 			}
 			_ = alert.addAction(title: NSLocalizedString("Cancel", comment: ""))
 			view.addSubview(alert)

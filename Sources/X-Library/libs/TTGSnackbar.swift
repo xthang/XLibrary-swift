@@ -365,9 +365,6 @@ public class TTGSnackbar: XView {
 		}
 	}
 	
-	/// Custom container view
-	@objc open dynamic var containerView: UIView?
-	
 	/// Custom content view
 	@objc open dynamic var customContentView: UIView?
 	
@@ -559,7 +556,7 @@ public extension TTGSnackbar {
 	/**
 	 Show the snackbar.
 	 */
-	@objc func show() {
+	@objc func show(in window: UIWindow? = nil) {
 		// Only show once
 		if superview != nil {
 			return
@@ -599,12 +596,12 @@ public extension TTGSnackbar {
 		addConstraints([contentViewTopConstraint!, contentViewBottomConstraint!, contentViewLeftConstraint!, contentViewRightConstraint!])
 		
 		// Get current window
-		var currentWindow: UIWindow? = UIApplication.shared.keyWindow
+		var currentWindow: UIWindow? = window ?? UIApplication.shared.keyWindow
 		currentWindow = currentWindow ?? UIApplication.shared.windows.filter {$0.isKeyWindow}.first
 		currentWindow = currentWindow ?? UIApplication.shared.windows.first
 		
 		// Get super view to show
-		if let containerView = containerView ?? currentWindow {
+		if let containerView = currentWindow {
 			var stackview = containerView.subviews.first(where: { $0.accessibilityIdentifier == "snackbars" }) as? UIStackView
 			
 			if stackview == nil {
@@ -788,7 +785,7 @@ public extension TTGSnackbar {
 		UIView.animate(withDuration: animationDuration, delay: 0,
 					   usingSpringWithDamping: animationSpringWithDamping,
 					   initialSpringVelocity: animationInitialSpringVelocity, options: .allowUserInteraction,
-					   animations: { () -> Void in
+					   animations: {
 			animationBlock?()
 			self.superview?.layoutIfNeeded()
 		}, completion: nil)
@@ -804,8 +801,7 @@ public extension TTGSnackbar {
 	 */
 	@objc func dismiss() {
 		// On main thread
-		DispatchQueue.main.async {
-			() -> Void in
+		DispatchQueue.main.async { 
 			self.dismissAnimated(true)
 		}
 	}
@@ -882,10 +878,10 @@ public extension TTGSnackbar {
 		UIView.animate(withDuration: animationDuration, delay: 0,
 					   usingSpringWithDamping: animationSpringWithDamping,
 					   initialSpringVelocity: animationInitialSpringVelocity, options: .curveEaseIn,
-					   animations: { () -> Void in
+					   animations: {
 			animationBlock?()
 			self.superview?.layoutIfNeeded()
-		}) { (finished) -> Void in
+		}) { finished in
 			self.dismissBlock?(self)
 			self.superview?.removeFromSuperview()
 			if stackview?.subviews.isEmpty ?? false { stackview!.removeFromSuperview() }
