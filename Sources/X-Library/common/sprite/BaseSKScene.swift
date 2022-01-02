@@ -50,7 +50,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	open override func didChangeSize(_ oldSize: CGSize) {
-		// NSLog("--  \(TAG) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
+		NSLog("--  \(TAG) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
 		
 		disableTouchNode.size = self.size
 	}
@@ -98,7 +98,7 @@ open class BaseSKScene: SKScene {
 		setUserInteraction(false)
 	}
 	
-	public func playSound(_ audio: SKAudioNode) {
+	public func playSound(_ audio: SKAudioNode, delay: TimeInterval? = nil) {
 		if soundOn {
 			if !audioEngine.isRunning {
 				NSLog("--  \(TAG) | playSound: audioEngine.isRunning: not")
@@ -108,7 +108,14 @@ open class BaseSKScene: SKScene {
 					NSLog("--  \(TAG) | playSound: start Engine: error: \(error)")
 				}
 			}
-			audio.run(SKAction.play())
+			if delay != nil {
+				audio.run(SKAction.sequence([
+					SKAction.wait(forDuration: delay!),
+					SKAction.play()
+				]), withKey: "play")
+			} else {
+				audio.run(SKAction.play(), withKey: "play")
+			}
 		}
 	}
 	
@@ -201,7 +208,7 @@ open class BaseSKScene: SKScene {
 				NSLog("--  \(TAG) | handleAudioSessionRouteChange: newDeviceAvailable: headphonesConnected: \(headphonesConnected)")
 			case .oldDeviceUnavailable: // Old device removed.
 				if let previousRoute =
-					userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
+						userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
 					let headphonesConnected = hasHeadphones(in: previousRoute)
 					NSLog("--  \(TAG) | handleAudioSessionRouteChange: oldDeviceUnavailable: headphonesConnected: \(headphonesConnected)")
 				}

@@ -20,7 +20,7 @@ public struct GameCenterHelper {
 			} else if GKLocalPlayer.local.isAuthenticated {
 				NSLog("--  \(TAG) | authen [\(tag)]: OK: \(GKLocalPlayer.local.isAuthenticated)")
 				GKLocalPlayer.local.register(xGKLocalPlayerListener())
-				if let bestLocal = ScoreData.getHishest() { submitScore("authenticateLocalPlayer", bestLocal.score) }
+				if let bestLocal = ScoreData.getHishest("authenticateLocalPlayer") { submitScore("authenticateLocalPlayer", bestLocal.score) }
 				state = true
 			} else {
 				NSLog("!-  \(TAG) | authen [\(tag)]: NotOK: \(GKLocalPlayer.local.isAuthenticated)")

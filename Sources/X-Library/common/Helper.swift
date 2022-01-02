@@ -9,9 +9,15 @@ import CoreTelephony
 import AVFoundation
 import GameKit
 
+public protocol IHelper {
+	static func buildUserActivitiesInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any]
+}
+
 public struct Helper {
 	
 	private static let TAG = "🧰"
+	
+	public static var appHelper: IHelper.Type?
 	
 	public static var appVersion: String {
 		return Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
@@ -34,12 +40,12 @@ public struct Helper {
 	public static var vibrationOn: Bool {
 		return UserDefaults.standard.object(forKey: CommonConfig.Settings.vibration) as? Bool ?? true
 	}
-	public static var isFirstRun: Bool {
-		return UserDefaults.standard.object(forKey: CommonConfig.Keys.isFirstRun) as? Bool ?? true
-	}
-	public static func setNotFirstRun() {
-		UserDefaults.standard.set(false, forKey: CommonConfig.Keys.isFirstRun)
-	}
+	//public static var isFirstRun: Bool {
+	//	return UserDefaults.standard.object(forKey: CommonConfig.Keys.isFirstRun) as? Bool ?? true
+	//}
+	//public static func setNotFirstRun() {
+	//	UserDefaults.standard.set(false, forKey: CommonConfig.Keys.isFirstRun)
+	//}
 	public static var adsRemoved: Bool {
 		return UserDefaults.standard.stringArray(forKey: CommonConfig.Keys.purchased)?.contains(AdsStore.shared.adsRemovalID) ?? false
 	}
@@ -79,6 +85,8 @@ public struct Helper {
 			app["CFBundleShortVersionString"] = info["CFBundleShortVersionString"]
 			app["AppIdentifierPrefix"] = info["AppIdentifierPrefix"]
 		}
+		
+		if tag.contains("cfg") { NSLog("--> \(TAG) | build App Info [\(tag)]: \(app)") }
 		
 		return app
 	}
@@ -195,7 +203,7 @@ public struct Helper {
 			return x
 		})
 		
-		if tag.contains("|cfg") { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
+		if tag.contains("cfg") { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
 		
 		return device
 	}
@@ -216,7 +224,7 @@ public struct Helper {
 		
 		data["isProtectedDataAvailable"] = UIApplication.shared.isProtectedDataAvailable
 		
-		if tag.contains("|cfg") { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
+		if tag.contains("cfg") { NSLog("--> \(TAG) | build System Info [\(tag)]: \(data)") }
 		
 		return data
 	}
@@ -378,6 +386,16 @@ public struct Helper {
 		return userSettings
 	}
 	
+	public static func buildUserActivitiesInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
+		var data: [String: Any] = [:]
+		
+		data["app_open_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.appOpenCount) as? Int
+		data["sessions_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.sessionsCount) as? Int
+		data["games_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) as? Int
+		
+		return data
+	}
+	
 	public static func buildBaseRequestBody(_ tag: String, _ errors: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
 		let app = buildAppInfo(tag, &errors)
 		let users = try buildUsersInfo(tag, &errors, suppressError)
@@ -402,7 +420,7 @@ public struct Helper {
 		do {
 			var errors: [String: Any] = [:]
 			
-			var jsonObj = try buildBaseRequestBody("\(tag)|cfg", &errors, false)
+			var jsonObj = try buildBaseRequestBody("cfg|\(tag)", &errors, false)
 			
 			jsonObj["data"] = data
 			jsonObj["process"] = buildProcessInfo(1, &errors)
@@ -410,6 +428,7 @@ public struct Helper {
 			jsonObj["connectivity"] = buildConnectivityInfo(1, &errors)
 			jsonObj["audio"] = buildAudioInfo(1, &errors)
 			jsonObj["user-settings"] = buildUserConfigInfo(1, &errors)
+			jsonObj["user-activities"] = appHelper?.buildUserActivitiesInfo("cfg|\(tag)", &errors)
 			jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
 			
 			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
@@ -423,7 +442,7 @@ public struct Helper {
 			let task = URLSession.shared.dataTask(with: request, completionHandler: { data, response, error -> Void in
 				let stt = (response as? HTTPURLResponse)?.statusCode
 				let dataStr = data != nil ? String(decoding: data!, as: UTF8.self) : nil
-				NSLog("<-- \(TAG) | getting Config [\(tag)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
+				NSLog("<-- \(TAG) | getConfig [\(tag)]: rép: \(stt as Any? ?? "--") | error: \(error?.localizedDescription ?? "--") | data: \(dataStr ?? "--")")
 				
 				if error != nil {
 					let msg = "[get config] [1] Something is wrong"
@@ -434,7 +453,7 @@ public struct Helper {
 				if let d = data {
 					do {
 						let dict = try JSONSerialization.jsonObject(with: d, options: []) as! [String: Any]
-						NSLog("--  \(TAG) | getting Config [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--")")
+						NSLog("--  \(TAG) | getConfig [\(tag)]: \(dict["result"] ?? "--") | \(dict["device-uid"] ?? "--")")
 						
 						if stt != 200 {
 							let msg = "[2] [code: \(stt as Any? ?? "")] Getting Config error"
@@ -478,10 +497,10 @@ public struct Helper {
 						
 						completion(error, dict)
 					} catch {
-						NSLog("!-- \(TAG) | getting Config [\(tag)]: decode error: \(error)")
+						NSLog("!-- \(TAG) | getConfig [\(tag)]: decode error: \(error)")
 						Snackbar.e("[get config] [2] Something is wrong")
 						let idx = dataStr?.firstIndex(of: "{")
-						Helper.log("get-cfg", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
+						log("cfg|\(tag)", error, idx != nil ? String(dataStr![..<idx!]) + "|......" : dataStr)
 						completion(error, nil)
 					}
 				}
@@ -491,12 +510,12 @@ public struct Helper {
 			task.resume()
 #endif
 		} catch { /// possible error: KeychainError.unhandledError(25308): errSecInteractionNotAllowed
-			NSLog("!-- \(TAG) | cfg [\(tag)] | error: \(error)")
-			log(tag, error, data == nil ? nil : "\(data!)")
+			NSLog("!-- \(TAG) | getConfig [\(tag)] | error: \(error)")
+			log("cfg|\(tag)", error, data == nil ? nil : "\(data!)")
 			completion(error, nil)
 			
 			// RunLoop.current.run(until: Date.init(timeIntervalSinceNow: 0.7))
-			// fatalError("cfg [\(tag)]: \(error)")
+			// fatalError("!-  getConfig [\(tag)]: \(error)")
 		}
 	}
 	
@@ -791,11 +810,11 @@ public struct Helper {
 	
 	public static func initAttributedString(string: String, fontSize: CGFloat) -> NSAttributedString {
 		return NSAttributedString(string: string,
-								  attributes: [.font: UIFont(name: "Maniac", size: fontSize)!,
-											   .strokeColor: UIColor.black,
-											   .strokeWidth: -5,
-											   .foregroundColor: UIColor.white,
-											  ])
+										  attributes: [.font: UIFont(name: "Maniac", size: fontSize)!,
+															.strokeColor: UIColor.black,
+															.strokeWidth: -5,
+															.foregroundColor: UIColor.white,
+														  ])
 	}
 	
 	public static func circle(diameter: CGFloat, color: UIColor) -> UIImage {

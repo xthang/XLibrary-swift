@@ -166,6 +166,8 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		// Otherwise, use the default `texture`.
 		selectedTexture = texture
 		
+		imgNode?.texture?.filteringMode = .nearest
+		
 		// The focus ring should be hidden until the button is given the input focus.
 		focusRing?.isHidden = true
 		

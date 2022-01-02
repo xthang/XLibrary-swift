@@ -27,11 +27,17 @@ public struct CommonConfig {
 	}
 	
 	public struct Keys {
-		public static let isFirstRun = "is_first_run"
+		// public static let isFirstRun = "is_first_run"
 		public static let appDataVersion = "app-data-version"
+		public static let welcomeVersion = "welcome-version"
 		public static let welcomeBannerVersion = "welcome-banner-version"
-		public static let purchased = "purchased"
+		
+		public static let appOpenCount = "app_open_count"
+		public static let sessionsCount = "sessions_count"
+		public static let gamesCount = "games_count"
 		public static let gameLevel = "gameLevel"
+		
+		public static let purchased = "purchased"
 		public static let coinCount = "coin-count"
 		public static let lastDailyRewardingTime = "lastDailyRewardingTime"
 	}

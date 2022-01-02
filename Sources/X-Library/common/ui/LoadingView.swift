@@ -27,6 +27,8 @@ class LoadingView: UIView {
 		loader.startAnimating()
 		addSubview(loader)
 		
+		texts.axis = .vertical
+		texts.spacing = 5
 		texts.translatesAutoresizingMaskIntoConstraints = false
 		addSubview(texts)
 		

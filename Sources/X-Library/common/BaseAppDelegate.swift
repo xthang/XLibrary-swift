@@ -27,6 +27,8 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		
 		AppConfig.initiate(TAG)
 		
+		UserDefaults.standard.set(UserDefaults.standard.integer(forKey: CommonConfig.Keys.appOpenCount) + 1, forKey: CommonConfig.Keys.appOpenCount)
+		
 		Helper.getConfig(TAG, data: launchOptions == nil ? nil : ["launchOptions": "\(launchOptions!)"]) { _,_ in }
 		
 		//if #available(iOS 14, *) {
@@ -139,6 +141,8 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 	public func applicationDidBecomeActive(_ application: UIApplication) {
 		// Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 		NSLog("\(TAG) -- applicationDidBecomeActive: \(application)")
+		
+		UserDefaults.standard.set(UserDefaults.standard.integer(forKey: CommonConfig.Keys.sessionsCount) + 1, forKey: CommonConfig.Keys.sessionsCount)
 	}
 	
 	open func applicationWillTerminate(_ application: UIApplication) {
@@ -169,7 +173,7 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 	}
 	
 	public func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-					 fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+									fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
 		// If you are receiving a notification message while your app is in the background,
 		// this callback will not be fired till the user taps on the notification launching the application.
 		// TODO: Handle data of notification
@@ -202,11 +206,11 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		// Process the URL.
 		// example: myphotoapp:Vacation?index=1
 		guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
-			  let path = components.path,
-			  let params = components.queryItems else {
-				  NSLog("--  \(TAG) | Invalid URL or album path missing")
-				  return false
-			  }
+				let path = components.path,
+				let params = components.queryItems else {
+					NSLog("--  \(TAG) | Invalid URL or album path missing")
+					return false
+				}
 		
 		if let index = params.first(where: { $0.name == "index" })?.value {
 			NSLog("--  \(TAG) | path = \(path) | index = \(index)")
@@ -231,8 +235,8 @@ class UserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDelegat
 	
 	// Receive displayed notifications for iOS 10 devices.
 	func userNotificationCenter(_ center: UNUserNotificationCenter,
-								willPresent notification: UNNotification,
-								withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+										 willPresent notification: UNNotification,
+										 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
 		let userInfo = notification.request.content.userInfo
 		NSLog("\(UserNotificationCenterDelegate.TAG) -- Noti: \(notification) | userInfo: \(userInfo)")
 		
@@ -248,8 +252,8 @@ class UserNotificationCenterDelegate : NSObject, UNUserNotificationCenterDelegat
 	}
 	
 	func userNotificationCenter(_ center: UNUserNotificationCenter,
-								didReceive response: UNNotificationResponse,
-								withCompletionHandler completionHandler: @escaping () -> Void) {
+										 didReceive response: UNNotificationResponse,
+										 withCompletionHandler completionHandler: @escaping () -> Void) {
 		let userInfo = response.notification.request.content.userInfo
 		NSLog("\(UserNotificationCenterDelegate.TAG) -- Noti resp: \(response) | userInfo: \(userInfo)")
 		

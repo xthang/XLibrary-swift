@@ -63,6 +63,8 @@ open class BaseSceneDelegate: UIResponder, UIWindowSceneDelegate {
 		// Called as the scene transitions from the background to the foreground.
 		// Use this method to undo the changes made on entering the background.
 		NSLog("\(TAG) -- sceneWillEnterForeground: \(scene.hash)")
+		
+		UserDefaults.standard.set(UserDefaults.standard.integer(forKey: CommonConfig.Keys.sessionsCount) + 1, forKey: CommonConfig.Keys.sessionsCount)
 	}
 	
 	public func sceneDidEnterBackground(_ scene: UIScene) {
