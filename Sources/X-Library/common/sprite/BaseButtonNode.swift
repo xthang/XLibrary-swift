@@ -64,6 +64,14 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		return responder
 	}
 	
+	var overlayView: SceneOverlay? {
+		var node: SKNode = self
+		while (node.parent != nil && !(node is SceneOverlay)) {
+			node = node.parent!
+		}
+		return node as? SceneOverlay
+	}
+	
 	/// Indicates whether the button is currently highlighted (pressed).
 	var isHighlighted = false {
 		// Animate to a pressed / unpressed state when the highlight state changes.
@@ -201,7 +209,17 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 			
 			// Forward the button press event through to the responder.
 			switch buttonIdentifier! {
-				case .close, .home, .play, .cancel, .pause, .resume, .replay, .back, .hint, .share:
+				case .close, .home, .play, .cancel, .pause, .resume, .replay, .back:
+					if let overlayView = overlayView {
+						let responder = self.responder
+						
+						overlayView.removeFromParent("buttonTriggered") { [weak self] in
+							responder.buttonTriggered(self!)
+						}
+					} else {
+						responder.buttonTriggered(self)
+					}
+				case .hint, .share:
 					responder.buttonTriggered(self)
 				case .sound:
 					isSelected = !isSelected

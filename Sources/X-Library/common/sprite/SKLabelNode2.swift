@@ -45,7 +45,7 @@ public class SKLabelNode2: SKNode {
 	
 	
 	init(fontTextureAtlas: SKTextureAtlas, fontMap: @escaping (SKTextureAtlas, Character) -> SKTexture, text: String? = nil) {
-		print("-------  \(TAG): \(String(describing: fontMap)) | \(text ?? "--")")
+		print("-------  \(TAG) | \(String(describing: fontMap)) | \(text ?? "--")")
 		
 		self.fontTextureAtlas = fontTextureAtlas
 		self.fontMap = fontMap
@@ -56,11 +56,27 @@ public class SKLabelNode2: SKNode {
 		self.addChild(textNodes)
 	}
 	
+	override init() {
+		print("-------  \(TAG)")
+		super.init()
+		
+		self.addChild(textNodes)
+	}
+	
 	required init?(coder aDecoder: NSCoder) {
-		print("-------  \(TAG) (coder:)")
+		print("-------  \(TAG) | (coder:)")
 		super.init(coder: aDecoder)
 		
 		self.addChild(textNodes)
+	}
+	
+	open override func copy(with zone: NSZone? = nil) -> Any {
+		print("--  \(TAG) | copy: \(zone as Any? ?? "--")")
+		
+		let n = super.copy(with: zone) as! SKLabelNode2
+		// n.textNodes = self.textNodes.copy() as! SKNode
+		
+		return n
 	}
 	
 	private func update(_ tag: String) {

@@ -80,22 +80,22 @@ open class BaseSKScene: SKScene {
 			disableTouchNode.removeFromParent()
 		} else if disableTouchNode.parent == nil {
 			disableTouchNode.isUserInteractionEnabled = true
-			disableTouchNode.zPosition = SceneLayer.disableAllLayer.rawValue
+			disableTouchNode.zPosition = SceneLayer.disableSceneLayer.rawValue
 			self.addChild(disableTouchNode)
 		}
 	}
 	
-	public func show(_ overlay: Popup) {
+	public func show(_ overlay: SceneOverlay) {
+		setUserInteraction(false)
+		overlay.willMove("\(TAG)|show", to: self)
 		addChild(overlay)
-		overlay.alpha = 0
-		overlay.run(SKAction.fadeIn(withDuration: 0.25))
-		overlay.updateScale()
+		overlay.didMove("\(TAG)|show", to: self)
 	}
 	
 	public func show(_ overlay: OverlayView) {
+		setUserInteraction(false)
 		overlays.append(overlay)
 		view!.addSubview(overlay)
-		setUserInteraction(false)
 	}
 	
 	public func playSound(_ audio: SKAudioNode, delay: TimeInterval? = nil) {

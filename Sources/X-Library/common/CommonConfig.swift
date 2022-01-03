@@ -36,6 +36,7 @@ public struct CommonConfig {
 		public static let sessionsCount = "sessions_count"
 		public static let gamesCount = "games_count"
 		public static let gameLevel = "gameLevel"
+		public static let bestScore = "best_score"
 		
 		public static let purchased = "purchased"
 		public static let coinCount = "coin-count"
