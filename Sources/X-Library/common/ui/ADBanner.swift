@@ -19,9 +19,10 @@ public class ADBanner: NSObject {
 	private var gAdBanner: GADBannerView
 	private var uADSBanner: UADSBannerView?
 	
-	var position: BannerPosition?
+	private var position: BannerPosition = .bottom
 	
-	var uAdLoaded = false
+	private var uAdLoaded = false
+	
 	
 	public init(_ tag: String) {
 		print("-------  \(TAG) | \(tag)")
@@ -39,20 +40,22 @@ public class ADBanner: NSObject {
 	
 	public func show(_ tag: String, viewController: UIViewController, position: BannerPosition? = nil) {
 		if Helper.adsRemoved {
-			NSLog("!-  \(TAG) | show in viewController: ads are removed")
+			NSLog("!-  \(TAG) | show in viewController [\(tag)]: ads are removed")
 			return
 		}
 		
 		rootViewController = viewController
 		gAdBanner.rootViewController = viewController
-		self.position = position
 		
 		if gAdBanner.responseInfo?.responseIdentifier != nil {
-			show("show|\(tag)|1", adBanner: gAdBanner)
+			show("show|\(tag)|1", adBanner: gAdBanner, position: position ?? self.position)
 		} else if uAdLoaded {
-			show("show|\(tag)|2", adBanner: uADSBanner!)
+			show("show|\(tag)|2", adBanner: uADSBanner!, position: position ?? self.position)
 		} else {
 			reloadAd("show|\(tag)")
+		}
+		if position != nil {
+			self.position = position!
 		}
 	}
 	
@@ -68,14 +71,15 @@ public class ADBanner: NSObject {
 		}
 		
 		// Step 2 - Determine the view width to use for the ad width.
+		// commented because safeAreaInsets change in portrait/landscape mode
 		let frame = { () -> CGRect in
 			// Here safe area is taken into account, hence the view frame is used
 			// after the view has been laid out.
-			if #available(iOS 11.0, *) {
-				return view.frame.inset(by: view.safeAreaInsets)
-			} else {
-				return view.frame
-			}
+			//	if #available(iOS 11.0, *) {
+			//		return view.frame.inset(by: view.safeAreaInsets)
+			//	} else {
+			return view.frame
+			//	}
 		}()
 		let viewWidth = min(frame.size.width, frame.size.height)
 		let newAdWidth = floor(viewWidth * (UIDevice.current.userInterfaceIdiom == .phone ? 0.95 : 0.85))
@@ -123,11 +127,13 @@ public class ADBanner: NSObject {
 		uAdLoaded = false
 	}
 	
-	private func show(_ tag: String, adBanner: UIView) {
-		if banner.superview != nil && banner.superview == rootViewController?.view {
-			print("!-  \(TAG) | [\(tag)] already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--")")
+	private func show(_ tag: String, adBanner: UIView, position: BannerPosition) {
+		if banner.superview != nil && banner.superview == rootViewController?.view
+				&& position == self.position {
+			print("!-  \(TAG) | [\(tag)] already shown in: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--") | \(position)")
 			return
 		}
+		print("!-  \(TAG) | show [\(tag)]: \(rootViewController?.view as Any? ?? rootViewController as Any? ?? "--") | \(position)")
 		
 		banner.removeFromSuperview()
 		adBanner.removeFromSuperview()
@@ -220,7 +226,7 @@ extension ADBanner: GADBannerViewDelegate {
 	public func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
 		print("<-- \(TAG) | GAds: bannerViewDidReceiveAd: \(rootViewController as Any? ?? "--") | \(bannerView.responseInfo?.adNetworkClassName as Any? ?? "--")")
 		
-		show("bannerViewDidReceiveAd", adBanner: bannerView)
+		show("bannerViewDidReceiveAd", adBanner: bannerView, position: position)
 	}
 	
 	public func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
@@ -265,7 +271,7 @@ extension ADBanner: UADSBannerViewDelegate {
 		print("<-- \(TAG) | UAds: bannerViewDidLoad: \(bannerView.placementId)")
 		
 		uAdLoaded = true
-		show("bannerViewDidLoad", adBanner: bannerView)
+		show("bannerViewDidLoad", adBanner: bannerView, position: position)
 	}
 	
 	public func bannerViewDidClick(_ bannerView: UADSBannerView) {

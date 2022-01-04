@@ -219,6 +219,9 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 					} else {
 						responder.buttonTriggered(self)
 					}
+				case .about:
+					let aboutView = UINib(nibName: "About", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+					scene!.view!.addSubview(aboutView)
 				case .hint, .share:
 					responder.buttonTriggered(self)
 				case .sound:
@@ -227,7 +230,17 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 					labelNode?.text = title
 					UserDefaults.standard.set(isSelected, forKey: CommonConfig.Settings.sound)
 					NotificationCenter.default.post(name: .sound, object: isSelected)
-				case .DEV, .about, .settings, .rate, .gameCenter, .leaderboards, .achievements, .ads:
+				case .rate:
+					Helper.showAppRatingDialog(TAG)
+				case .gameCenter:
+					GameCenterHelper.showGameCenter(TAG)
+				case .leaderboards:
+					GameCenterHelper.showGameCenterLeaderBoard(TAG)
+				case .achievements:
+					GameCenterHelper.showGameCenterAchievement(TAG)
+				case .ads:
+					Helper.showAdsRemovalDialog(TAG)
+				case .DEV, .settings:
 					fatalError("\(TAG) | Unsupported buttonNode with id '\(buttonIdentifier.rawValue)'")
 			}
 		}

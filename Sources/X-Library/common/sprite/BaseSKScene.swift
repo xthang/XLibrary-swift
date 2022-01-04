@@ -26,7 +26,7 @@ open class BaseSKScene: SKScene {
 	
 	
 	open override func sceneDidLoad() {
-		NSLog("--  \(TAG) | sceneDidLoad: \(hash) | \(frame)")
+		NSLog("--  \(TAG)|\(type(of: self)) | sceneDidLoad: \(hash) | \(frame)")
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(toggleMusic), name: .music, object: nil)
 		NotificationCenter.default.addObserver(self, selector: #selector(changeMusicVolume), name: .musicVolume, object: nil)
@@ -42,7 +42,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	open override func willMove(from view: SKView) {
-		NSLog("--  \(TAG) | willMove from view")
+		NSLog("--  \(TAG)|\(type(of: self)) | willMove from view")
 		super.willMove(from: view)
 		
 		// view.subviews.forEach { $0.removeFromSuperview() } // not working: it removes the next Overlay
@@ -50,27 +50,27 @@ open class BaseSKScene: SKScene {
 	}
 	
 	open override func didChangeSize(_ oldSize: CGSize) {
-		NSLog("--  \(TAG) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
+		NSLog("--  \(TAG)|\(type(of: self)) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
 		
 		disableTouchNode.size = self.size
 	}
 	
 	open func activate(_ tag: String, _ notification: NSNotification) {
-		NSLog("--  \(TAG) | activate [\(tag)]: \(hash)")
+		NSLog("--  \(TAG)|\(type(of: self)) | activate [\(tag)]: \(hash)")
 	}
 	
 	open func deactivate(_ tag: String, _ notification: NSNotification) {
-		NSLog("--  \(TAG) | deactivate [\(tag)]: \(hash)")
+		NSLog("--  \(TAG)|\(type(of: self)) | deactivate [\(tag)]: \(hash)")
 		
 		pause("deactivate|\(tag)")
 	}
 	
 	open func pause(_ tag: String) {
-		NSLog("--  \(TAG) | pause [\(tag)]: \(hash)")
+		NSLog("--  \(TAG)|\(type(of: self)) | pause [\(tag)]: \(hash)")
 	}
 	
 	open func resume(_ tag: String) {
-		NSLog("--  \(TAG) | resume [\(tag)]: \(hash)")
+		NSLog("--  \(TAG)|\(type(of: self)) | resume [\(tag)]: \(hash)")
 	}
 	
 	public func setUserInteraction(_ enabled: Bool) {
@@ -87,9 +87,15 @@ open class BaseSKScene: SKScene {
 	
 	public func show(_ overlay: SceneOverlay) {
 		setUserInteraction(false)
-		overlay.willMove("\(TAG)|show", to: self)
+		
+		if overlay.parent != nil {
+			print("--  \(TAG)|\(type(of: self)) | show overlay: already show")
+			return
+		}
+		
+		overlay.willMove("\(TAG)|\(type(of: self))|show", to: self)
 		addChild(overlay)
-		overlay.didMove("\(TAG)|show", to: self)
+		overlay.didMove("\(TAG)|\(type(of: self))|show", to: self)
 	}
 	
 	public func show(_ overlay: OverlayView) {
@@ -101,11 +107,11 @@ open class BaseSKScene: SKScene {
 	public func playSound(_ audio: SKAudioNode, delay: TimeInterval? = nil) {
 		if soundOn {
 			if !audioEngine.isRunning {
-				NSLog("--  \(TAG) | playSound: audioEngine.isRunning: not")
+				NSLog("--  \(TAG)|\(type(of: self)) | playSound: audioEngine.isRunning: not")
 				do {
 					try audioEngine.start()
 				} catch {
-					NSLog("--  \(TAG) | playSound: start Engine: error: \(error)")
+					NSLog("--  \(TAG)|\(type(of: self)) | playSound: start Engine: error: \(error)")
 				}
 			}
 			if delay != nil {
@@ -130,7 +136,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	@objc public func toggleSound(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | toggleSound: \(notification.object ?? "--")")
+		NSLog("--  \(TAG)|\(type(of: self)) | toggleSound: \(notification.object ?? "--")")
 		soundOn = notification.object as! Bool
 	}
 	
@@ -140,7 +146,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	@objc public func toggleMusic(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | toggleMusic: \(notification.object ?? "--")")
+		NSLog("--  \(TAG)|\(type(of: self)) | toggleMusic: \(notification.object ?? "--")")
 		musicOn = notification.object as! Bool
 	}
 	
@@ -150,7 +156,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	@objc public func toggleVibration(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | toggleVibration: \(notification.object ?? "--")")
+		NSLog("--  \(TAG)|\(type(of: self)) | toggleVibration: \(notification.object ?? "--")")
 		vibrationOn = notification.object as! Bool
 	}
 	
@@ -190,7 +196,7 @@ open class BaseSKScene: SKScene {
 	//	}
 	
 	@objc func handleAudioSessionRouteChange(_ notification: NSNotification) {
-		NSLog("--  \(TAG) | handleAudioSessionRouteChange: \(notification.object ?? "--") | \(notification.userInfo as Any? ?? "--") | audioEngine.isRunning: \(audioEngine.isRunning)")
+		NSLog("--  \(TAG)|\(type(of: self)) | handleAudioSessionRouteChange: \(notification.object ?? "--") | \(notification.userInfo as Any? ?? "--") | audioEngine.isRunning: \(audioEngine.isRunning)")
 		
 		guard
 			let userInfo = notification.userInfo,
@@ -198,19 +204,19 @@ open class BaseSKScene: SKScene {
 			let reason = AVAudioSession.RouteChangeReason(rawValue: reasonRaw.uintValue)
 		else { fatalError("!-  \(TAG) | Strange... could not get routeChange") }
 		
-		NSLog("--  \(TAG) | handleAudioSessionRouteChange: reasonRaw: \(reasonRaw) | reason: \(reason)")
+		NSLog("--  \(TAG)|\(type(of: self)) | handleAudioSessionRouteChange: reasonRaw: \(reasonRaw) | reason: \(reason)")
 		
 		// Switch over the route change reason.
 		switch reason {
 			case .newDeviceAvailable: // New device found.
 				let session = AVAudioSession.sharedInstance()
 				let headphonesConnected = hasHeadphones(in: session.currentRoute)
-				NSLog("--  \(TAG) | handleAudioSessionRouteChange: newDeviceAvailable: headphonesConnected: \(headphonesConnected)")
+				NSLog("--  \(TAG)|\(type(of: self)) | handleAudioSessionRouteChange: newDeviceAvailable: headphonesConnected: \(headphonesConnected)")
 			case .oldDeviceUnavailable: // Old device removed.
 				if let previousRoute =
 						userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription {
 					let headphonesConnected = hasHeadphones(in: previousRoute)
-					NSLog("--  \(TAG) | handleAudioSessionRouteChange: oldDeviceUnavailable: headphonesConnected: \(headphonesConnected)")
+					NSLog("--  \(TAG)|\(type(of: self)) | handleAudioSessionRouteChange: oldDeviceUnavailable: headphonesConnected: \(headphonesConnected)")
 				}
 			default: ()
 		}

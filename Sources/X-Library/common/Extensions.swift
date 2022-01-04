@@ -49,6 +49,8 @@ extension Notification.Name {
 	
 	public static let coinChanged = Notification.Name("coinChanged")
 	
+	public static let homeEntered = Notification.Name("homeEntered")
+	public static let levelEntered = Notification.Name("levelEntered")
 	public static let levelFinished = Notification.Name("levelFinished")
 }
 

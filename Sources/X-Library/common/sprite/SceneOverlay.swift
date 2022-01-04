@@ -60,15 +60,19 @@ open class SceneOverlay: SKSpriteNode {
 	}
 	
 	open func removeFromParent(_ tag: String, completion: (() -> Void)? = nil) {
-		if parent == nil {
-			print("--  \(TAG) | removeFromParent [\(tag)]: already removed")
+		let a = action(forKey: "remove")
+		if parent == nil || a != nil {
+			print("--  \(TAG) | removeFromParent [\(tag)]: already removed: \(parent == nil) | \(a != nil)")
 			return
 		}
-			
-		run(SKAction.fadeOut(withDuration: 0.25)) { [weak self] in
-			self!.willMove("removeFromParent|\(tag)", from: self!.scene!)
-			self!.superRemoveFromParent()
-			completion?()
-		}
+		
+		run(SKAction.sequence([
+			SKAction.fadeOut(withDuration: 0.25),
+			SKAction.run { [weak self] in
+				self!.willMove("removeFromParent|\(tag)", from: self!.scene!)
+				self!.superRemoveFromParent()
+				completion?()
+			},
+		]), withKey: "remove")
 	}
 }
