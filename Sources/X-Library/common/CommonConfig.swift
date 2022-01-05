@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import CoreGraphics
 
 public struct CommonConfig {
 	
@@ -10,6 +11,7 @@ public struct CommonConfig {
 	public static let scoresKey = "scores"
 	
 	public static let fontName = "Chalkboard SE"
+	public static let fontSize: CGFloat = 19
 	
 	public static let dateFormat = "yyyy-MM-dd HH:mm:ss"
 	public static let dateFormatter: DateFormatter = {

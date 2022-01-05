@@ -72,6 +72,15 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		return node as? SceneOverlay
 	}
 	
+	var isEnabled = false {
+		didSet {
+			isUserInteractionEnabled = isEnabled
+			
+			imgNode?.alpha = isEnabled ? 1 : 0.7
+			labelNode?.colorBlendFactor = isEnabled ? 0.7 : 0.0
+		}
+	}
+	
 	/// Indicates whether the button is currently highlighted (pressed).
 	var isHighlighted = false {
 		// Animate to a pressed / unpressed state when the highlight state changes.
@@ -182,12 +191,24 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		// Enable user interaction on the button node to detect tap and click events.
 		isUserInteractionEnabled = true
 		
+		update(nil)
+		
 		switch buttonIdentifier {
 			case .DEV:
 #if !DEBUG
 				isHidden = true
 #endif
 				break
+			case .sound, .ads:
+				if #available(iOS 13.0, *) {
+					NotificationCenter.default.addObserver(self, selector: #selector(self.update), name: UIScene.willEnterForegroundNotification, object: nil)
+				} else {
+					NotificationCenter.default.addObserver(self, selector: #selector(self.update), name: UIApplication.willEnterForegroundNotification, object: nil)
+				}
+				
+				if buttonIdentifier == .ads {
+					NotificationCenter.default.addObserver(self, selector: #selector(self.update), name: .AdsStatusChanged, object: nil)
+				}
 			default: break
 		}
 	}
@@ -201,6 +222,35 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		newButton.selectedTexture = selectedTexture?.copy() as? SKTexture
 		
 		return newButton
+	}
+	
+	@objc func update(_ notification: NSNotification?) {
+		switch buttonIdentifier! {
+			case .sound:
+				let isOn = Helper.soundOn
+				let title = NSLocalizedString("SOUND: \(isOn ? "ON" : "OFF")", comment: "")
+				labelNode?.text = title
+				let t = SKTexture(imageNamed: "sound_\(isOn ? "on" : "off")")
+				t.filteringMode = .nearest
+				imgNode?.texture = t
+			case .ads:
+				let title: String
+				let t: SKTexture
+				if !(notification?.object as? Bool ?? true) || Helper.adsRemoved {
+					title = NSLocalizedString("ADS REMOVED", comment: "")
+					t = SKTexture(imageNamed: "button_ads_removed")
+					isEnabled = false
+				} else {
+					title = NSLocalizedString("REMOVE ADS", comment: "")
+					t = SKTexture(imageNamed: "button_ads")
+					isEnabled = true
+				}
+				t.filteringMode = .nearest
+				labelNode?.text = title
+				imgNode?.texture = t
+			default:
+				break
+		}
 	}
 	
 	open func buttonTriggered() {

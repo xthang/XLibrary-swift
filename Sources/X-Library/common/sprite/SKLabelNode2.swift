@@ -57,21 +57,21 @@ public class SKLabelNode2: SKNode {
 	}
 	
 	override init() {
-		print("-------  \(TAG)")
+		// print("-------  \(TAG)")
 		super.init()
 		
 		self.addChild(textNodes)
 	}
 	
 	required init?(coder aDecoder: NSCoder) {
-		print("-------  \(TAG) | (coder:)")
+		// print("-------  \(TAG) | (coder:)")
 		super.init(coder: aDecoder)
 		
 		self.addChild(textNodes)
 	}
 	
 	open override func copy(with zone: NSZone? = nil) -> Any {
-		print("--  \(TAG) | copy: \(zone as Any? ?? "--")")
+		// print("--  \(TAG) | copy: \(zone as Any? ?? "--")")
 		
 		let n = super.copy(with: zone) as! SKLabelNode2
 		// n.textNodes = self.textNodes.copy() as! SKNode

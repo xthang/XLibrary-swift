@@ -23,11 +23,15 @@ public struct ThemeSettings {
 	
 	// Common
 	
+	public var fontName: String?
+	public var fontSize: CGFloat?
+	
 	public var textColor: UIColor?
 	public var backgroundColor: UIColor?
 	
 	// Popup
 	
+	public var popupStyle: PopupAlert.Style?
 	public var popupBackgroundColor: UIColor?
 	public var popupCornerRadiusRatio: CGFloat?
 	public var popupShadowRadius: CGFloat?
@@ -35,13 +39,23 @@ public struct ThemeSettings {
 	
 	// Button
 	
+	public var buttonLayout: PopupAlert.ButtonLayout?
+	public var buttonHeight: CGFloat?
+	
 	public var buttonBackgroundColor: UIColor?
+	public var buttonBackgroundImage: UIImage?
 	public var buttonTextColor: UIColor?
+	
 	public var buttonPrimary1BackgroundColor: UIColor?
+	public var buttonPrimary1BackgroundImage: UIImage?
 	public var buttonPrimary1TextColor: UIColor?
+	
 	public var buttonHighlightedBackgroundColor: UIColor?
+	public var buttonHighlightedBackgroundImage: UIImage?
 	public var buttonHighlightedTextColor: UIColor?
+	
 	public var buttonDisabledBackgroundColor: UIColor?
+	public var buttonDisabledBackgroundImage: UIImage?
 	public var buttonDisabledTextColor: UIColor?
 	
 	public var buttonCornerRadiusRatio: CGFloat?
@@ -60,6 +74,10 @@ public struct ThemeSettings {
 		let plist = FileManager.default.contents(atPath: path)! //or Data(contentsOf: url)
 		let themeItems = try! PropertyListSerialization.propertyList(from: plist, format: nil) as! [String: AnyObject]
 		
+		fontName = themeItems["fontName"] as? String
+		if let i = themeItems["fontSizePercent"] as? CGFloat {
+			fontSize = UIScreen.screens.first!.bounds.height * i
+		}
 		if let i = themeItems["textColor"], i as? String != "" {
 			textColor = try! ThemeSettings.getColor(i)
 		}
@@ -67,6 +85,9 @@ public struct ThemeSettings {
 			backgroundColor = try! ThemeSettings.getColor(i)
 		}
 		
+		if let i = themeItems["popupStyle"] as? String {
+			popupStyle = PopupAlert.Style(rawValue: i)
+		}
 		if let i = themeItems["popupBackgroundColor"], i as? String != "" {
 			popupBackgroundColor = try! ThemeSettings.getColor(themeItems["popupBackgroundColor"]!)
 		}
@@ -76,27 +97,51 @@ public struct ThemeSettings {
 			popupShadowColor = try! ThemeSettings.getColor(i)
 		}
 		
+		if let i = themeItems["buttonLayout"] as? String {
+			buttonLayout = PopupAlert.ButtonLayout(rawValue: i)
+		}
+		buttonHeight = themeItems["buttonHeight"] as? CGFloat
+		
 		if let i = themeItems["buttonBackgroundColor"], i as? String != "" {
 			buttonBackgroundColor = try! ThemeSettings.getColor(i)
+		}
+		if let i = themeItems["buttonBackgroundImage"] as? String {
+			buttonBackgroundImage = UIImage(named: i)
 		}
 		if let i = themeItems["buttonTextColor"], i as? String != "" {
 			buttonTextColor = try! ThemeSettings.getColor(i)
 		}
+		
 		if let i = themeItems["buttonPrimary1BackgroundColor"], i as? String != "" {
 			buttonPrimary1BackgroundColor = try! ThemeSettings.getColor(i)
+		}
+		if let i = themeItems["buttonPrimary1BackgroundImage"] as? String {
+			buttonPrimary1BackgroundImage = UIImage(named: i)
 		}
 		if let i = themeItems["buttonPrimary1TextColor"], i as? String != "" {
 			buttonPrimary1TextColor = try! ThemeSettings.getColor(i)
 		}
+		
 		if let i = themeItems["buttonHighlightedBackgroundColor"], i as? String != "" {
 			buttonHighlightedBackgroundColor = try! ThemeSettings.getColor(i)
+		}
+		if let i = themeItems["buttonHighlightedBackgroundImage"] as? String {
+			buttonHighlightedBackgroundImage = UIImage(named: i)
 		}
 		if let c = themeItems["buttonHighlightedTextColor"], c as? String != "" {
 			buttonHighlightedTextColor = try! ThemeSettings.getColor(c)
 		}
+		
 		if let i = themeItems["buttonDisabledBackgroundColor"], i as? String != "" {
 			buttonDisabledBackgroundColor = try! ThemeSettings.getColor(i)
 		}
+		if let i = themeItems["buttonDisabledBackgroundImage"] as? String {
+			buttonDisabledBackgroundImage = UIImage(named: i)
+		}
+		if let i = themeItems["buttonDisabledTextColor"], i as? String != "" {
+			buttonDisabledTextColor = try! ThemeSettings.getColor(i)
+		}
+		
 		if let f = themeItems["snackbarFont"] as? String, f != "", let fs = themeItems["snackbarFontSize"] as? CGFloat {
 			snackbarFont = UIFont(name: f, size: fs)
 		}

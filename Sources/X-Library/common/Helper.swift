@@ -634,7 +634,7 @@ public struct Helper {
 		task.resume()
 	}
 	
-	public static func openSystemSettings(style: PopupAlert.Style = .style1, title: String) {
+	public static func openSystemSettings(style: PopupAlert.Style = Theme.current.settings.popupStyle ?? .style1, title: String) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -714,7 +714,7 @@ public struct Helper {
 		}
 	}
 	
-	public static func showAppRatingDialog(_ tag: String, style: PopupAlert.Style = .style1, confirm: Bool = false) {
+	public static func showAppRatingDialog(_ tag: String, style: PopupAlert.Style = Theme.current.settings.popupStyle ?? .style1, confirm: Bool = false) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
@@ -761,7 +761,7 @@ public struct Helper {
 		}
 	}
 	
-	public static func showAdsRemovalDialog(_ tag: String, style: PopupAlert.Style = .style1) {
+	public static func showAdsRemovalDialog(_ tag: String, style: PopupAlert.Style = Theme.current.settings.popupStyle ?? .style1) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController

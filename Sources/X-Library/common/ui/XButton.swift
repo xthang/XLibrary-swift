@@ -57,12 +57,7 @@ open class XButton: UIButton, IXButton {
 	
 	public var style: ButtonStyle? {
 		didSet {
-			switch style {
-				case .primary1:
-					backgroundColor = Theme.current.settings.buttonPrimary1BackgroundColor
-					setTitleColor(Theme.current.settings.buttonPrimary1TextColor, for: .normal)
-				default: break
-			}
+			applyStyle("didSet", style!)
 		}
 	}
 	
@@ -174,6 +169,14 @@ open class XButton: UIButton, IXButton {
 		if let c = theme.settings.buttonShadowColor { shadowColor = c }
 	}
 	
+	func applyStyle(_ tag: String, _ style: ButtonStyle) {
+		switch style {
+			case .primary1:
+				backgroundColor = Theme.current.settings.buttonPrimary1BackgroundColor!
+				setTitleColor(Theme.current.settings.buttonPrimary1TextColor!, for: .normal)
+		}
+	}
+	
 	func playSound() {
 		if Helper.soundOn && soundEnabled { Singletons.instance.btnSound?.play() }
 	}
@@ -184,11 +187,7 @@ public class ImageButton: XButton {
 	override func initiate(_ tag: String) {
 		super.initiate(tag)
 		
-		if let bgImg = backgroundImage(for: .normal) {
-			let img = bgImg.resizableImage(
-				withCapInsets: UIEdgeInsets(top: bgImg.size.height * 0.5, left: bgImg.size.width * 0.5,
-											bottom: bgImg.size.height * 0.5, right: bgImg.size.width * 0.5),
-				resizingMode: .stretch)
+		if let img = backgroundImage(for: .normal) {
 			setBackgroundImage(img, for: .normal)
 		}
 		
@@ -199,17 +198,34 @@ public class ImageButton: XButton {
 	public override func setBackgroundImage(_ image: UIImage?, for state: UIControl.State) {
 		let img = image?.resizableImage(
 			withCapInsets: UIEdgeInsets(top: image!.size.height * 0.5, left: image!.size.width * 0.5,
-										bottom: image!.size.height * 0.5, right: image!.size.width * 0.5),
+												 bottom: image!.size.height * 0.5, right: image!.size.width * 0.5),
 			resizingMode: .stretch)
 		super.setBackgroundImage(img, for: state)
+	}
+	
+	public override func applyTheme(_ tag: String, _ theme: Theme) {
+		if let c = theme.settings.buttonTextColor { setTitleColor(c, for: .normal) }
+		if let c = theme.settings.buttonHighlightedTextColor { setTitleColor(c, for: .highlighted) }
+		if let c = theme.settings.buttonDisabledTextColor { setTitleColor(c, for: .disabled) }
+		
+		if let r = theme.settings.buttonShadowRadius { shadowRadius = r }
+		if let c = theme.settings.buttonShadowColor { shadowColor = c }
+	}
+	
+	internal override func applyStyle(_ tag: String, _ style: ButtonStyle) {
+		switch style {
+			case .primary1:
+				setBackgroundImage(Theme.current.settings.buttonPrimary1BackgroundImage!, for: .normal)
+				setTitleColor(Theme.current.settings.buttonPrimary1TextColor!, for: .normal)
+		}
 	}
 	
 	override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		// if !(self is SwitchButton) {
 		UIView.animate(withDuration: 0,
-					   delay: 0,
-					   options: .allowUserInteraction,
-					   animations: { [weak self] in
+							delay: 0,
+							options: .allowUserInteraction,
+							animations: { [weak self] in
 			self?.transform = CGAffineTransform(translationX: 0, y: 5)
 		})
 		super.touchesBegan(touches, with: event)
@@ -217,9 +233,9 @@ public class ImageButton: XButton {
 	
 	override open func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
 		UIView.animate(withDuration: 0.1,
-					   delay: 0,
-					   options: .allowUserInteraction,
-					   animations: { [weak self] in
+							delay: 0,
+							options: .allowUserInteraction,
+							animations: { [weak self] in
 			self?.transform = .identity
 		})
 		super.touchesEnded(touches, with: event)
@@ -230,9 +246,9 @@ public class TabButton: XButton {
 	
 	override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		UIView.animate(withDuration: 0,
-					   delay: 0,
-					   options: .allowUserInteraction,
-					   animations: { [weak self] in
+							delay: 0,
+							options: .allowUserInteraction,
+							animations: { [weak self] in
 			self?.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
 		})
 		super.touchesBegan(touches, with: event)
@@ -246,9 +262,9 @@ public class TabButton: XButton {
 	public func onSelected() {
 		transform = .identity
 		UIView.animate(withDuration: 0.1,
-					   delay: 0,
-					   options: .allowUserInteraction,
-					   animations: { [weak self] in
+							delay: 0,
+							options: .allowUserInteraction,
+							animations: { [weak self] in
 			self?.transform = CGAffineTransform(translationX: 0, y: (self?.frame.height ?? 0) * 0.20)
 		})
 	}
@@ -262,8 +278,8 @@ open class XButton2: UIControl, IXButton {
 		didSet {
 			switch style {
 				case .primary1:
-					backgroundColor = Theme.current.settings.buttonPrimary1BackgroundColor
-					setTitleColor(Theme.current.settings.buttonPrimary1TextColor, for: .normal)
+					backgroundColor = Theme.current.settings.buttonPrimary1BackgroundColor!
+					setTitleColor(Theme.current.settings.buttonPrimary1TextColor!, for: .normal)
 				default: break
 			}
 		}
@@ -413,8 +429,8 @@ open class XButton2: UIControl, IXButton {
 	}
 	
 	open func setTitleColor(_ color: UIColor?, for state: UIControl.State) {
-        // TODO: this
-        titleLabel?.textColor = color
+		// TODO: this
+		titleLabel?.textColor = color
 	}
 	
 	open func setTitleShadowColor(_ color: UIColor?, for state: UIControl.State) {
