@@ -50,8 +50,8 @@ extension Notification.Name {
 	public static let coinChanged = Notification.Name("coinChanged")
 	
 	public static let homeEntered = Notification.Name("homeEntered")
-	public static let levelEntered = Notification.Name("levelEntered")
-	public static let levelFinished = Notification.Name("levelFinished")
+	public static let gameEntered = Notification.Name("gameEntered")
+	public static let gameFinished = Notification.Name("gameFinished")
 }
 
 extension UIControl.Event {
@@ -408,6 +408,14 @@ extension UIImage {
 extension SKScene {
 	/// receive keyboard presses from ViewController
 	@objc open func pressesDidBegin(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
+}
+
+extension GKScene {
+	public convenience init(skScene: SKScene.Type) {
+		self.init()
+		
+		self.rootNode = skScene.init()
+	}
 }
 
 extension GKError {

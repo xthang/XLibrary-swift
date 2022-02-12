@@ -41,18 +41,18 @@ open class BaseSKScene: SKScene {
 		
 	}
 	
+	open override func didChangeSize(_ oldSize: CGSize) {
+		NSLog("--  \(TAG)|\(type(of: self)) | didChangeSize: \(oldSize) -> \(size) | \(view?.frame as Any? ?? "--") | \(frame) | \(scaleMode.rawValue)")
+		
+		disableTouchNode.size = self.size
+	}
+	
 	open override func willMove(from view: SKView) {
 		NSLog("--  \(TAG)|\(type(of: self)) | willMove from view")
 		super.willMove(from: view)
 		
 		// view.subviews.forEach { $0.removeFromSuperview() } // not working: it removes the next Overlay
 		overlays.forEach { $0.removeFromSuperview() }
-	}
-	
-	open override func didChangeSize(_ oldSize: CGSize) {
-		NSLog("--  \(TAG)|\(type(of: self)) | didChangeSize: \(view?.frame as Any? ?? "--") | \(frame)")
-		
-		disableTouchNode.size = self.size
 	}
 	
 	open func activate(_ tag: String, _ notification: NSNotification) {
@@ -73,7 +73,7 @@ open class BaseSKScene: SKScene {
 		NSLog("--  \(TAG)|\(type(of: self)) | resume [\(tag)]: \(hash)")
 	}
 	
-	public func setUserInteraction(_ enabled: Bool) {
+	public func setUserInteraction(_ tag: String, _ enabled: Bool) {
 		isUserInteractionEnabled = enabled
 		
 		if enabled {
@@ -86,7 +86,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	public func show(_ overlay: SceneOverlay) {
-		setUserInteraction(false)
+		setUserInteraction("showOverlay", false)
 		
 		if overlay.parent != nil {
 			print("--  \(TAG)|\(type(of: self)) | show overlay: already show")
@@ -99,7 +99,7 @@ open class BaseSKScene: SKScene {
 	}
 	
 	public func show(_ overlay: OverlayView) {
-		setUserInteraction(false)
+		setUserInteraction("showOverlay", false)
 		overlays.append(overlay)
 		view!.addSubview(overlay)
 	}

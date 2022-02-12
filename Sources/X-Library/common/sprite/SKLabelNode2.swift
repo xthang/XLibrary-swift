@@ -56,7 +56,7 @@ public class SKLabelNode2: SKNode {
 		self.addChild(textNodes)
 	}
 	
-	override init() {
+	public override init() {
 		// print("-------  \(TAG)")
 		super.init()
 		

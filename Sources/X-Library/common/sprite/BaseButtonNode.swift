@@ -177,6 +177,25 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		}
 		self.buttonIdentifier = buttonIdentifier
 		
+		initiate("1")
+		update(nil)
+	}
+	
+	public init(id: ButtonIdentifier, texture: SKTexture) {
+		super.init(texture: nil, color: .clear, size: .zero)
+		
+		self.buttonIdentifier = id
+		self.name = id.rawValue
+		
+		let imgNode = SKSpriteNode(texture: texture)
+		imgNode.name = "img"
+		addChild(imgNode)
+		
+		initiate("2")
+		update(nil)
+	}
+	
+	func initiate(_ tag: String) {
 		// Remember the button's default texture (taken from its texture in the scene).
 		defaultTexture = texture
 		
@@ -190,8 +209,6 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 		
 		// Enable user interaction on the button node to detect tap and click events.
 		isUserInteractionEnabled = true
-		
-		update(nil)
 		
 		switch buttonIdentifier {
 			case .DEV:

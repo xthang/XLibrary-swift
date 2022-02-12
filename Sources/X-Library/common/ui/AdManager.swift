@@ -28,7 +28,7 @@ public class AdManager: NSObject {
 		if !UnityAds.isSupported() {
 			NSLog("!-  \(TAG) | UnityAds is not supported")
 		} else if AppConfig.unityAdEnabled {
-			UnityAds.initialize(AppConfig.unityGameID, testMode: false, enablePerPlacementLoad: true, initializationDelegate: AdManager.shared)
+			UnityAds.initialize(AppConfig.unityGameID, testMode: false, initializationDelegate: AdManager.shared)
 		}
 	}
 }

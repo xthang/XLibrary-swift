@@ -13,7 +13,7 @@ open class SceneOverlay: SKSpriteNode {
 	
 	
 	public static func initiate(fileName: String, zPosition: CGFloat = SceneLayer.popup.rawValue) -> SceneOverlay {
-		print("-------  \(TAG) [\(fileName)]")
+		// print("-------  \(TAG) [\(fileName)]")
 		
 		let overlayScene = SKScene(fileNamed: fileName)!
 		let contentTemplateNode = overlayScene.childNode(withName: "Overlay") as! SceneOverlay
@@ -31,12 +31,22 @@ open class SceneOverlay: SKSpriteNode {
 		return overlay
 	}
 	
+	public class func initiate(zPosition: CGFloat = SceneLayer.popup.rawValue) -> SceneOverlay {
+		let overlay = self.init()
+		
+		overlay.zPosition = zPosition
+		
+		overlay.sceneDidLoad("init()")
+		
+		return overlay
+	}
+	
 	open func sceneDidLoad(_ tag: String) {
-		print("--  \(TAG) | sceneDidLoad [\(tag)]: \(isPaused)")
+		// print("--  \(TAG) | sceneDidLoad [\(tag)]: \(isPaused)")
 	}
 	
 	open func willMove(_ tag: String, to scene: SKScene) {
-		print("--  \(TAG) | willMove to scene [\(tag)]")
+		print("--  \(TAG) | willMove to scene [\(tag)] | \(scene.frame) | \(frame)")
 		
 		size = scene.frame.size
 	}
@@ -56,7 +66,7 @@ open class SceneOverlay: SKSpriteNode {
 	}
 	
 	open override func removeFromParent() {
-		removeFromParent("x", completion: nil)
+		removeFromParent("x")
 	}
 	
 	open func removeFromParent(_ tag: String, completion: (() -> Void)? = nil) {

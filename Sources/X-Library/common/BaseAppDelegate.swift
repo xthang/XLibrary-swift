@@ -39,6 +39,13 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		
 		try? AVAudioSession.sharedInstance().setCategory(.ambient)
 		
+		NotificationCenter.default.addObserver(forName: UIApplication.userDidTakeScreenshotNotification, object: nil, queue: .main) { notification in
+			NSLog("--  \(BaseAppDelegate.TAG) | Notification.userDidTakeScreenshot: \(notification.object!)")
+#if DEBUG
+			Snackbar.i("[Screenshot]")
+#endif
+		}
+		
 		_ = Singletons.instance
 		
 		// Register for remote notifications. This shows a permission dialog on first run, to

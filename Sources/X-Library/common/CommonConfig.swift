@@ -42,7 +42,7 @@ public struct CommonConfig {
 		
 		public static let purchased = "purchased"
 		public static let coinCount = "coin-count"
-		public static let lastDailyRewardingTime = "lastDailyRewardingTime"
+		public static let lastDailyRewardingTime = "last_daily_rewarding_time"
 	}
 }
 
