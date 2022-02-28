@@ -22,6 +22,10 @@ public struct GameCenterHelper {
 				GKLocalPlayer.local.register(xGKLocalPlayerListener())
 				if let bestLocal = ScoreData.getHishest("authenticateLocalPlayer") { submitScore("authenticateLocalPlayer", bestLocal.score) }
 				state = true
+				
+				// save player info to log data in the next session
+				let playerInfo = Helper.buildGamePlayerInfo("\(TAG)|authenticateLocalPlayer")
+				UserDefaults.standard.set(NSKeyedArchiver.archivedData(withRootObject: playerInfo), forKey: CommonConfig.Keys.gameCenterPlayerInfo)
 			} else {
 				NSLog("!-  \(TAG) | authen [\(tag)]: NotOK: \(GKLocalPlayer.local.isAuthenticated)")
 			}

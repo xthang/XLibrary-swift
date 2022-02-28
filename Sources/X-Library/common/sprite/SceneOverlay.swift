@@ -78,9 +78,9 @@ open class SceneOverlay: SKSpriteNode {
 		
 		run(SKAction.sequence([
 			SKAction.fadeOut(withDuration: 0.25),
-			SKAction.run { [weak self] in
-				self!.willMove("removeFromParent|\(tag)", from: self!.scene!)
-				self!.superRemoveFromParent()
+			SKAction.run { [unowned self] in
+				self.willMove("removeFromParent|\(tag)", from: self.scene!)
+				self.superRemoveFromParent()
 				completion?()
 			},
 		]), withKey: "remove")

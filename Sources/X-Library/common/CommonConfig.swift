@@ -40,6 +40,8 @@ public struct CommonConfig {
 		public static let gameLevel = "gameLevel"
 		public static let bestScore = "best_score"
 		
+		public static let gameCenterPlayerInfo = "game-center-player-info"
+		
 		public static let purchased = "purchased"
 		public static let coinCount = "coin-count"
 		public static let lastDailyRewardingTime = "last_daily_rewarding_time"

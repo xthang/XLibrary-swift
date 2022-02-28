@@ -96,8 +96,8 @@ open class BaseSceneButton: XButton, IButton {
 			case .close, .home, .play, .cancel, .pause, .resume, .replay:
 				let responder = self.responder
 				
-				rootView.dismissView(self) { [weak self] in
-					responder?.buttonTriggered(self!)
+				rootView.dismissView(self) { [unowned self] in
+					responder?.buttonTriggered(self)
 				}
 			case .about:
 				let aboutView = UINib(nibName: "About", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView

@@ -406,8 +406,10 @@ extension UIImage {
 }
 
 extension SKScene {
+	@objc open func willMove(_ tag: String, to view: SKView) {}
+	
 	/// receive keyboard presses from ViewController
-	@objc open func pressesDidBegin(_ presses: Set<UIPress>, with event: UIPressesEvent?) {}
+	@objc open func pressesDidBegin(_ tag: String, _ presses: Set<UIPress>, with event: UIPressesEvent?) {}
 }
 
 extension GKScene {

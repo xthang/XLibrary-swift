@@ -280,8 +280,8 @@ open class BaseButtonNode: SKSpriteNode, IButton {
 					if let overlayView = overlayView {
 						let responder = self.responder
 						
-						overlayView.removeFromParent("buttonTriggered") { [weak self] in
-							responder.buttonTriggered(self!)
+						overlayView.removeFromParent("buttonTriggered") { [unowned self] in
+							responder.buttonTriggered(self)
 						}
 					} else {
 						responder.buttonTriggered(self)

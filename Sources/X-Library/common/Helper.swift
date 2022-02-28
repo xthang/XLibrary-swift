@@ -103,14 +103,30 @@ public struct Helper {
 			else { err["user-info"] = "[\(tag)] \(error)" }
 		}
 		
+		if !GKLocalPlayer.local.isAuthenticated,
+			let playerInfoData = UserDefaults.standard.object(forKey: CommonConfig.Keys.gameCenterPlayerInfo) as? Data,
+			var playerInfo = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(playerInfoData) as? [String: Any] {
+			playerInfo["type"] = 2
+			data["game-player"] = playerInfo
+		} else {
+			data["game-player"] = buildGamePlayerInfo(tag)
+		}
+		
+		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
+		
+		return data
+	}
+	
+	public static func buildGamePlayerInfo(_ tag: String) -> [String: Any] {
 		var gamePlayer: [String: Any] = [:]
+		
+		gamePlayer["isAuthenticated"] = GKLocalPlayer.local.isAuthenticated
 		gamePlayer["playerID"] = GKLocalPlayer.local.playerID
 		gamePlayer["guestIdentifier"] = GKLocalPlayer.local.guestIdentifier
 		gamePlayer["alias"] = GKLocalPlayer.local.alias
 		gamePlayer["displayName"] = GKLocalPlayer.local.displayName
 		gamePlayer["friends"] = GKLocalPlayer.local.friends?.count
 		gamePlayer["isFriend"] = GKLocalPlayer.local.isFriend
-		gamePlayer["isAuthenticated"] = GKLocalPlayer.local.isAuthenticated
 		gamePlayer["isUnderage"] = GKLocalPlayer.local.isUnderage
 		if #available(iOS 12.4, *) {
 			gamePlayer["gamePlayerID"] = GKLocalPlayer.local.gamePlayerID
@@ -123,11 +139,10 @@ public struct Helper {
 			gamePlayer["isInvitable"] = GKLocalPlayer.local.isInvitable
 			gamePlayer["isPersonalizedCommunicationRestricted"] = GKLocalPlayer.local.isPersonalizedCommunicationRestricted
 		}
-		data["game-player"] = gamePlayer
 		
-		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
+		NSLog("--> \(TAG) | build Game Player Info [\(tag)]: \(gamePlayer)")
 		
-		return data
+		return gamePlayer
 	}
 	
 	public static func buildDeviceInfo(_ tag: String, _ err: inout [String: Any], _ suppressError: Bool) throws -> [String: Any] {
