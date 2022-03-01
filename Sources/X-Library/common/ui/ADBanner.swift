@@ -159,22 +159,37 @@ public class ADBanner: NSObject {
 		}
 		let attribute: NSLayoutConstraint.Attribute = position == .top ? .top : .bottom
 		
-		banner.addConstraints(
-			[NSLayoutConstraint(item: adBanner,
-									  attribute: attribute,
-									  relatedBy: .equal,
-									  toItem: banner,
-									  attribute: attribute,
-									  multiplier: 1,
-									  constant: 0),
-			 NSLayoutConstraint(item: adBanner,
-									  attribute: .centerX,
-									  relatedBy: .equal,
-									  toItem: banner,
-									  attribute: .centerX,
-									  multiplier: 1,
-									  constant: 0)
-			])
+		// IMPORTANT: add height & width constraints or else can not click on ads
+		banner.addConstraints([
+			NSLayoutConstraint(item: adBanner,
+									 attribute: .height,
+									 relatedBy: .equal,
+									 toItem: banner,
+									 attribute: .height,
+									 multiplier: 1,
+									 constant: 0),
+			NSLayoutConstraint(item: adBanner,
+									 attribute: .width,
+									 relatedBy: .equal,
+									 toItem: banner,
+									 attribute: .width,
+									 multiplier: 1,
+									 constant: 0),
+			NSLayoutConstraint(item: adBanner,
+									 attribute: attribute,
+									 relatedBy: .equal,
+									 toItem: banner,
+									 attribute: attribute,
+									 multiplier: 1,
+									 constant: 0),
+			NSLayoutConstraint(item: adBanner,
+									 attribute: .centerX,
+									 relatedBy: .equal,
+									 toItem: banner,
+									 attribute: .centerX,
+									 multiplier: 1,
+									 constant: 0)
+		])
 		
 		view.addConstraints(
 			[NSLayoutConstraint(item: banner,
