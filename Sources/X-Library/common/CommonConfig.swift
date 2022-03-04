@@ -29,9 +29,10 @@ public struct CommonConfig {
 	}
 	
 	public struct Keys {
+		public static let appInstallVersion = "app-install-version"
 		// public static let isFirstRun = "is_first_run"
 		public static let appDataVersion = "app-data-version"
-		public static let welcomeVersion = "welcome-version"
+		// public static let welcomeVersion = "welcome-version"
 		public static let newAppUpdateNotiVersion = "new-app-update-noti-version"
 		
 		public static let appOpenCount = "app_open_count"

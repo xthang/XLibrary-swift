@@ -24,18 +24,20 @@ open class BaseDEV: PopupView {
 	open override func awakeFromNib() {
 		super.awakeFromNib()
 		
-		info.text = "- appDataVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appDataVersion) ?? "--")"
-		info.text! += "\n- welcomeVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) ?? "--")"
+		info.text = "INFO:"
+		info.text! += "\n- appInstallVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appInstallVersion) ?? "--")"
+		info.text! += "\n- appDataVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appDataVersion) ?? "--")"
+		// info.text! += "\n- welcomeVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) ?? "--")"
 		info.text! += "\n- newAppUpdateNotiVersion: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.newAppUpdateNotiVersion) ?? "--")"
-		
-		info.text! += "\n\n- appOpenCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appOpenCount) ?? "--")"
-		info.text! += "\n\n- sessionsCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.sessionsCount) ?? "--")"
-		info.text! += "\n\n- gamesCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) ?? "--")"
+		info.text! += "\n"
+		info.text! += "\n- appOpenCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.appOpenCount) ?? "--")"
+		info.text! += "\n- sessionsCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.sessionsCount) ?? "--")"
+		info.text! += "\n- gamesCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) ?? "--")"
 		info.text! += "\n- bestScore: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.bestScore) ?? "--")"
-		
+		info.text! += "\n"
 		info.text! += "\n- gameCenterPlayerInfo: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.gameCenterPlayerInfo) ?? "--")"
-		
-		info.text! += "\n\n- coinCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.coinCount) ?? "--")"
+		info.text! += "\n"
+		info.text! += "\n- coinCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.coinCount) ?? "--")"
 		info.text! += "\n- purchased: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.purchased) ?? "--")"
 		info.text! += "\n- lastDailyRewardingTime: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.lastDailyRewardingTime) ?? "--")"
 		
@@ -92,7 +94,7 @@ open class BaseDEV: PopupView {
 		print("--  \(TAG) | reset ...")
 		
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.appDataVersion)
-		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.welcomeVersion)
+		// UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.welcomeVersion)
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
 		
 		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.gamesCount)
@@ -111,7 +113,7 @@ open class BaseDEV: PopupView {
 	@IBAction func resetWelcome(_ sender: UIButton) {
 		print("--  \(TAG) | resetWelcome ...")
 		
-		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.welcomeVersion)
+		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
 		
 		Snackbar.s("resetWelcome DONE")
 	}
@@ -119,7 +121,7 @@ open class BaseDEV: PopupView {
 	@IBAction func resetNewAppUpdateNoti(_ sender: UIButton) {
 		print("--  \(TAG) | resetNewAppUpdateNoti ...")
 		
-		UserDefaults.standard.setValue(nil, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
+		UserDefaults.standard.setValue("x.x.x", forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
 		
 		Snackbar.s("resetNewAppUpdateNoti DONE")
 	}

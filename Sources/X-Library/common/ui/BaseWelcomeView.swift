@@ -16,7 +16,7 @@ open class BaseWelcomeView: OverlayView {
 	
 	@IBAction public func getStartedButtonTapped(_ sender: UIButton) {
 		self.removeFromSuperview()
-		UserDefaults.standard.setValue(Helper.appVersion, forKey: CommonConfig.Keys.welcomeVersion)
+		// UserDefaults.standard.setValue(Helper.appVersion, forKey: CommonConfig.Keys.welcomeVersion)
 		completion?()
 	}
 }

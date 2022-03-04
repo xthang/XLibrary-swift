@@ -77,7 +77,11 @@ open class BaseViewController: UIViewController {
 			}
 			
 			// set scene after viewDidAppear so skView size is defined
-			if canShowWelcome && UserDefaults.standard.object(forKey: CommonConfig.Keys.welcomeVersion) == nil {
+			// if storedAppVersion is never set & canShowWelcome -> show welcome
+			// else if storedAppVersion is never set & not canShowWelcome -> show home, not show app-updated noti
+			// else if storedAppVersion is set & storedAppVersion != current appVersion -> show home, show app-updated noti
+			// after all, set storedAppVersion
+			if canShowWelcome && UserDefaults.standard.object(forKey: CommonConfig.Keys.newAppUpdateNotiVersion) == nil {
 				showWelcome()
 			} else {
 				loadHomeView("viewDidAppear")
@@ -104,9 +108,7 @@ open class BaseViewController: UIViewController {
 		let appVersion = Helper.appVersion
 		let newAppUpdateNotiVersion = UserDefaults.standard.object(forKey: CommonConfig.Keys.newAppUpdateNotiVersion) as? String
 		if newAppUpdateNotiVersion != appVersion {
-			UserDefaults.standard.set(appVersion, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
-			
-			if !tag.contains("showWelcome") {
+			if newAppUpdateNotiVersion != nil {
 				newUpdateIsNotified = true
 				
 				let alert = PopupAlert.initiate(title: NSLocalizedString("YOUR APP HAS BEEN UPDATED", comment: ""), message: "\(NSLocalizedString("NEW VERSION", comment: "")): \(appVersion)")
@@ -115,11 +117,15 @@ open class BaseViewController: UIViewController {
 				_ = alert.addAction(title: NSLocalizedString("LET'S PLAY", comment: ""), style: .primary1) { [unowned self] in
 					newUpdateIsNotified = false
 					
+					UserDefaults.standard.set(appVersion, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
+					
 					GameCenterHelper.authenticateLocalPlayer(TAG, self)
 					
 					onNewUpdateNotified()
 				}
 				view.addSubview(alert)
+			} else {
+				UserDefaults.standard.set(appVersion, forKey: CommonConfig.Keys.newAppUpdateNotiVersion)
 			}
 		}
 		

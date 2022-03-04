@@ -27,6 +27,12 @@ open class BaseAppDelegate: UIResponder, UIApplicationDelegate {
 		
 		AppConfig.initiate(TAG)
 		
+		let appVersion = Helper.appVersion
+		if UserDefaults.standard.object(forKey: CommonConfig.Keys.appInstallVersion) == nil {
+			NSLog("*******  \(TAG) | welcome to our new app: v\(appVersion)")
+			UserDefaults.standard.set(appVersion, forKey: CommonConfig.Keys.appInstallVersion)
+		}
+		
 		UserDefaults.standard.set(UserDefaults.standard.integer(forKey: CommonConfig.Keys.appOpenCount) + 1, forKey: CommonConfig.Keys.appOpenCount)
 		
 		Helper.getConfig(TAG, data: launchOptions == nil ? nil : ["launchOptions": "\(launchOptions!)"]) { _,_ in }
