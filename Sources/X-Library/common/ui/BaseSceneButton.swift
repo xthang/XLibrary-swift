@@ -83,13 +83,7 @@ open class BaseSceneButton: XButton, IButton {
 		}
 	}
 	
-	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-		if buttonIdentifier != .sound { super.touchesEnded(touches, with: event) }
-		
-		guard let touch = touches.first else { return }
-		let location = touch.location(in: self)
-		if !bounds.contains(location) { return }
-		
+	open func buttonTriggered() {
 		switch buttonIdentifier! {
 			case .DEV:
 				Helper.showDevView(TAG)
@@ -123,6 +117,16 @@ open class BaseSceneButton: XButton, IButton {
 			case .back, .settings:
 				fatalError("\(TAG) | Unsupported SceneButton with id '\(buttonIdentifier.rawValue)'")
 		}
+	}
+	
+	open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+		if buttonIdentifier != .sound { super.touchesEnded(touches, with: event) }
+		
+		guard let touch = touches.first else { return }
+		let location = touch.location(in: self)
+		if !bounds.contains(location) { return }
+		
+		buttonTriggered()
 		
 		if buttonIdentifier == .sound { super.touchesEnded(touches, with: event) }
 	}

@@ -350,10 +350,10 @@ extension UIImageView {
 		}
 		let url = URL(fileURLWithPath: path)
 		guard let gifData = try? Data(contentsOf: url),
-			  let source =  CGImageSourceCreateWithData(gifData as CFData, nil) else {
-				  NSLog("--  \(UIImageView.TAG) | gifData / source is nil")
-				  return
-			  }
+				let source =  CGImageSourceCreateWithData(gifData as CFData, nil) else {
+					NSLog("--  \(UIImageView.TAG) | gifData / source is nil")
+					return
+				}
 		var images = [UIImage]()
 		let imageCount = CGImageSourceGetCount(source)
 		for i in 0 ..< imageCount {
@@ -402,6 +402,15 @@ extension UIImage {
 		return UIGraphicsImageRenderer(size: size).image { _ in
 			draw(in: CGRect(origin: .zero, size: size))
 		}
+	}
+}
+
+extension SKView {
+	open func presentScene(_ tag: String, _ scene: SKScene, transition: SKTransition? = nil) {
+		scene.willMove(tag, to: self)
+		
+		if transition != nil { presentScene(scene, transition: transition!) }
+		else { presentScene(scene) }
 	}
 }
 

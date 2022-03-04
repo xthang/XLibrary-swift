@@ -10,7 +10,7 @@ import AVFoundation
 import GameKit
 
 public protocol IHelper {
-	static func buildUserActivitiesInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any]
+	static func insertUserActivitiesInfo(_ tag: String, _ data: inout [String: Any], _ err: inout [String: Any])
 }
 
 public struct Helper {
@@ -407,6 +407,9 @@ public struct Helper {
 		data["app_open_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.appOpenCount) as? Int
 		data["sessions_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.sessionsCount) as? Int
 		data["games_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) as? Int
+		data["best_score"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.bestScore) as? Int
+		
+		appHelper?.insertUserActivitiesInfo(tag, &data, &err)
 		
 		return data
 	}
@@ -443,7 +446,7 @@ public struct Helper {
 			jsonObj["connectivity"] = buildConnectivityInfo(1, &errors)
 			jsonObj["audio"] = buildAudioInfo(1, &errors)
 			jsonObj["user-settings"] = buildUserConfigInfo(1, &errors)
-			jsonObj["user-activities"] = appHelper?.buildUserActivitiesInfo("cfg|\(tag)", &errors)
+			jsonObj["user-activities"] = buildUserActivitiesInfo("cfg|\(tag)", &errors)
 			jsonObj["errors"] = !errors.isEmpty ? errors as Any : nil
 			
 			let url = URL(string: "https://xthang.xyz/app/config-api.php")!
@@ -707,9 +710,14 @@ public struct Helper {
 			if #available(iOS 13.0, *) {
 				activityViewController.activityItemsConfiguration = [
 					UIActivity.ActivityType.message,
+					UIActivity.ActivityType.mail,
+					UIActivity.ActivityType.airDrop,
 					UIActivity.ActivityType.saveToCameraRoll,
+					UIActivity.ActivityType.copyToPasteboard,
 					UIActivity.ActivityType.print,
 					UIActivity.ActivityType.addToReadingList,
+					UIActivity.ActivityType.markupAsPDF,
+					UIActivity.ActivityType.openInIBooks,
 					UIActivity.ActivityType.postToFacebook,
 					UIActivity.ActivityType.postToTwitter,
 					UIActivity.ActivityType.postToFlickr,
@@ -811,14 +819,21 @@ public struct Helper {
 		}
 	}
 	
-	public static func showDevView(_ tag: String) {
+	public static func showDevView(_ tag: String, fromMainBundle: Bool = false) {
 		if var topController = UIApplication.shared.keyWindow?.rootViewController {
 			while let presentedViewController = topController.presentedViewController {
 				topController = presentedViewController
 			}
 			let view = topController.view!
 			
-			let devView = UINib(nibName: "DEV", bundle: nil).instantiate(withOwner: nil, options: nil)[0] as! UIView
+			let devView: UIView
+			if fromMainBundle {
+				let nibObjects = UINib(nibName: "DEV", bundle: nil).instantiate(withOwner: nil, options: nil)
+				devView = nibObjects[0] as! UIView
+			} else {
+				let nibObjects = UINib(nibName: "BaseDEV", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)
+				devView = nibObjects[0] as! UIView
+			}
 			view.addSubview(devView)
 		}
 	}

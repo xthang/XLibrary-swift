@@ -55,14 +55,14 @@ open class BaseSKScene: SKScene {
 		overlays.forEach { $0.removeFromSuperview() }
 	}
 	
-	open func activate(_ tag: String, _ notification: NSNotification) {
-		NSLog("--  \(TAG)|\(type(of: self)) | activate [\(tag)]: \(hash)")
-	}
-	
 	open func deactivate(_ tag: String, _ notification: NSNotification) {
 		NSLog("--  \(TAG)|\(type(of: self)) | deactivate [\(tag)]: \(hash)")
 		
 		pause("deactivate|\(tag)")
+	}
+	
+	open func activate(_ tag: String, _ notification: NSNotification) {
+		NSLog("--  \(TAG)|\(type(of: self)) | activate [\(tag)]: \(hash)")
 	}
 	
 	open func pause(_ tag: String) {
