@@ -20,7 +20,8 @@ open class BaseSKScene: SKScene {
 	public var backgroundSoundPlayer : AVAudioPlayer?
 	public var sounds: [SKAudioNode] = []
 	
-	private let disableTouchNode = SKSpriteNode(color: SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.1), size: .zero)
+	private let disableTouchNode = SKSpriteNode()
+	private let dimLayer = SKSpriteNode(color: SKColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.2), size: .zero)
 	
 	public var overlays: [OverlayView] = []
 	
@@ -35,6 +36,10 @@ open class BaseSKScene: SKScene {
 		NotificationCenter.default.addObserver(self, selector: #selector(toggleVibration), name: .vibration, object: nil)
 		
 		NotificationCenter.default.addObserver(self, selector: #selector(handleAudioSessionRouteChange(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
+		
+		disableTouchNode.zPosition = SceneLayer.disableSceneLayer.rawValue
+		disableTouchNode.isUserInteractionEnabled = true
+		dimLayer.zPosition = SceneLayer.disableSceneLayer.rawValue
 	}
 	
 	deinit {
@@ -45,6 +50,7 @@ open class BaseSKScene: SKScene {
 		NSLog("--  \(TAG)|\(type(of: self)) | didChangeSize: \(oldSize) -> \(size) | \(view?.frame as Any? ?? "--") | \(frame) | \(scaleMode.rawValue)")
 		
 		disableTouchNode.size = self.size
+		dimLayer.size = self.size
 	}
 	
 	open override func willMove(from view: SKView) {
@@ -73,20 +79,28 @@ open class BaseSKScene: SKScene {
 		NSLog("--  \(TAG)|\(type(of: self)) | resume [\(tag)]: \(hash)")
 	}
 	
-	public func setUserInteraction(_ tag: String, _ enabled: Bool) {
+	public func setUserInteraction(_ tag: String, _ enabled: Bool, _ lightDimmed: Bool = false) {
 		isUserInteractionEnabled = enabled
 		
 		if enabled {
 			disableTouchNode.removeFromParent()
+			dimLayer.removeFromParent()
 		} else if disableTouchNode.parent == nil {
-			disableTouchNode.isUserInteractionEnabled = true
-			disableTouchNode.zPosition = SceneLayer.disableSceneLayer.rawValue
 			self.addChild(disableTouchNode)
+		}
+	}
+	
+	public func dim(_ tag: String, _ on: Bool) {
+		if !on {
+			dimLayer.removeFromParent()
+		} else if dimLayer.parent == nil {
+			self.addChild(dimLayer)
 		}
 	}
 	
 	public func show(_ overlay: SceneOverlay) {
 		setUserInteraction("showOverlay", false)
+		dim("showOverlay", true)
 		
 		if overlay.parent != nil {
 			print("--  \(TAG)|\(type(of: self)) | show overlay: already show")
@@ -100,6 +114,7 @@ open class BaseSKScene: SKScene {
 	
 	public func show(_ overlay: OverlayView) {
 		setUserInteraction("showOverlay", false)
+		// dim("showOverlay", true) // ???
 		overlays.append(overlay)
 		view!.addSubview(overlay)
 	}
@@ -115,12 +130,12 @@ open class BaseSKScene: SKScene {
 				}
 			}
 			if delay != nil {
-				audio.run(SKAction.sequence([
-					SKAction.wait(forDuration: delay!),
-					SKAction.play()
+				audio.run(.sequence([
+					.wait(forDuration: delay!),
+					.play()
 				]), withKey: "play")
 			} else {
-				audio.run(SKAction.play(), withKey: "play")
+				audio.run(.play(), withKey: "play")
 			}
 		}
 	}
@@ -142,7 +157,7 @@ open class BaseSKScene: SKScene {
 	
 	@objc public func changeSoundVolume(_ notification: NSNotification) {
 		let vol = notification.object as! Float
-		sounds.forEach { $0.run(SKAction.changeVolume(to: vol, duration: 0)) }
+		sounds.forEach { $0.run(.changeVolume(to: vol, duration: 0)) }
 	}
 	
 	@objc public func toggleMusic(_ notification: NSNotification) {

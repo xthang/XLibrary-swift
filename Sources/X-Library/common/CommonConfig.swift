@@ -46,6 +46,9 @@ public struct CommonConfig {
 		public static let purchased = "purchased"
 		public static let coinCount = "coin-count"
 		public static let lastDailyRewardingTime = "last_daily_rewarding_time"
+		
+		// configs from server
+		public static let hideAdsWhilePlaying = "hide-ads-while-playing"
 	}
 }
 

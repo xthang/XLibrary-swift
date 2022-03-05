@@ -100,10 +100,6 @@ open class BaseViewController: UIViewController {
 	}
 	
 	open func loadHomeView(_ tag: String) {
-		checkAndNotifyNewAppUpdate("loadHomeView|\(tag)")
-	}
-	
-	private func checkAndNotifyNewAppUpdate(_ tag: String) {
 		// show Noti on new version update
 		let appVersion = Helper.appVersion
 		let newAppUpdateNotiVersion = UserDefaults.standard.object(forKey: CommonConfig.Keys.newAppUpdateNotiVersion) as? String

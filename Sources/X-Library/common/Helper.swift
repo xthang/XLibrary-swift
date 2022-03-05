@@ -404,12 +404,17 @@ public struct Helper {
 	public static func buildUserActivitiesInfo(_ tag: String, _ err: inout [String: Any]) -> [String: Any] {
 		var data: [String: Any] = [:]
 		
+		data["app_install_version"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.appInstallVersion) as? String
+		
 		data["app_open_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.appOpenCount) as? Int
 		data["sessions_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.sessionsCount) as? Int
+		
 		data["games_count"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.gamesCount) as? Int
 		data["best_score"] = UserDefaults.standard.object(forKey: CommonConfig.Keys.bestScore) as? Int
 		
 		appHelper?.insertUserActivitiesInfo(tag, &data, &err)
+		
+		NSLog("--> \(TAG) | build User Activities Info [\(tag)]: \(data)")
 		
 		return data
 	}
@@ -494,6 +499,10 @@ public struct Helper {
 								return
 							}
 						}
+						if let configs = dict["configs"] as? [String: Any] {
+							let hideAdsWhilePlaying = configs["hide-ads-while-playing"] as? Bool
+							UserDefaults.standard.set(hideAdsWhilePlaying, forKey: CommonConfig.Keys.hideAdsWhilePlaying)
+						}
 						if let versionCheck = dict["version-check"] as? [String: Any] {
 							if versionCheck["update-required"] as! Bool {
 								completion(NSError(domain: "", code: ERROR.UpdateRequired.rawValue, userInfo: [NSLocalizedDescriptionKey: "To continue using the app, please update to newest version"]), dict)
@@ -524,9 +533,9 @@ public struct Helper {
 				}
 			})
 			
-#if !DEBUG
+			//#if !DEBUG
 			task.resume()
-#endif
+			//#endif
 		} catch { /// possible error: KeychainError.unhandledError(25308): errSecInteractionNotAllowed
 			NSLog("!-- \(TAG) | getConfig [\(tag)] | error: \(error)")
 			log("cfg|\(tag)", error, data == nil ? nil : "\(data!)")
