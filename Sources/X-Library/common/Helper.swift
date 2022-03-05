@@ -500,8 +500,10 @@ public struct Helper {
 							}
 						}
 						if let configs = dict["configs"] as? [String: Any] {
-							let hideAdsWhilePlaying = configs["hide-ads-while-playing"] as? Bool
-							UserDefaults.standard.set(hideAdsWhilePlaying, forKey: CommonConfig.Keys.hideAdsWhilePlaying)
+							if configs.keys.contains("hide-ads-while-playing") {
+								let hideAdsWhilePlaying = configs["hide-ads-while-playing"] as? Bool
+								UserDefaults.standard.set(hideAdsWhilePlaying, forKey: CommonConfig.Keys.hideAdsWhilePlaying)
+							}
 						}
 						if let versionCheck = dict["version-check"] as? [String: Any] {
 							if versionCheck["update-required"] as! Bool {
@@ -533,9 +535,9 @@ public struct Helper {
 				}
 			})
 			
-			//#if !DEBUG
+#if !DEBUG
 			task.resume()
-			//#endif
+#endif
 		} catch { /// possible error: KeychainError.unhandledError(25308): errSecInteractionNotAllowed
 			NSLog("!-- \(TAG) | getConfig [\(tag)] | error: \(error)")
 			log("cfg|\(tag)", error, data == nil ? nil : "\(data!)")

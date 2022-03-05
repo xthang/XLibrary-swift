@@ -40,7 +40,23 @@ open class BaseDEV: PopupView {
 		info.text! += "\n- coinCount: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.coinCount) ?? "--")"
 		info.text! += "\n- purchased: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.purchased) ?? "--")"
 		info.text! += "\n- lastDailyRewardingTime: \(UserDefaults.standard.object(forKey: CommonConfig.Keys.lastDailyRewardingTime) ?? "--")"
-		
+		info.text! += "\n"
+		let userDefaults = UserDefaults.standard.dictionaryRepresentation().filter({ (key, value) in
+			return ![
+				CommonConfig.Keys.appInstallVersion,
+				CommonConfig.Keys.appDataVersion,
+				CommonConfig.Keys.newAppUpdateNotiVersion,
+				CommonConfig.Keys.appOpenCount,
+				CommonConfig.Keys.sessionsCount,
+				CommonConfig.Keys.gamesCount,
+				CommonConfig.Keys.bestScore,
+				CommonConfig.Keys.gameCenterPlayerInfo,
+				CommonConfig.Keys.coinCount,
+				CommonConfig.Keys.purchased,
+				CommonConfig.Keys.lastDailyRewardingTime,
+			].contains(key)
+		})
+		info.text! += "\n- UserDefaults: \(userDefaults)"
 		info.text! += "\n-------------------------------------------------\n"
 		
 		keyboardConstraint = NSLayoutConstraint(item: contentView!,

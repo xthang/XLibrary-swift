@@ -79,7 +79,7 @@ open class BaseSKScene: SKScene {
 		NSLog("--  \(TAG)|\(type(of: self)) | resume [\(tag)]: \(hash)")
 	}
 	
-	public func setUserInteraction(_ tag: String, _ enabled: Bool, _ lightDimmed: Bool = false) {
+	public func setUserInteraction(_ tag: String, _ enabled: Bool) {
 		isUserInteractionEnabled = enabled
 		
 		if enabled {
