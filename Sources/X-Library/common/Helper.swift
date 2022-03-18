@@ -107,9 +107,9 @@ public struct Helper {
 			let playerInfoData = UserDefaults.standard.object(forKey: CommonConfig.Keys.gameCenterPlayerInfo) as? Data,
 			var playerInfo = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(playerInfoData) as? [String: Any] {
 			playerInfo["type"] = 2
-			data["game-player"] = playerInfo
+			data["game-player"] = playerInfo.filter { $0.key == "displayName" || $0.key == "alias" }
 		} else {
-			data["game-player"] = buildGamePlayerInfo(tag)
+			data["game-player"] = buildGamePlayerInfo(tag).filter { $0.key == "displayName" || $0.key == "alias" }
 		}
 		
 		NSLog("--> \(TAG) | build Users Info [\(tag)]: \(data)")
@@ -187,6 +187,7 @@ public struct Helper {
 		device["systemSize"] = Device.systemSizeInBytes
 		device["systemFreeSize"] = Device.systemFreeSizeInBytes
 		
+#if DEBUG
 		device["screens"] = UIScreen.screens.map({ s -> [String: Any] in
 			var x: [String: Any] = [
 				"traitCollection": s.traitCollection.description,
@@ -217,6 +218,7 @@ public struct Helper {
 			
 			return x
 		})
+#endif
 		
 		if tag.contains("cfg") { NSLog("--> \(TAG) | build Device Info [\(tag)]: \(device)") }
 		
@@ -248,12 +250,14 @@ public struct Helper {
 		var data: [String: Any] = [:]
 		
 		let processInfo = ProcessInfo.processInfo
+#if DEBUG
 		data["environment"] = processInfo.environment
 		data["arguments"] = processInfo.arguments
 		// data["hostName"] = processInfo.hostName	// this makes app lag on first run, and then open popup to require access to local network. It also returns: xPhone, xPad
 		data["processName"] = processInfo.processName
 		data["processIdentifier"] = processInfo.processIdentifier
 		data["globallyUniqueString"] = processInfo.globallyUniqueString
+#endif
 		data["operatingSystem"] = processInfo.operatingSystem()
 		data["operatingSystemName"] = processInfo.operatingSystemName()
 		let v = processInfo.operatingSystemVersion
@@ -855,7 +859,7 @@ public struct Helper {
 															.strokeColor: UIColor.black,
 															.strokeWidth: -5,
 															.foregroundColor: UIColor.white,
-														  ])
+										  ])
 	}
 	
 	public static func circle(diameter: CGFloat, color: UIColor) -> UIImage {

@@ -16,8 +16,6 @@ open class PopupAlert: PopupView {
 		case style3
 	}
 	
-	private var font = UIFont(name: Theme.current.settings.fontName ?? CommonConfig.fontName, size: Theme.current.settings.fontSize ?? CommonConfig.fontSize)!
-	
 	@IBOutlet var background: ScaleFrame?
 	@IBOutlet var title: UILabel!
 	@IBOutlet var message: UILabel!
@@ -25,7 +23,7 @@ open class PopupAlert: PopupView {
 	
 	private var buttonType: IXButton.Type = XButton.self
 	
-	open class func initiate(style: Style? = Theme.current.settings.popupStyle, title: String?, message: String?, font: UIFont? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
+	open class func initiate(style: Style? = Theme.current.settings.popupStyle, title: String?, message: String?, fontName: String? = nil, buttonLayout: ButtonLayout? = nil, showCloseButton: Bool = false) -> PopupAlert {
 		let alert = UINib(nibName: style == .style2 ? "PopupAlert2" : "PopupAlert", bundle: Bundle.module).instantiate(withOwner: nil, options: nil)[0] as! PopupAlert
 		
 		switch style {
@@ -43,11 +41,8 @@ open class PopupAlert: PopupView {
 		if message == nil { alert.message.isHidden = true }
 		else { alert.message.text = message }
 		
-		if font != nil {
-			alert.font = font!
-		}
-		alert.title.font = alert.font
-		alert.message.font = alert.font
+		alert.title.font = UIFont(name: fontName ?? Theme.current.settings.fontName ?? CommonConfig.fontName, size: Theme.current.settings.fontSizeLarge1 ?? CommonConfig.fontSize)!
+		alert.message.font = UIFont(name: fontName ?? Theme.current.settings.fontName ?? CommonConfig.fontName, size: Theme.current.settings.fontSizeLarge ?? CommonConfig.fontSize)!
 		
 		switch buttonLayout {
 			case .style2:
@@ -78,7 +73,7 @@ open class PopupAlert: PopupView {
 		
 		// btn.soundEnabled = false
 		btn.setTitle(title, for: .normal)
-		btn.titleLabel?.font = font
+		btn.titleLabel?.font = UIFont(name: Theme.current.settings.fontName ?? CommonConfig.fontName, size: Theme.current.settings.buttonFontSize ?? CommonConfig.fontSize)!
 		if btn is ImageButton {
 			btn.setBackgroundImage(Theme.current.settings.buttonBackgroundImage!, for: .normal)
 			btn.setBackgroundImage(Theme.current.settings.buttonHighlightedBackgroundImage!, for: .highlighted)

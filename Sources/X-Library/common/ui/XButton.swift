@@ -155,6 +155,8 @@ open class XButton: UIButton, IXButton {
 	}
 	
 	public func applyTheme(_ tag: String, _ theme: Theme) {
+		titleLabel?.font = UIFont(name: theme.settings.fontName ?? CommonConfig.fontName, size: theme.settings.buttonFontSize ?? CommonConfig.fontSize)!
+		
 		if let c = theme.settings.buttonBackgroundColor { backgroundColor = c }
 		if let c = theme.settings.buttonHighlightedBackgroundColor { highlightedColor = c }
 		if let c = theme.settings.buttonDisabledBackgroundColor { disabledColor = c }
@@ -477,6 +479,8 @@ open class XButton2: UIControl, IXButton {
 	}
 	
 	public func applyTheme(_ tag: String, _ theme: Theme) {
+		titleLabel?.font = UIFont(name: theme.settings.fontName ?? CommonConfig.fontName, size: theme.settings.buttonFontSize ?? CommonConfig.fontSize)!
+		
 		if let c = theme.settings.buttonBackgroundColor { backgroundColor = c }
 		if let c = theme.settings.buttonHighlightedBackgroundColor { highlightedColor = c }
 		if let c = theme.settings.buttonDisabledBackgroundColor { disabledColor = c }

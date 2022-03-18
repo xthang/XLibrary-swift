@@ -25,6 +25,9 @@ public struct ThemeSettings {
 	
 	public var fontName: String?
 	public var fontSize: CGFloat?
+	public var fontSizeByPercent: CGFloat?
+	public var fontSizeLarge: CGFloat?
+	public var fontSizeLarge1: CGFloat?
 	
 	public var textColor: UIColor?
 	public var backgroundColor: UIColor?
@@ -41,6 +44,7 @@ public struct ThemeSettings {
 	
 	public var buttonLayout: PopupAlert.ButtonLayout?
 	public var buttonHeight: CGFloat?
+	public var buttonFontSize: CGFloat?
 	
 	public var buttonBackgroundColor: UIColor?
 	public var buttonBackgroundImage: UIImage?
@@ -75,9 +79,12 @@ public struct ThemeSettings {
 		let themeItems = try! PropertyListSerialization.propertyList(from: plist, format: nil) as! [String: AnyObject]
 		
 		fontName = themeItems["fontName"] as? String
+		fontSize = themeItems["fontSize"] as? CGFloat
 		if let i = themeItems["fontSizePercent"] as? CGFloat {
-			fontSize = UIScreen.screens.first!.bounds.height * i
+			fontSizeByPercent = UIScreen.screens.first!.bounds.height * i
 		}
+		fontSizeLarge = themeItems["fontSizeLarge"] as? CGFloat
+		fontSizeLarge1 = themeItems["fontSizeLarge1"] as? CGFloat
 		if let i = themeItems["textColor"], i as? String != "" {
 			textColor = try! ThemeSettings.getColor(i)
 		}
@@ -101,6 +108,7 @@ public struct ThemeSettings {
 			buttonLayout = PopupAlert.ButtonLayout(rawValue: i)
 		}
 		buttonHeight = themeItems["buttonHeight"] as? CGFloat
+		buttonFontSize = themeItems["buttonFontSize"] as? CGFloat
 		
 		if let i = themeItems["buttonBackgroundColor"], i as? String != "" {
 			buttonBackgroundColor = try! ThemeSettings.getColor(i)

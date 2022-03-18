@@ -24,6 +24,7 @@ open class BaseViewController: UIViewController {
 	public var welcomeView: BaseWelcomeView?
 	
 	private var adBanner: ADBanner!
+	public var adBannerPosition: BannerPosition = .bottom
 	public var adInterstitial: AdInterstitial!
 	
 	public var lastShowAdInterstitial = Date()
@@ -153,13 +154,15 @@ open class BaseViewController: UIViewController {
 	@objc open func activate(_ noti: NSNotification) {}
 	
 	public func updateAdsBanner(_ tag: String, _ on: Bool, position: BannerPosition? = nil) {
+		if on && position != nil { adBannerPosition = position! }
+		
 		if adBanner == nil {
 			print("--  \(TAG) | updateAdsBanner [\(tag)]: adBanner is null")
 			return
 		}
 		
 		if on {
-			adBanner?.show("\(TAG)|updateAdsBanner|\(tag)", viewController: self, position: position) // allCases.randomElement()
+			adBanner?.show("\(TAG)|updateAdsBanner|\(tag)", viewController: self, position: adBannerPosition) // allCases.randomElement()
 		} else {
 			adBanner?.remove("\(TAG)|updateAdsBanner|\(tag)")
 		}
